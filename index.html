@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <script>
+      (function () {
+        // AI Studio preview environment: HMR is disabled via environment configuration.
+        // Gracefully shim Vite HMR WebSocket and suppress benign connection rejections.
+        var OrigWebSocket = window.WebSocket;
+        if (typeof OrigWebSocket !== 'undefined') {
+          window.WebSocket = function (url, protocols) {
+            var urlStr = String(url || '');
+            var isViteHmr = false;
+            if (protocols === 'vite-hmr' || protocols === 'vite-ping') isViteHmr = true;
+            if (Array.isArray(protocols) && (protocols.indexOf('vite-hmr') !== -1 || protocols.indexOf('vite-ping') !== -1)) isViteHmr = true;
+            if (urlStr.indexOf('token=') !== -1 || urlStr.indexOf('@vite') !== -1 || urlStr.indexOf('vite-hmr') !== -1) isViteHmr = true;
+            if (isViteHmr) {
+              var listeners = {};
+              var fakeSocket = {
+                readyState: 1, // OPEN
+                OPEN: 1,
+                CLOSED: 3,
+                CLOSING: 2,
+                CONNECTING: 0,
+                url: urlStr,
+                protocol: Array.isArray(protocols) ? protocols[0] : (protocols || ''),
+                onopen: null,
+                onclose: null,
+                onerror: null,
+                onmessage: null,
+                addEventListener: function (type, fn) {
+                  if (!listeners[type]) listeners[type] = [];
+                  listeners[type].push(fn);
+                },
+                removeEventListener: function (type, fn) {
+                  if (!listeners[type]) return;
+                  listeners[type] = listeners[type].filter(function (l) { return l !== fn; });
+                },
+                dispatchEvent: function (event) {
+                  var handlers = (listeners[event.type] || []).slice();
+                  for (var i = 0; i < handlers.length; i++) {
+                    try { handlers[i].call(fakeSocket, event); } catch (e) {}
+                  }
+                  var onevent = fakeSocket['on' + event.type];
+                  if (typeof onevent === 'function') {
+                    try { onevent.call(fakeSocket, event); } catch (e) {}
+                  }
+                  return true;
+                },
+                send: function () {},
+                close: function () {
+                  fakeSocket.readyState = 3;
+                  var evt = new Event('close');
+                  fakeSocket.dispatchEvent(evt);
+                },
+              };
+              setTimeout(function () {
+                if (fakeSocket.readyState === 1) {
+                  var openEvt = new Event('open');
+                  fakeSocket.dispatchEvent(openEvt);
+                }
+              }, 10);
+              return fakeSocket;
+            }
+            return new OrigWebSocket(url, protocols);
+          };
+          window.WebSocket.prototype = OrigWebSocket.prototype;
+          window.WebSocket.CONNECTING = 0;
+          window.WebSocket.OPEN = 1;
+          window.WebSocket.CLOSING = 2;
+          window.WebSocket.CLOSED = 3;
+        }
+        function isViteHmrError(msg, filename) {
+          msg = msg || '';
+          filename = filename || '';
+          return (
+            msg.indexOf('WebSocket') !== -1 ||
+            msg.indexOf('createWebSocketModuleRunnerTransport') !== -1 ||
+            msg.indexOf('vite-hmr') !== -1 ||
+            msg.indexOf('vite:ws') !== -1 ||
+            filename.indexOf('@vite/client') !== -1
+          );
+        }
+        window.addEventListener(
+          'unhandledrejection',
+          function (event) {
+            var reason = event.reason;
+            var msg = (reason && (reason.message || reason.stack || String(reason))) || '';
+            if (isViteHmrError(msg)) {
+              event.preventDefault();
+              if (event.stopImmediatePropagation) event.stopImmediatePropagation();
+            }
+          },
+          true
+        );
+        window.addEventListener(
+          'error',
+          function (event) {
+            var msg = (event && (event.message || '')) || '';
+            var filename = (event && event.filename) || '';
+            if (isViteHmrError(msg, filename)) {
+              event.preventDefault();
+              if (event.stopImmediatePropagation) event.stopImmediatePropagation();
+            }
+          },
+          true
+        );
+      })();
+    </script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Genova Profile - Professional Resumes, Matrimonial Profiles & Cover Letters</title>
+    <meta name="description" content="Genova Profile helps you create professional resumes, matrimonial profiles, and cover letters with beautiful templates and instant downloads." />
+    <link rel="canonical" href="https://genovaprofile.com/" />
+    <meta property="og:title" content="Genova Profile - Professional Resumes, Matrimonial Profiles & Cover Letters" />
+    <meta property="og:description" content="Genova Profile helps you create professional resumes, matrimonial profiles, and cover letters with beautiful templates and instant downloads." />
+    <meta property="og:site_name" content="Genova Profile" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://genovaprofile.com/" />
+    <meta property="og:image" content="https://genovaprofile.com/images/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Genova Profile - Professional Resumes, Matrimonial Profiles & Cover Letters" />
+    <meta name="twitter:description" content="Genova Profile helps you create professional resumes, matrimonial profiles, and cover letters with beautiful templates and instant downloads." />
+    <meta name="twitter:image" content="https://genovaprofile.com/images/og-image.png" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+    <!-- Schema.org Structured Data (Organization) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "Genova Profile",
+      "url": "https://genovaprofile.com",
+      "logo": "https://genovaprofile.com/images/genova-logo.png",
+      "description": "Genova Profile helps you create professional resumes, matrimonial biodatas, and cover letters with beautiful templates and instant downloads.",
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "email": "support@genovaprofile.com",
+        "contactType": "customer service"
+      }
+    }
+    </script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600;700&family=Cinzel:wght@500;600;700;800;900&family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Poppins:wght@400;500;600;700&family=Rozha+One&family=Yatra+One&display=swap" rel="stylesheet">
+    <!-- Official Cashfree JS SDK v3 for Web Checkout -->
+    <script src="https://sdk.cashfree.com/js/v3/cashfree.js"></script>
+  </head>
+  <body class="bg-slate-50 text-slate-900 antialiased selection:bg-indigo-500 selection:text-white overflow-x-hidden min-h-screen w-full">
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

@@ -1,0 +1,177 @@
+import React from 'react';
+import { DocumentData } from '../../types/document';
+
+export const ATSBasicResumeTemplate: React.FC<{ data: DocumentData }> = ({ data }) => {
+  const { personal, contact, summary, experience, education, skills, projects, certifications, achievements, customSections, customization } = data;
+
+  return (
+    <div
+      className="document-page-sheet p-10 font-sans text-black bg-white leading-normal"
+      style={{
+        fontSize: customization.fontSize === 'sm' ? '12px' : customization.fontSize === 'lg' ? '15px' : '13px',
+      }}
+    >
+      {/* ATS Header: Center Aligned, Pure Text, Standard Contact */}
+      <div className="text-center pb-4 border-b border-black mb-4">
+        <h1 className="text-2xl font-bold uppercase tracking-tight text-black">
+          {personal.fullName || 'FULL NAME'}
+        </h1>
+        {personal.professionalTitle && (
+          <p className="text-sm font-semibold uppercase mt-0.5">{personal.professionalTitle}</p>
+        )}
+        <div className="text-xs mt-1 flex flex-wrap justify-center gap-x-3 text-black no-justify">
+          {contact.phone && <span>{contact.phone}</span>}
+          {contact.email && <span>{contact.email}</span>}
+          {(contact.city || contact.state || contact.country) && <span>{[contact.city, contact.state, contact.country].filter(Boolean).join(', ')}</span>}
+          {contact.linkedin && <span>{contact.linkedin}</span>}
+          {(contact.portfolio || contact.website) && <span>{contact.portfolio || contact.website}</span>}
+        </div>
+      </div>
+
+      {/* Professional Summary */}
+      {summary && (
+        <div className="mb-4 avoid-break">
+          <h2 className="text-xs font-bold uppercase tracking-wider border-b border-black pb-0.5 mb-1.5">
+            PROFESSIONAL SUMMARY
+          </h2>
+          <p className="text-xs leading-relaxed text-justify text-black">{summary}</p>
+        </div>
+      )}
+
+      {/* Experience */}
+      {experience.length > 0 && (
+        <div className="mb-4">
+          <h2 className="text-xs font-bold uppercase tracking-wider border-b border-black pb-0.5 mb-1.5">
+            WORK EXPERIENCE
+          </h2>
+          <div className="space-y-3">
+            {experience.map((exp) => (
+              <div key={exp.id}>
+                <div className="flex justify-between items-baseline text-xs font-bold">
+                  <span>{exp.jobTitle}, {exp.company}</span>
+                  <span>{exp.startDate} - {(exp.currentlyWorking && (!exp.endDate || exp.endDate.trim().toLowerCase() === 'present')) ? 'Present' : (exp.endDate || 'Present')}</span>
+                </div>
+                {exp.location && <div className="text-[11px] italic text-neutral-800">{exp.location}</div>}
+                {exp.description && (
+                  exp.description.includes('\n') || exp.description.trim().startsWith('-') || exp.description.trim().startsWith('•') ? (
+                    <div className="mt-1 space-y-1 text-xs text-slate-700">
+                      {exp.description
+                        .split('\n')
+                        .map((l) => l.trim().replace(/^[-•*]\s*/, ''))
+                        .filter(Boolean)
+                        .map((line, idx) => (
+                          <div key={idx} className="flex items-start gap-1.5 leading-relaxed">
+                            <span className="text-slate-400 select-none">•</span>
+                            <span>{line}</span>
+                          </div>
+                        ))}
+                    </div>
+                  ) : (
+                    <p className="text-xs text-slate-700 mt-1 whitespace-pre-line leading-relaxed">{exp.description}</p>
+                  )
+                )}
+                {exp.achievements && (
+                  <div className="text-xs mt-1 whitespace-pre-line leading-relaxed">
+                    {exp.achievements}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Education */}
+      {education.length > 0 && (
+        <div className="mb-4 avoid-break">
+          <h2 className="text-xs font-bold uppercase tracking-wider border-b border-black pb-0.5 mb-1.5">
+            EDUCATION
+          </h2>
+          <div className="space-y-2">
+            {education.map((edu) => (
+              <div key={edu.id}>
+                <div className="flex justify-between items-baseline text-xs font-bold">
+                  <span>{edu.degree} - {edu.institute}{edu.score ? ` • ${/^[0-9./\s]+$/.test(edu.score.trim()) ? `GPA: ${edu.score.trim()}` : edu.score.trim()}` : ''}</span>
+                  <span>{edu.endYear}</span>
+                </div>
+                {edu.description && <div className="text-[11px]">{edu.description}</div>}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Skills */}
+      {skills.length > 0 && (
+        <div className="mb-4 avoid-break no-justify">
+          <h2 className="text-xs font-bold uppercase tracking-wider border-b border-black pb-0.5 mb-1.5">
+            SKILLS & COMPETENCIES
+          </h2>
+          <p className="text-xs leading-relaxed no-justify">
+            {skills.map((s) => s.name).join(' &bull; ')}
+          </p>
+        </div>
+      )}
+
+      {/* Projects */}
+      {projects.length > 0 && (
+        <div className="mb-4 avoid-break">
+          <h2 className="text-xs font-bold uppercase tracking-wider border-b border-black pb-0.5 mb-1.5">
+            KEY PROJECTS
+          </h2>
+          <div className="space-y-2">
+            {projects.map((proj) => (
+              <div key={proj.id}>
+                <div className="flex justify-between items-baseline text-xs font-bold">
+                  <span>{proj.name} {proj.role ? `(${proj.role})` : ''}</span>
+                  {proj.link && <span className="font-normal text-neutral-700">{proj.link}</span>}
+                </div>
+                {proj.technologies && <div className="text-[11px] italic">Technologies: {proj.technologies}</div>}
+                <p className="text-xs mt-0.5">{proj.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Certifications & Achievements */}
+      {(certifications.length > 0 || achievements.length > 0) && (
+        <div className="mb-4 avoid-break">
+          <h2 className="text-xs font-bold uppercase tracking-wider border-b border-black pb-0.5 mb-1.5">
+            CERTIFICATIONS & HONORS
+          </h2>
+          <ul className="list-disc list-inside text-xs space-y-1">
+            {certifications.map((c) => (
+              <li key={c.id}>
+                <strong>{c.name}</strong> - {c.issuer} ({c.issueDate || 'Verified'})
+              </li>
+            ))}
+            {achievements.map((a) => (
+              <li key={a.id}>
+                <strong>{a.title}</strong>: {a.description}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {/* Custom Sections */}
+      {customSections.map((sec) => (
+        <div key={sec.id} className="mb-3 avoid-break">
+          <h2 className="text-xs font-bold uppercase tracking-wider border-b border-black pb-0.5 mb-1.5">
+            {sec.title.toUpperCase()}
+          </h2>
+          {sec.items ? (
+            <div className="text-xs space-y-1">
+              {sec.items.map((it) => (
+                <div key={it.id}><strong>{it.key}:</strong> {it.value}</div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-xs">{sec.content}</p>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+};

@@ -1,0 +1,6 @@
+{
+  "name": "GenovaProfile",
+  "description": "GenovaProfile helps you create professional resumes, matrimonial profiles, cover letters, and personal profiles with beautiful templates and easy customization.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
