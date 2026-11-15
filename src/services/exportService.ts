@@ -26,8 +26,8 @@ export const EXPORT_CONFIG = {
   targetDpi: 300,
   targetWidthPx: 2480,
   targetHeightPx: 3508,
-  desktopScale: 3.125,
-  mobileScale: 2.2,
+  desktopScale: 2,
+  mobileScale: 2,
   maxCanvasPixelsDesktop: 25000000,
   maxCanvasPixelsMobile: 12000000,
   jpegQuality: 1.0,
@@ -212,6 +212,13 @@ export function sanitizeClonedDocumentForExport(
             clonedEl.style[prop as any] = sanitized;
           }
         }
+        if (computed.wordBreak === 'break-all') {
+          clonedEl.style.wordBreak = 'normal';
+        }
+        if ((computed as any).hyphens === 'auto' || (computed as any).webkitHyphens === 'auto') {
+          (clonedEl.style as any).hyphens = 'none';
+          (clonedEl.style as any).webkitHyphens = 'none';
+        }
         if (clonedEl.style.cssText && clonedEl.style.cssText.includes('oklch')) {
           clonedEl.style.cssText = sanitizeModernColorString(clonedEl.style.cssText);
         }
@@ -235,6 +242,10 @@ export function sanitizeClonedDocumentForExport(
     clonedTarget.style.width = liveTarget.style.width || '800px';
     clonedTarget.style.height = liveTarget.style.height || '1131px';
     clonedTarget.style.boxSizing = 'border-box';
+    clonedTarget.style.wordBreak = 'normal';
+    clonedTarget.style.overflowWrap = 'break-word';
+    (clonedTarget.style as any).hyphens = 'none';
+    (clonedTarget.style as any).webkitHyphens = 'none';
     clonedTarget.style.textRendering = 'geometricPrecision';
     (clonedTarget.style as any).webkitFontSmoothing = 'antialiased';
   } catch {}
@@ -474,13 +485,9 @@ export async function generatePdfBlob(
         sheet.getAttribute('data-document-type') === 'biodata' ||
         sheet.hasAttribute('data-one-page-fit');
 
-      const renderScale = isBiodata
-        ? 3
-        : calculateOptimalExportScale(sheet, options?.targetDpi || EXPORT_CONFIG.targetDpi);
       const canvas = await html2canvas(sheet, {
-        scale: renderScale,
+        scale: 2,
         useCORS: true,
-        allowTaint: true,
         logging: false,
         backgroundColor: sheet.style.backgroundColor || '#ffffff',
         imageTimeout: 15000,
@@ -570,13 +577,9 @@ export async function generatePngBlob(
       targetElement.getAttribute('data-document-type') === 'biodata' ||
       targetElement.hasAttribute('data-one-page-fit');
 
-    const renderScale = isBiodata
-      ? 3
-      : calculateOptimalExportScale(targetElement, options?.targetDpi || EXPORT_CONFIG.targetDpi);
     const canvas = await html2canvas(targetElement, {
-      scale: renderScale,
+      scale: 2,
       useCORS: true,
-      allowTaint: true,
       logging: false,
       backgroundColor: targetElement.style.backgroundColor || '#ffffff',
       imageTimeout: 15000,
@@ -661,12 +664,19 @@ export const exportService = {
     isExportInProgress = true;
 
     try {
+      if (typeof document !== 'undefined' && document.fonts) {
+        try {
+          await document.fonts.ready;
+        } catch {}
+      }
+      // Safe 1000ms render delay so all Tailwind styles and webfonts finish painting before html2canvas captures
+      await new Promise((resolve) => setTimeout(resolve, 1000));
       const blob = await generatePdfBlob(elementId);
       const cleanFilename = filename.endsWith('.pdf') ? filename : `${filename}.pdf`;
       saveBlob(blob, cleanFilename);
       return {
         success: true,
-        message: 'PDF downloaded successfully (300 DPI HD).',
+        message: 'PDF downloaded successfully (HD).',
       };
     } catch (err: any) {
       console.error('Failed to generate high-quality PDF:', err);

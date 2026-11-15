@@ -277,8 +277,8 @@ export const CoverLetterOnePagePreview: React.FC<CoverLetterOnePagePreviewProps>
             text-align: justify !important;
             text-justify: inter-word !important;
             text-align-last: left !important;
-            hyphens: auto !important;
-            -webkit-hyphens: auto !important;
+            hyphens: none !important;
+            -webkit-hyphens: none !important;
             overflow-wrap: break-word !important;
             word-break: normal !important;
             text-wrap: pretty;

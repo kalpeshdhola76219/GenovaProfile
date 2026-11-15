@@ -149,6 +149,9 @@ const MultiPagePaginatedDocumentPreview: React.FC<PaginatedDocumentPreviewProps>
                   height: '1131px',
                   position: 'relative',
                   backgroundColor: '#ffffff',
+                  wordBreak: 'normal',
+                  overflowWrap: 'break-word',
+                  hyphens: 'none',
                 }}
               >
                 {/* Content Viewport Window */}

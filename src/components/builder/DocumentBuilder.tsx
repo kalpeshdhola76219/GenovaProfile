@@ -293,8 +293,8 @@ export const DocumentBuilder: React.FC<DocumentBuilderProps> = ({
     setIsPreparingBlob(true);
     setIsDocumentEditedSinceBuild(false);
 
-    // Yield slightly to ensure the preview DOM has painted
-    await new Promise((resolve) => setTimeout(resolve, 450));
+    // Safe 1000ms render delay to ensure Tailwind styles and webfonts have painted before capture
+    await new Promise((resolve) => setTimeout(resolve, 1000));
 
     const captureVersion = docVersionRef.current;
     const filename = generateExportFilename(doc.personal?.fullName, doc.title, doc.type, type);
