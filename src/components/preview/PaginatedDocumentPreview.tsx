@@ -1,6 +1,7 @@
-import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { DocumentData } from '../../types/document';
 import { calculateDocumentPagination, DocumentPaginationResult, A4_DIMENSIONS } from '../../services/paginationEngine';
+import { sanitizeDocumentTextFields } from '../../utils/textSanitizer';
 import { OnePageFit } from './OnePageFit';
 
 interface PaginatedDocumentPreviewProps {
@@ -28,11 +29,12 @@ export const PaginatedDocumentPreview: React.FC<PaginatedDocumentPreviewProps> =
 const GUJARATI_CHAR_REGEX = /[\u0A80-\u0AFF]/;
 
 const MultiPagePaginatedDocumentPreview: React.FC<PaginatedDocumentPreviewProps> = ({
-  data,
+  data: rawData,
   TemplateComponent,
   isUnpaidPremium = false,
   onPageCountChange,
 }) => {
+  const data = useMemo(() => sanitizeDocumentTextFields(rawData), [rawData]);
   const measureRef = useRef<HTMLDivElement>(null);
   const [isPaginationSettled, setIsPaginationSettled] = useState<boolean>(false);
   const [pagination, setPagination] = useState<DocumentPaginationResult>({
@@ -269,7 +271,9 @@ const MultiPagePaginatedDocumentPreview: React.FC<PaginatedDocumentPreviewProps>
                       ? isMultiPage
                         ? `${page.endY}px`
                         : '1131px'
-                      : `${Math.min(1055, page.contentHeight)}px`,
+                      : isLastPage
+                      ? `${Math.min(1080, page.contentHeight + 12)}px`
+                      : `${Math.min(1065, page.contentHeight)}px`,
                     padding: 0,
                   }}
                 >

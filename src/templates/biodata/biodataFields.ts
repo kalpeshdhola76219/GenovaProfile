@@ -1,4 +1,5 @@
 import { DocumentData } from '../../types/document';
+import { sanitizeText } from '../../utils/textSanitizer';
 
 /**
  * Maximum character limits for matrimonial biodata fields to prevent layout overflows
@@ -117,7 +118,7 @@ function addField(
   value?: string | number | null
 ): void {
   if (value === undefined || value === null) return;
-  const strVal = String(value).trim();
+  const strVal = sanitizeText(String(value).trim());
   if (!strVal) return;
   list.push({ key, label, value: strVal });
 }

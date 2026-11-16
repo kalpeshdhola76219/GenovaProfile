@@ -8,9 +8,11 @@ import {
   METADATA_ROW_STYLE,
   ResumeBulletItem,
   ResumeDescriptionBlock,
+  sanitizeDocumentTextFields,
 } from './resumeTemplateUtils';
 
 export const ATSProfessionalResumeTemplate: React.FC<{ data: DocumentData }> = ({ data }) => {
+  const safeData = sanitizeDocumentTextFields(data);
   const {
     personal = {} as any,
     contact = {} as any,
@@ -23,7 +25,7 @@ export const ATSProfessionalResumeTemplate: React.FC<{ data: DocumentData }> = (
     achievements = [],
     customSections = [],
     customization = {} as any,
-  } = data || {};
+  } = safeData || {};
   const primary = customization.primaryColor || '#0f172a';
 
   return (
@@ -161,7 +163,7 @@ export const ATSProfessionalResumeTemplate: React.FC<{ data: DocumentData }> = (
                       )}
                     </div>
                     {years && (
-                      <span className="text-slate-500 font-mono text-[11px] shrink-0 ml-2" style={METADATA_RIGHT_STYLE}>
+                      <span className="text-slate-500 font-mono text-[11px]" style={METADATA_RIGHT_STYLE}>
                         {years}
                       </span>
                     )}

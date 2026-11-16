@@ -2,6 +2,7 @@ import React, { createContext, useContext, useLayoutEffect, useRef } from 'react
 import { DocumentCustomization } from '../../types/document';
 import { MappedCoverLetterData } from '../../utils/mapCoverLetterData';
 import { getStaticFontClass } from '../../utils/fontClassMap';
+import { sanitizeText } from '../../utils/textSanitizer';
 
 interface CoverLetterPreviewContextValue {
   isExportMode: boolean;
@@ -153,7 +154,7 @@ export const CoverLetterSampleText: React.FC<{
   suffix?: React.ReactNode;
 }> = ({ value, sample, required = false, dark = false, prefix, suffix }) => {
   const { isExportMode, previewMode } = useCoverLetterPreviewMode();
-  const clean = (value || '').trim();
+  const clean = sanitizeText((value || '').trim());
   if (clean) {
     return (
       <>
@@ -209,12 +210,12 @@ export const CoverLetterDetailsBlock: React.FC<{
           Application Details
         </div>
         {hasFreelanceSummary && (
-          <div className="cl-meta font-semibold text-black">{mapped.freelanceSummaryLine}</div>
+          <div className="cl-meta font-semibold text-black">{sanitizeText(mapped.freelanceSummaryLine || '')}</div>
         )}
         {mapped.details.map((item) => (
           <div key={item.label} className="cl-meta">
             <span className="font-medium text-gray-600">{item.label}:</span>{' '}
-            <span className="font-semibold text-black">{item.value}</span>
+            <span className="font-semibold text-black">{sanitizeText(item.value)}</span>
           </div>
         ))}
       </div>
@@ -230,14 +231,14 @@ export const CoverLetterDetailsBlock: React.FC<{
         Application Details
       </div>
       {hasFreelanceSummary && (
-        <div className="cl-meta font-bold text-slate-900 mb-1.5">{mapped.freelanceSummaryLine}</div>
+        <div className="cl-meta font-bold text-slate-900 mb-1.5">{sanitizeText(mapped.freelanceSummaryLine || '')}</div>
       )}
       {hasDetails && (
         <div className="grid grid-cols-2 gap-x-6 gap-y-1">
           {mapped.details.map((item) => (
             <div key={item.label} className="cl-meta whitespace-normal">
               <span className="font-medium text-slate-500">{item.label}:</span>{' '}
-              <span className="text-slate-900 font-semibold">{item.value}</span>
+              <span className="text-slate-900 font-semibold">{sanitizeText(item.value)}</span>
             </div>
           ))}
         </div>
@@ -308,7 +309,7 @@ export const CoverLetterBodyBlocks: React.FC<{
     <div className={`cl-body-content cl-body ${className}`}>
       {mapped.blocks.map((block) => (
         <div key={block.id}>
-          {block.text && <p>{renderBodyParagraphTokens(block.text)}</p>}
+          {block.text && <p>{renderBodyParagraphTokens(sanitizeText(block.text))}</p>}
         </div>
       ))}
     </div>
@@ -353,11 +354,11 @@ export const CoverLetterClosingBlock: React.FC<{
     <div className={`cl-signature-block avoid-break ${containerClassName}`}>
       {closing.declarationLine && (
         <p className="cl-meta text-slate-700 mb-3 break-words">
-          <strong className="font-semibold text-slate-900">Declaration:</strong> {closing.declarationLine}
+          <strong className="font-semibold text-slate-900">Declaration:</strong> {sanitizeText(closing.declarationLine)}
         </p>
       )}
       {closing.signOff && (
-        <div className="cl-body font-normal break-words">{closing.signOff}</div>
+        <div className="cl-body font-normal break-words">{sanitizeText(closing.signOff)}</div>
       )}
 
       {closing.signatureType === 'image' && closing.signatureImage ? (
@@ -402,7 +403,7 @@ export const CoverLetterClosingBlock: React.FC<{
 
       {closing.enclosures && (
         <div className="cl-meta text-slate-600 font-normal pt-3 border-t border-slate-200 mt-4 break-words">
-          <span className="font-semibold text-slate-800">Enclosures:</span> {closing.enclosures}
+          <span className="font-semibold text-slate-800">Enclosures:</span> {sanitizeText(closing.enclosures)}
         </div>
       )}
     </div>

@@ -7,10 +7,11 @@ import {
   METADATA_RIGHT_STYLE,
   ResumeBulletItem,
   ResumeDescriptionBlock,
+  sanitizeDocumentTextFields,
 } from './resumeTemplateUtils';
 
 export const ProfessionalResumeTemplate: React.FC<{ data: DocumentData }> = ({ data }) => {
-  const { personal, contact, summary, experience, education, skills, projects, certifications, achievements, customSections, customization } = data;
+  const { personal, contact, summary, experience, education, skills, projects, certifications, achievements, customSections, customization } = sanitizeDocumentTextFields(data);
   const primary = customization.primaryColor || '#0369a1'; // Sky 700
 
   return (
@@ -24,7 +25,7 @@ export const ProfessionalResumeTemplate: React.FC<{ data: DocumentData }> = ({ d
       {/* Header Accent Line */}
       <div className="h-1.5 w-full rounded mb-6" style={{ backgroundColor: primary }}></div>
 
-      <div className="flex justify-between items-baseline border-b border-slate-200 pb-4 mb-5" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', columnGap: '16px' }}>
+      <div className="flex justify-between items-start border-b border-slate-200 pb-4 mb-5" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', width: '100%', gap: '16px', columnGap: '16px' }}>
         <div style={METADATA_LEFT_STYLE}>
           <h1 className="text-2xl font-black tracking-tight text-slate-900">
             {personal.fullName || 'FULL NAME'}
@@ -92,12 +93,17 @@ export const ProfessionalResumeTemplate: React.FC<{ data: DocumentData }> = ({ d
               Education
             </h2>
             <div className="space-y-2 text-xs">
-              {education.map((edu) => (
-                <div key={edu.id}>
-                  <div className="font-bold text-slate-900">{edu.degree}</div>
-                  <div className="text-slate-600">{edu.institute} • {edu.endYear}{edu.score ? ` • ${/^[0-9./\s]+$/.test(edu.score.trim()) ? `GPA: ${edu.score.trim()}` : edu.score.trim()}` : ''}</div>
-                </div>
-              ))}
+              {education.map((edu) => {
+                const scoreLabel = edu.score ? (/^[0-9./\s]+$/.test(edu.score.trim()) ? `GPA: ${edu.score.trim()}` : edu.score.trim()) : '';
+                const subline = [edu.institute, edu.endYear, scoreLabel].filter(Boolean).join(' • ');
+                return (
+                  <div key={edu.id} data-entry="true">
+                    <div className="font-bold text-slate-900">{edu.degree}</div>
+                    {subline && <div className="text-slate-600">{subline}</div>}
+                    {edu.description && <div className="text-[11px] text-slate-500 mt-0.5">{edu.description}</div>}
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}

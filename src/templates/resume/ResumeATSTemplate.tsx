@@ -8,12 +8,15 @@ import {
   METADATA_RIGHT_STYLE,
   CONTACT_ROW_STYLE,
   ResumeDescriptionBlock,
+  sanitizeDocumentTextFields,
 } from './resumeTemplateUtils';
 
 export const ResumeATSTemplate: React.FC<{ data: DocumentData }> = ({ data }) => {
+  const safeData = sanitizeDocumentTextFields(data);
   const {
     personal,
     contact,
+    summary = '',
     education = [],
     experience = [],
     skills = [],
@@ -21,7 +24,7 @@ export const ResumeATSTemplate: React.FC<{ data: DocumentData }> = ({ data }) =>
     certifications = [],
     customSections = [],
     customization,
-  } = data;
+  } = safeData;
   const primary = customization?.primaryColor || '#0f172a';
   const paperColor = customization?.paperColor || '#ffffff';
 
@@ -88,7 +91,7 @@ export const ResumeATSTemplate: React.FC<{ data: DocumentData }> = ({ data }) =>
       </header>
 
       {/* Professional Summary */}
-      {data.summary && (
+      {summary && (
         <section className="mb-4">
           <h2
             className="text-xs font-bold uppercase tracking-wider border-b pb-1 mb-2"
@@ -96,7 +99,7 @@ export const ResumeATSTemplate: React.FC<{ data: DocumentData }> = ({ data }) =>
           >
             Professional Summary
           </h2>
-          <p className="text-xs text-slate-700 text-justify leading-relaxed">{data.summary}</p>
+          <p className="text-xs text-slate-700 text-justify leading-relaxed">{summary}</p>
         </section>
       )}
 
@@ -152,7 +155,7 @@ export const ResumeATSTemplate: React.FC<{ data: DocumentData }> = ({ data }) =>
           </h2>
           <div className="space-y-2">
             {education.map((edu, idx) => (
-              <div key={edu.id || idx} className="text-xs">
+              <div key={edu.id || idx} data-entry="true" className="text-xs">
                 <div className="flex justify-between font-bold text-slate-900" style={METADATA_ROW_STYLE}>
                   <span style={METADATA_LEFT_STYLE}>{edu.degree}</span>
                   <span className="text-slate-500 font-normal" style={METADATA_RIGHT_STYLE}>
@@ -161,7 +164,7 @@ export const ResumeATSTemplate: React.FC<{ data: DocumentData }> = ({ data }) =>
                 </div>
                 <div className="text-slate-600 flex justify-between" style={METADATA_ROW_STYLE}>
                   <span style={METADATA_LEFT_STYLE}>
-                    {edu.institute}{edu.location ? `, ${edu.location}` : ''}
+                    {[edu.institute, edu.location].filter(Boolean).join(', ')}
                     {edu.score ? ` • ${/^[0-9./\s]+$/.test(edu.score.trim()) ? `GPA: ${edu.score.trim()}` : edu.score.trim()}` : ''}
                   </span>
                 </div>

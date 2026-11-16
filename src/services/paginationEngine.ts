@@ -248,13 +248,17 @@ export function calculateDocumentPagination(
       }
     }
 
+    // Keep compact entries (e.g. projects, education) or single-paragraph entries atomic so titles & descriptions stay together
+    const hasSplittableBullets = bullets.length >= 2 && r.height > 150;
+    const entryBullets = hasSplittableBullets ? bullets : [];
+
     entries.push({
       element: el,
       top: r.top,
       bottom: r.bottom,
       height: r.height,
       headerBottom,
-      bullets,
+      bullets: entryBullets,
       headingBefore: closestHeading,
     });
   }
@@ -340,7 +344,7 @@ export function calculateDocumentPagination(
 
       if (bullets.length > 0) {
         const firstBullet = bullets[0];
-        // Requirement 4: Keep job titles, company names, dates, and their first responsibility together
+        // Keep job titles, company names, dates, and their first responsibility together
         const firstUnitBottom = Math.max(e.headerBottom, firstBullet.bottom);
 
         // Can the header + first responsibility fit on this page?
@@ -354,7 +358,7 @@ export function calculateDocumentPagination(
               e.top - e.headingBefore.bottom < 50
             ) {
               // Section heading stays together with this entry!
-              cutY = e.headingBefore.top - 6;
+              cutY = e.headingBefore.top - 4;
               nextStartY = e.headingBefore.top;
             } else {
               cutY = e.top - 4;
@@ -409,13 +413,13 @@ export function calculateDocumentPagination(
           }
         }
       } else {
-        // Entry has no multiple bullets (single block)
+        // Entry is compact/atomic (e.g. Featured Project or Education): move entire entry cleanly
         if (
           e.headingBefore &&
           e.headingBefore.top >= currentStartY + minPageHeight &&
           e.top - e.headingBefore.bottom < 50
         ) {
-          cutY = e.headingBefore.top - 6;
+          cutY = e.headingBefore.top - 4;
           nextStartY = e.headingBefore.top;
         } else {
           cutY = e.top - 4;
@@ -429,7 +433,7 @@ export function calculateDocumentPagination(
       for (const h of headings) {
         if (h.top < targetEndY && h.top > currentStartY + minPageHeight) {
           if (h.bottom > targetEndY || targetEndY - h.top < 60) {
-            cutY = h.top - 6;
+            cutY = h.top - 4;
             nextStartY = h.top;
             break;
           }
@@ -457,11 +461,13 @@ export function calculateDocumentPagination(
       }
 
       if (bestBottom > currentStartY + minPageHeight) {
-        cutY = bestBottom;
-        if (matchingUnitTop !== null && matchingUnitTop >= bestBottom && matchingUnitTop - bestBottom <= 24) {
-          nextStartY = matchingUnitTop;
+        if (matchingUnitTop !== null && matchingUnitTop > bestBottom) {
+          const midpoint = Math.round((bestBottom + matchingUnitTop) / 2);
+          cutY = Math.min(targetEndY, midpoint);
+          nextStartY = matchingUnitTop - 1;
         } else {
-          nextStartY = bestBottom;
+          cutY = Math.min(targetEndY, bestBottom);
+          nextStartY = cutY;
         }
       }
     }

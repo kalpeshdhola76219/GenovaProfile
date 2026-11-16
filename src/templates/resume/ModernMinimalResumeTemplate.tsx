@@ -7,10 +7,11 @@ import {
   METADATA_RIGHT_STYLE,
   ResumeBulletItem,
   ResumeDescriptionBlock,
+  sanitizeDocumentTextFields,
 } from './resumeTemplateUtils';
 
 export const ModernMinimalResumeTemplate: React.FC<{ data: DocumentData }> = ({ data }) => {
-  const { personal, contact, summary, experience, education, skills, projects, certifications, achievements, customSections, customization } = data;
+  const { personal, contact, summary, experience, education, skills, projects, certifications, achievements, customSections, customization } = sanitizeDocumentTextFields(data);
 
   return (
     <div
@@ -20,7 +21,7 @@ export const ModernMinimalResumeTemplate: React.FC<{ data: DocumentData }> = ({ 
         fontSize: customization.fontSize === 'sm' ? '12px' : customization.fontSize === 'lg' ? '15px' : '13px',
       }}
     >
-      <div className="flex justify-between items-baseline border-b-2 border-slate-900 pb-3 mb-4" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', columnGap: '16px' }}>
+      <div className="flex justify-between items-start border-b-2 border-slate-900 pb-3 mb-4" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', width: '100%', gap: '16px', columnGap: '16px' }}>
         <div style={METADATA_LEFT_STYLE}>
           <h1 className="text-2xl font-bold tracking-tight text-slate-900">
             {personal.fullName || 'FULL NAME'}

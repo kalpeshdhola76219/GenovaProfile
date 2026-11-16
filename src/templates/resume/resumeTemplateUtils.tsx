@@ -1,21 +1,27 @@
 import React from 'react';
+import { sanitizeDocumentTextFields, sanitizeText } from '../../utils/textSanitizer';
+
+export { sanitizeDocumentTextFields, sanitizeText };
 
 export const METADATA_ROW_STYLE: React.CSSProperties = {
   display: 'flex',
   justifyContent: 'space-between',
-  alignItems: 'baseline',
-  columnGap: '12px',
+  alignItems: 'flex-start',
+  width: '100%',
+  gap: '16px',
+  columnGap: '16px',
   rowGap: '2px',
 };
 
 export const METADATA_LEFT_STYLE: React.CSSProperties = {
+  flex: 1,
   minWidth: 0,
-  flex: '1 1 auto',
 };
 
 export const METADATA_RIGHT_STYLE: React.CSSProperties = {
-  whiteSpace: 'nowrap',
   flexShrink: 0,
+  whiteSpace: 'nowrap',
+  textAlign: 'right',
 };
 
 export const CONTACT_ROW_STYLE: React.CSSProperties = {
@@ -61,7 +67,7 @@ export const BULLET_TEXT_STYLE: React.CSSProperties = {
 
 export const isBulletedOrMultiline = (text?: string): boolean => {
   if (!text) return false;
-  const trimmed = text.trim();
+  const trimmed = sanitizeText(text).trim();
   return (
     text.includes('\n') ||
     trimmed.startsWith('-') ||
@@ -72,7 +78,7 @@ export const isBulletedOrMultiline = (text?: string): boolean => {
 
 export const parseBulletLines = (text?: string): string[] => {
   if (!text) return [];
-  return text
+  return sanitizeText(text)
     .split('\n')
     .map((line) => line.trim().replace(/^[-•*]\s*/, ''))
     .filter(Boolean);
@@ -118,9 +124,10 @@ export const ResumeDescriptionBlock: React.FC<{
   markerClassName = 'text-slate-400',
   paragraphClassName = 'text-xs text-slate-700 mt-1 whitespace-pre-line leading-relaxed',
 }) => {
-  if (!text) return null;
-  if (isBulletedOrMultiline(text)) {
-    const lines = parseBulletLines(text);
+  const safe = text ? sanitizeText(text) : '';
+  if (!safe) return null;
+  if (isBulletedOrMultiline(safe)) {
+    const lines = parseBulletLines(safe);
     if (lines.length === 0) return null;
     return (
       <div className={wrapperClassName} style={BULLET_LIST_STYLE}>
@@ -136,5 +143,5 @@ export const ResumeDescriptionBlock: React.FC<{
       </div>
     );
   }
-  return <p className={paragraphClassName}>{text}</p>;
+  return <p className={paragraphClassName}>{safe}</p>;
 };

@@ -7,6 +7,8 @@ export function sanitizeDisplayText(value: string): string {
   return value.replace(/\\{1,2}([$€£₹¥%#&_*])/g, '$1');
 }
 
+export const sanitizeText = sanitizeDisplayText;
+
 const SKIP_STRING_KEYS = new Set([
   'id',
   'templateId',

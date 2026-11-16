@@ -687,6 +687,251 @@ export function saveBlob(blob: Blob, filename: string): void {
   }, 15000);
 }
 
+const EXPORT_A4_WIDTH_PX = 794;
+const EXPORT_A4_HEIGHT_PX = 1123;
+const EXPORT_PAGE_TOP_MARGIN_PX = 36;
+const EXPORT_PAGE_BOTTOM_MARGIN_PX = 40;
+
+/**
+ * Unwraps any live preview height/transform clipping on a cloned multi-page resume sheet
+ * and inserts normal-flow marginTop spacers before any heading, entry, card, or bullet row
+ * that crosses an A4 (1123px @ 96 DPI) boundary so no content is ever sliced or clipped.
+ */
+function layoutClonedMultiPageSheet(
+  clonedRoot: HTMLElement,
+  flowRoot: HTMLElement,
+  clonedDoc: Document,
+  safeBgColor: string
+): number {
+  // Unclip any preview window wrapper between clonedRoot and flowRoot (e.g. translateY / height clip)
+  let walker: HTMLElement | null = flowRoot;
+  while (walker && walker !== clonedRoot) {
+    walker.style.overflow = 'visible';
+    walker.style.height = 'auto';
+    walker.style.minHeight = '0';
+    walker.style.maxHeight = 'none';
+    walker.style.marginTop = '0px';
+    walker.style.transform = 'none';
+    walker.style.width = '100%';
+    walker = walker.parentElement;
+  }
+
+  clonedRoot.style.width = `${EXPORT_A4_WIDTH_PX}px`;
+  clonedRoot.style.minWidth = `${EXPORT_A4_WIDTH_PX}px`;
+  clonedRoot.style.maxWidth = `${EXPORT_A4_WIDTH_PX}px`;
+  clonedRoot.style.height = 'auto';
+  clonedRoot.style.minHeight = `${EXPORT_A4_HEIGHT_PX}px`;
+  clonedRoot.style.maxHeight = 'none';
+  clonedRoot.style.overflow = 'visible';
+  clonedRoot.style.transform = 'none';
+  clonedRoot.style.margin = '0';
+  clonedRoot.style.boxShadow = 'none';
+  clonedRoot.style.backgroundColor = safeBgColor;
+  clonedRoot.style.boxSizing = 'border-box';
+
+  if (flowRoot !== clonedRoot) {
+    flowRoot.style.width = `${EXPORT_A4_WIDTH_PX}px`;
+    flowRoot.style.minWidth = `${EXPORT_A4_WIDTH_PX}px`;
+    flowRoot.style.maxWidth = `${EXPORT_A4_WIDTH_PX}px`;
+    flowRoot.style.height = 'auto';
+    flowRoot.style.minHeight = `${EXPORT_A4_HEIGHT_PX}px`;
+    flowRoot.style.maxHeight = 'none';
+    flowRoot.style.overflow = 'visible';
+    flowRoot.style.transform = 'none';
+    flowRoot.style.margin = '0';
+    flowRoot.style.boxShadow = 'none';
+    flowRoot.style.boxSizing = 'border-box';
+  }
+
+  // Force reflow at exact 794px desktop A4 width
+  void flowRoot.offsetHeight;
+
+  const getRelRect = (el: HTMLElement) => {
+    const rootTop = flowRoot.getBoundingClientRect().top;
+    const r = el.getBoundingClientRect();
+    return {
+      top: r.top - rootTop,
+      bottom: r.bottom - rootTop,
+      height: r.height,
+      width: r.width,
+    };
+  };
+
+  const pushToNextPage = (el: HTMLElement, pageIdx: number) => {
+    const curRect = getRelRect(el);
+    const targetTop = (pageIdx + 1) * EXPORT_A4_HEIGHT_PX + EXPORT_PAGE_TOP_MARGIN_PX;
+    const delta = Math.ceil(targetTop - curRect.top);
+    if (delta > 0) {
+      const view = clonedDoc.defaultView || window;
+      const existingMargin = parseFloat(view.getComputedStyle(el).marginTop) || 0;
+      el.style.marginTop = `${existingMargin + delta}px`;
+      void flowRoot.offsetHeight;
+    }
+  };
+
+  const totalNaturalHeight = Math.max(flowRoot.scrollHeight, flowRoot.offsetHeight);
+  if (totalNaturalHeight > EXPORT_A4_HEIGHT_PX) {
+    const pushedElements = new Set<HTMLElement>();
+
+    // Pass 1: Scan entries, headings, and compact avoid-break sections in document order
+    const blocks = Array.from(
+      flowRoot.querySelectorAll('h1, h2, h3, [data-heading], [data-section-title], [data-entry], .avoid-break, [data-atomic]')
+    ) as HTMLElement[];
+
+    for (let i = 0; i < blocks.length; i++) {
+      const el = blocks[i];
+      if (pushedElements.has(el)) continue;
+
+      const rect = getRelRect(el);
+      if (rect.height < 6) continue;
+
+      // Never treat an outer full-width multi-column wrapper (> 340px tall containing nested entries) as atomic
+      const isHeading = /^(H1|H2|H3)$/.test(el.tagName) || el.hasAttribute('data-heading') || el.hasAttribute('data-section-title');
+      if (!isHeading && el.classList.contains('avoid-break') && !el.hasAttribute('data-entry')) {
+        if (rect.height > 320) continue;
+      }
+
+      const pageIdx = Math.floor(Math.max(0, rect.top) / EXPORT_A4_HEIGHT_PX);
+      const pageEnd = (pageIdx + 1) * EXPORT_A4_HEIGHT_PX - EXPORT_PAGE_BOTTOM_MARGIN_PX;
+
+      if (isHeading) {
+        // Check whether the heading itself crosses pageEnd or would be orphaned from its immediate next item
+        let orphaned = rect.bottom > pageEnd;
+        if (!orphaned) {
+          for (let j = i + 1; j < blocks.length; j++) {
+            const candidate = blocks[j];
+            if (el.contains(candidate) || candidate.contains(el)) continue;
+            const cRect = getRelRect(candidate);
+            if (cRect.top >= rect.bottom - 2 && cRect.top - rect.bottom <= 70) {
+              if (cRect.height <= 220 && cRect.bottom > pageEnd) {
+                orphaned = true;
+              } else if (cRect.height > 220) {
+                const firstBullet = candidate.querySelector('[data-bullet], li') as HTMLElement | null;
+                if (firstBullet && getRelRect(firstBullet).bottom > pageEnd) {
+                  orphaned = true;
+                }
+              }
+              break;
+            }
+          }
+        }
+        if (orphaned && rect.top > pageIdx * EXPORT_A4_HEIGHT_PX + 120) {
+          pushToNextPage(el, pageIdx);
+          pushedElements.add(el);
+        }
+        continue;
+      }
+
+      if (rect.bottom <= pageEnd) continue;
+
+      // Element crosses pageEnd
+      const bullets = Array.from(el.querySelectorAll('[data-bullet], li')) as HTMLElement[];
+      const isSplittableLargeEntry = el.hasAttribute('data-entry') && rect.height > 150 && bullets.length >= 2;
+
+      if (isSplittableLargeEntry) {
+        // Keep header + first bullet together; if even first bullet doesn't fit, push whole entry
+        const firstBulletRect = getRelRect(bullets[0]);
+        if (firstBulletRect.bottom > pageEnd && rect.top > pageIdx * EXPORT_A4_HEIGHT_PX + 120) {
+          pushToNextPage(el, pageIdx);
+          pushedElements.add(el);
+        } else {
+          for (const b of bullets) {
+            const bRect = getRelRect(b);
+            const bPageIdx = Math.floor(Math.max(0, bRect.top) / EXPORT_A4_HEIGHT_PX);
+            const bPageEnd = (bPageIdx + 1) * EXPORT_A4_HEIGHT_PX - EXPORT_PAGE_BOTTOM_MARGIN_PX;
+            if (bRect.bottom > bPageEnd && bRect.height < EXPORT_A4_HEIGHT_PX - 120) {
+              pushToNextPage(b, bPageIdx);
+              pushedElements.add(b);
+            }
+          }
+        }
+      } else {
+        // Compact entry (e.g. Featured Project, Education, Certification) or compact avoid-break block: move whole block
+        // If a heading sits immediately above this block with no siblings before it, push the heading too
+        let precedingHeading: HTMLElement | null = null;
+        for (let k = i - 1; k >= 0; k--) {
+          const prev = blocks[k];
+          if (/^(H2|H3)$/.test(prev.tagName) || prev.hasAttribute('data-heading') || prev.hasAttribute('data-section-title')) {
+            const pRect = getRelRect(prev);
+            const hasEntryBetween = blocks.slice(k + 1, i).some((mid) => !prev.contains(mid) && mid.hasAttribute('data-entry'));
+            if (!hasEntryBetween && rect.top - pRect.bottom < 50 && pRect.top > pageIdx * EXPORT_A4_HEIGHT_PX + 120) {
+              precedingHeading = prev;
+            }
+            break;
+          }
+        }
+        if (precedingHeading && !pushedElements.has(precedingHeading)) {
+          pushToNextPage(precedingHeading, pageIdx);
+          pushedElements.add(precedingHeading);
+        } else if (rect.top > pageIdx * EXPORT_A4_HEIGHT_PX + 80 && rect.height < EXPORT_A4_HEIGHT_PX - 120) {
+          pushToNextPage(el, pageIdx);
+          pushedElements.add(el);
+        }
+      }
+    }
+
+    // Pass 2: Safety sweep over leaf paragraphs/bullets/grid cells so no single line gets sliced by 1123px
+    const leafCandidates = Array.from(
+      flowRoot.querySelectorAll('[data-bullet], li, p, .grid > div')
+    ) as HTMLElement[];
+    for (const leaf of leafCandidates) {
+      if (pushedElements.has(leaf)) continue;
+      const lRect = getRelRect(leaf);
+      if (lRect.height <= 4 || lRect.height > 220) continue;
+      // Skip multi-column layout wrappers (only check leaf grid cells <= 60px tall)
+      if (leaf.parentElement?.classList.contains('grid') && lRect.height > 80) continue;
+      const lPageIdx = Math.floor(Math.max(0, lRect.top) / EXPORT_A4_HEIGHT_PX);
+      const lPageEnd = (lPageIdx + 1) * EXPORT_A4_HEIGHT_PX - EXPORT_PAGE_BOTTOM_MARGIN_PX;
+      if (lRect.bottom > lPageEnd && lRect.top > lPageIdx * EXPORT_A4_HEIGHT_PX + 80) {
+        pushToNextPage(leaf, lPageIdx);
+        pushedElements.add(leaf);
+      }
+    }
+  }
+
+  // Measure final rendered bottom across all non-empty leaf elements
+  void flowRoot.offsetHeight;
+  const rootTop = flowRoot.getBoundingClientRect().top;
+  let maxBottom = flowRoot.scrollHeight;
+  const allEls = Array.from(flowRoot.querySelectorAll('h1, h2, h3, p, div, li, span, img')) as HTMLElement[];
+  for (const el of allEls) {
+    if ((el.children.length === 0 && (el.textContent || '').trim().length > 0) || el.tagName === 'IMG') {
+      const b = el.getBoundingClientRect().bottom - rootTop;
+      if (b > maxBottom) maxBottom = b;
+    }
+  }
+
+  const totalPages = Math.max(1, Math.ceil((maxBottom + 20) / EXPORT_A4_HEIGHT_PX));
+  const finalHeightPx = totalPages * EXPORT_A4_HEIGHT_PX;
+
+  clonedRoot.style.height = `${finalHeightPx}px`;
+  clonedRoot.style.minHeight = `${finalHeightPx}px`;
+  clonedRoot.style.maxHeight = `${finalHeightPx}px`;
+  if (flowRoot !== clonedRoot) {
+    flowRoot.style.height = `${finalHeightPx}px`;
+    flowRoot.style.minHeight = `${finalHeightPx}px`;
+  }
+
+  // Ensure unpaid PREVIEW watermark covers each exported page cleanly if present
+  const existingWatermark = clonedRoot.querySelector('.no-export-when-paid') as HTMLElement | null;
+  if (existingWatermark && totalPages > 1) {
+    const view = clonedDoc.defaultView || window;
+    if (view.getComputedStyle(existingWatermark).display !== 'none') {
+      existingWatermark.style.bottom = 'auto';
+      existingWatermark.style.height = `${EXPORT_A4_HEIGHT_PX}px`;
+      for (let p = 1; p < totalPages; p++) {
+        const cloneWm = existingWatermark.cloneNode(true) as HTMLElement;
+        cloneWm.style.top = `${p * EXPORT_A4_HEIGHT_PX}px`;
+        cloneWm.style.height = `${EXPORT_A4_HEIGHT_PX}px`;
+        cloneWm.style.bottom = 'auto';
+        clonedRoot.appendChild(cloneWm);
+      }
+    }
+  }
+
+  return totalPages;
+}
+
 /**
  * Unified PDF generation pipeline used identically for both automatic background builds
  * and manual PDF downloads across resumes, biodatas, and cover letters.
@@ -727,24 +972,20 @@ export async function generatePdfBlob(
 
     const pdfWidth = pdf.internal.pageSize.getWidth();
     const pdfHeight = pdf.internal.pageSize.getHeight();
-    const totalPages = pageSheets.length;
+    const firstSheet = pageSheets[0];
 
-    for (let pageIdx = 0; pageIdx < totalPages; pageIdx++) {
-      const sheet = pageSheets[pageIdx];
-      if (pageIdx > 0) {
-        pdf.addPage();
-      }
+    const isBiodata =
+      firstSheet.getAttribute('data-document-type') === 'biodata' ||
+      firstSheet.hasAttribute('data-one-page-fit');
+    const isCoverLetter = firstSheet.getAttribute('data-document-type') === 'cover-letter';
 
+    if (isBiodata || isCoverLetter) {
+      // Single-page OnePageFit export path (Biodata & Cover Letter)
+      const sheet = firstSheet;
       await waitForDocumentReadyForExport(sheet);
       if (typeof document !== 'undefined' && document.fonts) {
         await document.fonts.ready;
       }
-
-      const isBiodata =
-        sheet.getAttribute('data-document-type') === 'biodata' ||
-        sheet.hasAttribute('data-one-page-fit');
-      const isCoverLetter = sheet.getAttribute('data-document-type') === 'cover-letter';
-      const isPaginatedSheet = sheet.classList.contains('a4-page-sheet') || sheet.hasAttribute('data-page-index');
 
       const computedSheetBg = sanitizeModernColorString(
         sheet.style.backgroundColor || window.getComputedStyle(sheet).backgroundColor || '#ffffff'
@@ -769,10 +1010,13 @@ export async function generatePdfBlob(
 
           sanitizeClonedDocumentForExport(clonedDoc, clonedElement, sheet);
 
-          // Enforce exact desktop A4 width (794px) and clean zero-transform clone layout
-          clonedElement.style.width = '794px';
-          clonedElement.style.maxWidth = '794px';
-          clonedElement.style.minWidth = '794px';
+          clonedElement.style.width = `${EXPORT_A4_WIDTH_PX}px`;
+          clonedElement.style.maxWidth = `${EXPORT_A4_WIDTH_PX}px`;
+          clonedElement.style.minWidth = `${EXPORT_A4_WIDTH_PX}px`;
+          clonedElement.style.height = `${EXPORT_A4_HEIGHT_PX}px`;
+          clonedElement.style.minHeight = `${EXPORT_A4_HEIGHT_PX}px`;
+          clonedElement.style.maxHeight = `${EXPORT_A4_HEIGHT_PX}px`;
+          clonedElement.style.overflow = 'hidden';
           clonedElement.style.transform = 'none';
           clonedElement.style.margin = '0';
           clonedElement.style.boxShadow = 'none';
@@ -780,22 +1024,12 @@ export async function generatePdfBlob(
           clonedElement.style.boxSizing = 'border-box';
 
           if (isCoverLetter) {
-            clonedElement.style.height = '1123px';
-            clonedElement.style.minHeight = '1123px';
-            clonedElement.style.maxHeight = '1123px';
-            clonedElement.style.overflow = 'hidden';
-
             const clStage = clonedElement.querySelector('.cl-one-page-stage') as HTMLElement | null;
             if (clStage) {
-              clStage.style.transform = `scale(${794 / 800})`;
+              clStage.style.transform = `scale(${EXPORT_A4_WIDTH_PX / 800})`;
               clStage.style.transformOrigin = 'top left';
             }
-          } else if (isBiodata) {
-            clonedElement.style.height = '1123px';
-            clonedElement.style.minHeight = '1123px';
-            clonedElement.style.maxHeight = '1123px';
-            clonedElement.style.overflow = 'hidden';
-
+          } else {
             const stage = clonedElement.querySelector('.one-page-stage') as HTMLElement | null;
             const liveStage = sheet.querySelector('.one-page-stage') as HTMLElement | null;
             if (stage && liveStage) {
@@ -803,19 +1037,102 @@ export async function generatePdfBlob(
               const liveScale = Number.isFinite(liveScaleAttr) && liveScaleAttr > 0 ? liveScaleAttr : 1;
               stage.style.width = liveStage.style.width;
               stage.style.height = liveStage.style.height;
-              stage.style.transform = `scale(${liveScale * (794 / 800)})`;
+              stage.style.transform = `scale(${liveScale * (EXPORT_A4_WIDTH_PX / 800)})`;
               stage.style.transformOrigin = 'top left';
             }
-          } else if (isPaginatedSheet) {
-            clonedElement.style.height = '1123px';
-            clonedElement.style.minHeight = '1123px';
-            clonedElement.style.maxHeight = '1123px';
-            clonedElement.style.overflow = 'hidden';
           }
         },
       });
 
       const pageImgData = canvas.toDataURL('image/png');
+      pdf.addImage(pageImgData, 'PNG', 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
+      return pdf.output('blob');
+    }
+
+    // Multi-page Resume export: measure and space unclipped flow in onclone at exact 794px,
+    // then slice the 2x high-resolution canvas into clean 794×1123 A4 pages.
+    await waitForDocumentReadyForExport(firstSheet);
+    if (typeof document !== 'undefined' && document.fonts) {
+      await document.fonts.ready;
+    }
+
+    const computedSheetBg = sanitizeModernColorString(
+      firstSheet.style.backgroundColor || window.getComputedStyle(firstSheet).backgroundColor || '#ffffff'
+    );
+    const safeBgColor =
+      computedSheetBg && computedSheetBg !== 'rgba(0, 0, 0, 0)' && computedSheetBg !== 'transparent'
+        ? computedSheetBg
+        : '#ffffff';
+
+    // Determine safe canvas scale respecting browser pixel limits across all estimated pages
+    const isMobile =
+      typeof window !== 'undefined' &&
+      (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+        (typeof window.innerWidth !== 'undefined' && window.innerWidth < 768));
+    const maxSafePixels = isMobile ? EXPORT_CONFIG.maxCanvasPixelsMobile : EXPORT_CONFIG.maxCanvasPixelsDesktop;
+    const measureEl = initialRoot.querySelector('[aria-hidden="true"]') as HTMLElement | null;
+    const estimatedContentHeight = Math.max(
+      measureEl?.scrollHeight || 0,
+      pageSheets.length * EXPORT_A4_HEIGHT_PX
+    );
+    const estimatedTotalPages = Math.max(1, Math.ceil((estimatedContentHeight + 120) / EXPORT_A4_HEIGHT_PX));
+    let exportScale: number = EXPORT_CONFIG.desktopScale;
+    const projectedPixels = EXPORT_A4_WIDTH_PX * exportScale * (estimatedTotalPages * EXPORT_A4_HEIGHT_PX * exportScale);
+    if (projectedPixels > maxSafePixels) {
+      const capFactor = Math.sqrt(maxSafePixels / (EXPORT_A4_WIDTH_PX * estimatedTotalPages * EXPORT_A4_HEIGHT_PX));
+      exportScale = Math.max(1.4, Math.floor(capFactor * 100) / 100);
+    }
+
+    let resolvedTotalPages = Math.max(1, pageSheets.length);
+
+    const fullCanvas = await html2canvas(firstSheet, {
+      scale: exportScale,
+      useCORS: true,
+      allowTaint: false,
+      logging: false,
+      backgroundColor: safeBgColor,
+      imageTimeout: 15000,
+      windowWidth: 1200,
+      width: EXPORT_A4_WIDTH_PX,
+      onclone: (clonedDoc: Document, clonedElement: HTMLElement) => {
+        sanitizeClonedDocumentForExport(clonedDoc, clonedElement, firstSheet);
+        const templateSheet = (clonedElement.querySelector('.document-page-sheet') as HTMLElement | null) || clonedElement;
+        resolvedTotalPages = layoutClonedMultiPageSheet(clonedElement, templateSheet, clonedDoc, safeBgColor);
+      },
+    });
+
+    const sliceCanvasHeight = Math.round(EXPORT_A4_HEIGHT_PX * exportScale);
+    const actualPages = Math.max(1, resolvedTotalPages, Math.round(fullCanvas.height / sliceCanvasHeight));
+
+    const sliceCanvas = document.createElement('canvas');
+    sliceCanvas.width = fullCanvas.width;
+    sliceCanvas.height = sliceCanvasHeight;
+    const sliceCtx = sliceCanvas.getContext('2d');
+
+    for (let pageIdx = 0; pageIdx < actualPages; pageIdx++) {
+      if (pageIdx > 0) {
+        pdf.addPage();
+      }
+      const srcY = pageIdx * sliceCanvasHeight;
+      const srcH = Math.min(sliceCanvasHeight, Math.max(0, fullCanvas.height - srcY));
+      if (sliceCtx) {
+        sliceCtx.fillStyle = safeBgColor;
+        sliceCtx.fillRect(0, 0, sliceCanvas.width, sliceCanvas.height);
+        if (srcH > 0) {
+          sliceCtx.drawImage(
+            fullCanvas,
+            0,
+            srcY,
+            fullCanvas.width,
+            srcH,
+            0,
+            0,
+            sliceCanvas.width,
+            srcH
+          );
+        }
+      }
+      const pageImgData = sliceCanvas.toDataURL('image/png');
       pdf.addImage(pageImgData, 'PNG', 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
     }
 

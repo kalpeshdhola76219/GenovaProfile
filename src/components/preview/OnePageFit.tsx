@@ -1,5 +1,6 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { DocumentData } from '../../types/document';
+import { sanitizeDocumentTextFields } from '../../utils/textSanitizer';
 
 export interface OnePageFitProps {
   data: DocumentData;
@@ -464,7 +465,7 @@ export const OnePageFit: React.FC<OnePageFitProps> = ({
             padding: 0,
           }}
         >
-          <TemplateComponent data={data} />
+          <TemplateComponent data={sanitizeDocumentTextFields(data)} />
         </div>
 
         {/* Diagonal PREVIEW Watermark Overlay for Unpaid Premium Templates */}
