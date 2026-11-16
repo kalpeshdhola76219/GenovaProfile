@@ -1,5 +1,12 @@
 import React from 'react';
 import { DocumentData } from '../../types/document';
+import { FONT_FAMILY_CSS_MAP } from '../../utils/fontClassMap';
+import {
+  METADATA_ROW_STYLE,
+  METADATA_LEFT_STYLE,
+  METADATA_RIGHT_STYLE,
+  ResumeDescriptionBlock,
+} from './resumeTemplateUtils';
 
 export const MonacoSovereignTemplate: React.FC<{ data: DocumentData }> = ({ data }) => {
   const {
@@ -34,6 +41,7 @@ export const MonacoSovereignTemplate: React.FC<{ data: DocumentData }> = ({ data
     <div
       className="document-page-sheet p-10 font-jakarta text-slate-800 bg-[#fdfdfd] relative"
       style={{
+        fontFamily: FONT_FAMILY_CSS_MAP.jakarta,
         fontSize: customization.fontSize === 'sm' ? '12px' : customization.fontSize === 'lg' ? '15px' : '13px',
       }}
     >
@@ -41,15 +49,15 @@ export const MonacoSovereignTemplate: React.FC<{ data: DocumentData }> = ({ data
       <div className="h-1 w-full bg-gradient-to-r from-transparent via-[#c5a059] to-transparent mb-6"></div>
 
       {/* Hero Header */}
-      <div className="flex justify-between items-start border-b border-slate-200/80 pb-6 mb-6">
-        <div>
+      <div className="flex justify-between items-start border-b border-slate-200/80 pb-6 mb-6" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', columnGap: '16px' }}>
+        <div style={METADATA_LEFT_STYLE}>
           <span className="text-[10px] uppercase tracking-[0.25em] font-extrabold text-[#c5a059] block mb-1">
             Global Leadership Dossier
           </span>
-          <h1 className="text-3xl font-black tracking-tight uppercase font-cinzel" style={{ color: primary }}>
+          <h1 className="text-3xl font-black tracking-tight uppercase font-cinzel" style={{ color: primary, fontFamily: FONT_FAMILY_CSS_MAP.cinzel }}>
             {personal.fullName || 'ALEXANDER STERLING'}
           </h1>
-          <p className="text-xs font-semibold text-slate-600 mt-1 tracking-wide font-playfair italic text-sm no-justify">
+          <p className="text-xs font-semibold text-slate-600 mt-1 tracking-wide font-playfair italic text-sm no-justify" style={{ fontFamily: FONT_FAMILY_CSS_MAP.playfair }}>
             {personal.professionalTitle || 'Chief Strategy Officer • Cross-Border Enterprise Architect'}
           </p>
         </div>
@@ -110,37 +118,30 @@ export const MonacoSovereignTemplate: React.FC<{ data: DocumentData }> = ({ data
               </h2>
               <div className="space-y-4">
                 {experience.map((exp) => (
-                  <div key={exp.id} className="relative pl-3 border-l border-slate-200 avoid-break">
-                    <div className="flex justify-between items-baseline">
-                      <span className="font-extrabold text-slate-900 text-xs">{exp.jobTitle}</span>
-                      <span className="text-[10px] font-semibold text-slate-400 font-mono">
+                  <div key={exp.id} data-entry="true" className="relative pl-3 border-l border-slate-200 avoid-break">
+                    <div className="flex justify-between items-baseline" style={METADATA_ROW_STYLE}>
+                      <span className="font-extrabold text-slate-900 text-xs" style={METADATA_LEFT_STYLE}>{exp.jobTitle}</span>
+                      <span className="text-[10px] font-semibold text-slate-400 font-mono" style={METADATA_RIGHT_STYLE}>
                         {exp.startDate} &ndash; {(exp.currentlyWorking && (!exp.endDate || exp.endDate.trim().toLowerCase() === 'present')) ? 'Present' : (exp.endDate || 'Present')}
                       </span>
                     </div>
                     <div className="text-xs font-semibold text-[#c5a059] mb-1">
                       {exp.company} {exp.location ? `• ${exp.location}` : ''}
                     </div>
-                    {exp.description && (
-                      exp.description.includes('\n') || exp.description.trim().startsWith('-') || exp.description.trim().startsWith('•') ? (
-                        <div className="mt-1 space-y-1 text-xs text-slate-700">
-                          {exp.description
-                            .split('\n')
-                            .map((l) => l.trim().replace(/^[-•*]\s*/, ''))
-                            .filter(Boolean)
-                            .map((line, idx) => (
-                              <div key={idx} className="flex items-start gap-1.5 leading-relaxed">
-                                <span className="text-slate-400 select-none">•</span>
-                                <span>{line}</span>
-                              </div>
-                            ))}
-                        </div>
-                      ) : (
-                        <p className="text-xs text-slate-700 mt-1 whitespace-pre-line leading-relaxed">{exp.description}</p>
-                      )
-                    )}
+                    <ResumeDescriptionBlock
+                      text={exp.description}
+                      wrapperClassName="mt-1 space-y-1 text-xs text-slate-700"
+                      markerClassName="text-slate-400"
+                      paragraphClassName="text-xs text-slate-700 mt-1 whitespace-pre-line leading-relaxed"
+                    />
                     {exp.achievements && (
                       <div className="text-xs text-slate-700 mt-1.5 bg-slate-50 p-2 rounded-lg border border-slate-100 font-medium">
-                        {exp.achievements}
+                        <ResumeDescriptionBlock
+                          text={exp.achievements}
+                          wrapperClassName="space-y-1 text-xs text-slate-700"
+                          markerClassName="text-slate-500"
+                          paragraphClassName="text-xs text-slate-700 whitespace-pre-line leading-relaxed"
+                        />
                       </div>
                     )}
                   </div>
@@ -158,10 +159,10 @@ export const MonacoSovereignTemplate: React.FC<{ data: DocumentData }> = ({ data
               </h2>
               <div className="space-y-3">
                 {projects.map((p) => (
-                  <div key={p.id} className="text-xs">
-                    <div className="flex justify-between font-bold text-slate-900">
-                      <span>{p.name}</span>
-                      {p.link && <span className="text-[#c5a059] font-normal text-[11px]">{p.link}</span>}
+                  <div key={p.id} data-entry="true" className="text-xs">
+                    <div className="flex justify-between font-bold text-slate-900" style={METADATA_ROW_STYLE}>
+                      <span style={METADATA_LEFT_STYLE}>{p.name}</span>
+                      {p.link && <span className="text-[#c5a059] font-normal text-[11px]" style={METADATA_RIGHT_STYLE}>{p.link}</span>}
                     </div>
                     {p.technologies && <div className="text-[10px] text-slate-400 italic">Domain: {p.technologies}</div>}
                     <p className="text-slate-600 mt-0.5">{p.description}</p>
@@ -230,9 +231,9 @@ export const MonacoSovereignTemplate: React.FC<{ data: DocumentData }> = ({ data
               {sec.items ? (
                 <div className="space-y-1 text-xs">
                   {sec.items.map((i) => (
-                    <div key={i.id} className="flex justify-between text-[11px]">
-                      <span className="text-slate-500 font-medium">{i.key}:</span>
-                      <span className="font-semibold text-slate-800">{i.value}</span>
+                    <div key={i.id} className="flex justify-between text-[11px]" style={METADATA_ROW_STYLE}>
+                      <span className="text-slate-500 font-medium" style={METADATA_LEFT_STYLE}>{i.key}:</span>
+                      <span className="font-semibold text-slate-800" style={METADATA_RIGHT_STYLE}>{i.value}</span>
                     </div>
                   ))}
                 </div>

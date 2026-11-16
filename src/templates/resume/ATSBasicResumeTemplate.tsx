@@ -1,5 +1,15 @@
 import React from 'react';
 import { DocumentData } from '../../types/document';
+import { FONT_FAMILY_CSS_MAP } from '../../utils/fontClassMap';
+import {
+  BULLET_LIST_STYLE,
+  CONTACT_CENTER_ROW_STYLE,
+  METADATA_LEFT_STYLE,
+  METADATA_RIGHT_STYLE,
+  METADATA_ROW_STYLE,
+  ResumeBulletItem,
+  ResumeDescriptionBlock,
+} from './resumeTemplateUtils';
 
 export const ATSBasicResumeTemplate: React.FC<{ data: DocumentData }> = ({ data }) => {
   const { personal, contact, summary, experience, education, skills, projects, certifications, achievements, customSections, customization } = data;
@@ -8,6 +18,7 @@ export const ATSBasicResumeTemplate: React.FC<{ data: DocumentData }> = ({ data 
     <div
       className="document-page-sheet p-10 font-sans text-black bg-white leading-normal"
       style={{
+        fontFamily: FONT_FAMILY_CSS_MAP.sans,
         fontSize: customization.fontSize === 'sm' ? '12px' : customization.fontSize === 'lg' ? '15px' : '13px',
       }}
     >
@@ -19,7 +30,7 @@ export const ATSBasicResumeTemplate: React.FC<{ data: DocumentData }> = ({ data 
         {personal.professionalTitle && (
           <p className="text-sm font-semibold uppercase mt-0.5">{personal.professionalTitle}</p>
         )}
-        <div className="text-xs mt-1 flex flex-wrap justify-center gap-x-3 text-black no-justify">
+        <div className="text-xs mt-1 flex flex-wrap justify-center gap-x-3 text-black no-justify" style={CONTACT_CENTER_ROW_STYLE}>
           {contact.phone && <span>{contact.phone}</span>}
           {contact.email && <span>{contact.email}</span>}
           {(contact.city || contact.state || contact.country) && <span>{[contact.city, contact.state, contact.country].filter(Boolean).join(', ')}</span>}
@@ -46,35 +57,23 @@ export const ATSBasicResumeTemplate: React.FC<{ data: DocumentData }> = ({ data 
           </h2>
           <div className="space-y-3">
             {experience.map((exp) => (
-              <div key={exp.id}>
-                <div className="flex justify-between items-baseline text-xs font-bold">
-                  <span>{exp.jobTitle}, {exp.company}</span>
-                  <span>{exp.startDate} - {(exp.currentlyWorking && (!exp.endDate || exp.endDate.trim().toLowerCase() === 'present')) ? 'Present' : (exp.endDate || 'Present')}</span>
+              <div key={exp.id} data-entry>
+                <div className="flex justify-between items-baseline text-xs font-bold" style={METADATA_ROW_STYLE}>
+                  <span style={METADATA_LEFT_STYLE}>{exp.jobTitle}, {exp.company}</span>
+                  <span style={METADATA_RIGHT_STYLE}>{exp.startDate} - {(exp.currentlyWorking && (!exp.endDate || exp.endDate.trim().toLowerCase() === 'present')) ? 'Present' : (exp.endDate || 'Present')}</span>
                 </div>
                 {exp.location && <div className="text-[11px] italic text-neutral-800">{exp.location}</div>}
-                {exp.description && (
-                  exp.description.includes('\n') || exp.description.trim().startsWith('-') || exp.description.trim().startsWith('•') ? (
-                    <div className="mt-1 space-y-1 text-xs text-slate-700">
-                      {exp.description
-                        .split('\n')
-                        .map((l) => l.trim().replace(/^[-•*]\s*/, ''))
-                        .filter(Boolean)
-                        .map((line, idx) => (
-                          <div key={idx} className="flex items-start gap-1.5 leading-relaxed">
-                            <span className="text-slate-400 select-none">•</span>
-                            <span>{line}</span>
-                          </div>
-                        ))}
-                    </div>
-                  ) : (
-                    <p className="text-xs text-slate-700 mt-1 whitespace-pre-line leading-relaxed">{exp.description}</p>
-                  )
-                )}
-                {exp.achievements && (
-                  <div className="text-xs mt-1 whitespace-pre-line leading-relaxed">
-                    {exp.achievements}
-                  </div>
-                )}
+                <ResumeDescriptionBlock
+                  text={exp.description}
+                  wrapperClassName="mt-1 space-y-1 text-xs text-slate-700"
+                  paragraphClassName="text-xs text-slate-700 mt-1 whitespace-pre-line leading-relaxed"
+                />
+                <ResumeDescriptionBlock
+                  text={exp.achievements}
+                  wrapperClassName="mt-1 space-y-1 text-xs text-black"
+                  markerClassName="text-black"
+                  paragraphClassName="text-xs mt-1 whitespace-pre-line leading-relaxed"
+                />
               </div>
             ))}
           </div>
@@ -89,10 +88,10 @@ export const ATSBasicResumeTemplate: React.FC<{ data: DocumentData }> = ({ data 
           </h2>
           <div className="space-y-2">
             {education.map((edu) => (
-              <div key={edu.id}>
-                <div className="flex justify-between items-baseline text-xs font-bold">
-                  <span>{edu.degree} - {edu.institute}{edu.score ? ` • ${/^[0-9./\s]+$/.test(edu.score.trim()) ? `GPA: ${edu.score.trim()}` : edu.score.trim()}` : ''}</span>
-                  <span>{edu.endYear}</span>
+              <div key={edu.id} data-entry>
+                <div className="flex justify-between items-baseline text-xs font-bold" style={METADATA_ROW_STYLE}>
+                  <span style={METADATA_LEFT_STYLE}>{edu.degree} - {edu.institute}{edu.score ? ` • ${/^[0-9./\s]+$/.test(edu.score.trim()) ? `GPA: ${edu.score.trim()}` : edu.score.trim()}` : ''}</span>
+                  <span style={METADATA_RIGHT_STYLE}>{edu.endYear}</span>
                 </div>
                 {edu.description && <div className="text-[11px]">{edu.description}</div>}
               </div>
@@ -121,10 +120,10 @@ export const ATSBasicResumeTemplate: React.FC<{ data: DocumentData }> = ({ data 
           </h2>
           <div className="space-y-2">
             {projects.map((proj) => (
-              <div key={proj.id}>
-                <div className="flex justify-between items-baseline text-xs font-bold">
-                  <span>{proj.name} {proj.role ? `(${proj.role})` : ''}</span>
-                  {proj.link && <span className="font-normal text-neutral-700">{proj.link}</span>}
+              <div key={proj.id} data-entry>
+                <div className="flex justify-between items-baseline text-xs font-bold" style={METADATA_ROW_STYLE}>
+                  <span style={METADATA_LEFT_STYLE}>{proj.name} {proj.role ? `(${proj.role})` : ''}</span>
+                  {proj.link && <span className="font-normal text-neutral-700" style={METADATA_RIGHT_STYLE}>{proj.link}</span>}
                 </div>
                 {proj.technologies && <div className="text-[11px] italic">Technologies: {proj.technologies}</div>}
                 <p className="text-xs mt-0.5">{proj.description}</p>
@@ -140,18 +139,18 @@ export const ATSBasicResumeTemplate: React.FC<{ data: DocumentData }> = ({ data 
           <h2 className="text-xs font-bold uppercase tracking-wider border-b border-black pb-0.5 mb-1.5">
             CERTIFICATIONS & HONORS
           </h2>
-          <ul className="list-disc list-inside text-xs space-y-1">
+          <div className="text-xs space-y-1 text-black" style={BULLET_LIST_STYLE}>
             {certifications.map((c) => (
-              <li key={c.id}>
+              <ResumeBulletItem key={c.id} markerClassName="text-black">
                 <strong>{c.name}</strong> - {c.issuer} ({c.issueDate || 'Verified'})
-              </li>
+              </ResumeBulletItem>
             ))}
             {achievements.map((a) => (
-              <li key={a.id}>
+              <ResumeBulletItem key={a.id} markerClassName="text-black">
                 <strong>{a.title}</strong>: {a.description}
-              </li>
+              </ResumeBulletItem>
             ))}
-          </ul>
+          </div>
         </div>
       )}
 

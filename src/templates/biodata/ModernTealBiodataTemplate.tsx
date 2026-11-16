@@ -1,5 +1,6 @@
 import React from 'react';
 import { DocumentData } from '../../types/document';
+import { getStaticFontClass } from '../../utils/fontClassMap';
 import {
   GraduationCap,
   Users,
@@ -15,7 +16,7 @@ export const ModernTealBiodataTemplate: React.FC<{ data: DocumentData }> = ({ da
 
   const tealBg = customization.primaryColor || '#123940'; // Deep Dark Teal
   const goldAccent = customization.secondaryColor || customization.accentColor || '#eab308'; // Radiant Warm Gold
-  const fontClass = customization.fontFamily ? `font-${customization.fontFamily}` : 'font-jakarta';
+  const fontClass = getStaticFontClass(customization.fontFamily, 'jakarta');
   const baseFontSize =
     customization.fontSize === 'sm' ? 'text-[11px]' : customization.fontSize === 'lg' ? 'text-[13px]' : 'text-[12px]';
 

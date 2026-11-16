@@ -1,10 +1,11 @@
 import React from 'react';
 import { DocumentData } from '../../types/document';
+import { getStaticFontClass } from '../../utils/fontClassMap';
 import { getBiodataSections } from './biodataFields';
 
 export const PremiumContemporaryProfileTemplate: React.FC<{ data: DocumentData }> = ({ data }) => {
   const { personal, customSections, customization } = data;
-  const fontClass = customization.fontFamily ? `font-${customization.fontFamily}` : 'font-jakarta';
+  const fontClass = getStaticFontClass(customization.fontFamily, 'jakarta');
   const baseFontSize =
     customization.fontSize === 'sm' ? 'text-[12px]' : customization.fontSize === 'lg' ? 'text-[15px]' : 'text-[13px]';
 

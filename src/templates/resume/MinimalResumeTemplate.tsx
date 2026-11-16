@@ -1,5 +1,14 @@
 import React from 'react';
 import { DocumentData } from '../../types/document';
+import { FONT_FAMILY_CSS_MAP } from '../../utils/fontClassMap';
+import {
+  BULLET_LIST_STYLE,
+  METADATA_LEFT_STYLE,
+  METADATA_RIGHT_STYLE,
+  METADATA_ROW_STYLE,
+  ResumeBulletItem,
+  ResumeDescriptionBlock,
+} from './resumeTemplateUtils';
 
 export const MinimalResumeTemplate: React.FC<{ data: DocumentData }> = ({ data }) => {
   const { personal, contact, summary, experience, education, skills, projects, certifications, achievements, customSections, customization } = data;
@@ -8,11 +17,12 @@ export const MinimalResumeTemplate: React.FC<{ data: DocumentData }> = ({ data }
     <div
       className="document-page-sheet p-10 font-jakarta text-slate-800 bg-white"
       style={{
+        fontFamily: FONT_FAMILY_CSS_MAP.jakarta,
         fontSize: customization.fontSize === 'sm' ? '12px' : customization.fontSize === 'lg' ? '15px' : '13px',
       }}
     >
-      <div className="flex justify-between items-baseline border-b border-slate-200 pb-5 mb-6">
-        <div>
+      <div className="flex justify-between items-baseline border-b border-slate-200 pb-5 mb-6" style={METADATA_ROW_STYLE}>
+        <div style={METADATA_LEFT_STYLE}>
           <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">
             {personal.fullName || 'Full Name'}
           </h1>
@@ -20,7 +30,7 @@ export const MinimalResumeTemplate: React.FC<{ data: DocumentData }> = ({ data }
             {personal.professionalTitle || 'Software Engineer'}
           </p>
         </div>
-        <div className="text-right text-xs text-slate-500 space-y-0.5 no-justify">
+        <div className="text-right text-xs text-slate-500 space-y-0.5 no-justify" style={{ flexShrink: 0 }}>
           {contact.email && <div>{contact.email}</div>}
           {contact.phone && <div>{contact.phone}</div>}
           {(contact.city || contact.state || contact.country) && <div>{[contact.city, contact.state, contact.country].filter(Boolean).join(', ')}</div>}
@@ -40,30 +50,21 @@ export const MinimalResumeTemplate: React.FC<{ data: DocumentData }> = ({ data }
           <h2 className="text-[11px] font-bold uppercase tracking-widest text-slate-400 mb-3">Experience</h2>
           <div className="space-y-4">
             {experience.map((exp) => (
-              <div key={exp.id} className="relative pl-4 border-l border-slate-200">
-                <div className="flex justify-between items-baseline text-xs">
-                  <span className="font-semibold text-slate-900">{exp.jobTitle} <span className="text-slate-500 font-normal">at</span> {exp.company}</span>
-                  <span className="text-[11px] text-slate-400">{exp.startDate} &ndash; {(exp.currentlyWorking && (!exp.endDate || exp.endDate.trim().toLowerCase() === 'present')) ? 'Present' : (exp.endDate || 'Present')}</span>
+              <div key={exp.id} data-entry className="relative pl-4 border-l border-slate-200">
+                <div className="flex justify-between items-baseline text-xs" style={METADATA_ROW_STYLE}>
+                  <span className="font-semibold text-slate-900" style={METADATA_LEFT_STYLE}>{exp.jobTitle} <span className="text-slate-500 font-normal">at</span> {exp.company}</span>
+                  <span className="text-[11px] text-slate-400" style={METADATA_RIGHT_STYLE}>{exp.startDate} &ndash; {(exp.currentlyWorking && (!exp.endDate || exp.endDate.trim().toLowerCase() === 'present')) ? 'Present' : (exp.endDate || 'Present')}</span>
                 </div>
-                {exp.description && (
-                  exp.description.includes('\n') || exp.description.trim().startsWith('-') || exp.description.trim().startsWith('•') ? (
-                    <div className="mt-1 space-y-1 text-xs text-slate-700">
-                      {exp.description
-                        .split('\n')
-                        .map((l) => l.trim().replace(/^[-•*]\s*/, ''))
-                        .filter(Boolean)
-                        .map((line, idx) => (
-                          <div key={idx} className="flex items-start gap-1.5 leading-relaxed">
-                            <span className="text-slate-400 select-none">•</span>
-                            <span>{line}</span>
-                          </div>
-                        ))}
-                    </div>
-                  ) : (
-                    <p className="text-xs text-slate-700 mt-1 whitespace-pre-line leading-relaxed">{exp.description}</p>
-                  )
-                )}
-                {exp.achievements && <p className="text-xs text-slate-600 mt-1 whitespace-pre-line">{exp.achievements}</p>}
+                <ResumeDescriptionBlock
+                  text={exp.description}
+                  wrapperClassName="mt-1 space-y-1 text-xs text-slate-700"
+                  paragraphClassName="text-xs text-slate-700 mt-1 whitespace-pre-line leading-relaxed"
+                />
+                <ResumeDescriptionBlock
+                  text={exp.achievements}
+                  wrapperClassName="mt-1 space-y-1 text-xs text-slate-600"
+                  paragraphClassName="text-xs text-slate-600 mt-1 whitespace-pre-line"
+                />
               </div>
             ))}
           </div>
@@ -100,10 +101,10 @@ export const MinimalResumeTemplate: React.FC<{ data: DocumentData }> = ({ data }
           <h2 className="text-[11px] font-bold uppercase tracking-widest text-slate-400 mb-3">Projects</h2>
           <div className="space-y-2 text-xs">
             {projects.map((p) => (
-              <div key={p.id}>
-                <div className="flex justify-between font-semibold">
-                  <span>{p.name}</span>
-                  {p.link && <span className="text-slate-400 font-normal">{p.link}</span>}
+              <div key={p.id} data-entry>
+                <div className="flex justify-between items-baseline font-semibold" style={METADATA_ROW_STYLE}>
+                  <span style={METADATA_LEFT_STYLE}>{p.name}</span>
+                  {p.link && <span className="text-slate-400 font-normal" style={METADATA_RIGHT_STYLE}>{p.link}</span>}
                 </div>
                 <p className="text-slate-600 mt-0.5">{p.description}</p>
               </div>
@@ -115,12 +116,12 @@ export const MinimalResumeTemplate: React.FC<{ data: DocumentData }> = ({ data }
       {(certifications.length > 0 || achievements.length > 0) && (
         <div className="mb-4 avoid-break">
           <h2 className="text-[11px] font-bold uppercase tracking-widest text-slate-400 mb-2">Recognition</h2>
-          <div className="text-xs text-slate-600 space-y-1">
+          <div className="text-xs text-slate-600 space-y-1" style={BULLET_LIST_STYLE}>
             {certifications.map((c) => (
-              <div key={c.id}>• {c.name} ({c.issuer})</div>
+              <ResumeBulletItem key={c.id}>{c.name} ({c.issuer})</ResumeBulletItem>
             ))}
             {achievements.map((a) => (
-              <div key={a.id}>• {a.title}: {a.description}</div>
+              <ResumeBulletItem key={a.id}>{a.title}: {a.description}</ResumeBulletItem>
             ))}
           </div>
         </div>

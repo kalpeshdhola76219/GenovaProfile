@@ -1,12 +1,13 @@
 import React from 'react';
 import { DocumentData } from '../../types/document';
+import { getStaticFontClass } from '../../utils/fontClassMap';
 import { getBiodataSections } from './biodataFields';
 
 export const PremiumLuxuryGoldTemplate: React.FC<{ data: DocumentData }> = ({ data }) => {
   const { personal, customSections, customization } = data;
   const goldPrimary = customization.primaryColor || '#b45309';
   const deepCharcoal = customization.secondaryColor || '#292524';
-  const fontClass = customization.fontFamily ? `font-${customization.fontFamily}` : 'font-cinzel';
+  const fontClass = getStaticFontClass(customization.fontFamily, 'cinzel');
   const baseFontSize =
     customization.fontSize === 'sm' ? 'text-[12px]' : customization.fontSize === 'lg' ? 'text-[15px]' : 'text-[13px]';
 

@@ -1,5 +1,6 @@
 import React from 'react';
 import { DocumentData } from '../../types/document';
+import { getStaticFontClass } from '../../utils/fontClassMap';
 import { ToranArchPattern } from './decorativeAssets';
 import { User } from 'lucide-react';
 import { getBiodataSections } from './biodataFields';
@@ -10,7 +11,7 @@ export const RoyalMaroonBiodataTemplate: React.FC<{ data: DocumentData }> = ({ d
 
   const bgMaroon = customization.primaryColor || '#450a0a'; // Rich Deep Royal Maroon
   const gold = customization.accentColor || '#fbbf24'; // Radiant Gold
-  const fontClass = customization.fontFamily ? `font-${customization.fontFamily}` : 'font-cormorant';
+  const fontClass = getStaticFontClass(customization.fontFamily, 'cormorant');
   const baseFontSize =
     customization.fontSize === 'sm' ? 'text-[11px]' : customization.fontSize === 'lg' ? 'text-[13px]' : 'text-[12px]';
 

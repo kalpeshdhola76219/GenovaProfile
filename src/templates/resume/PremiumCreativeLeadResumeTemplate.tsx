@@ -1,5 +1,12 @@
 import React from 'react';
 import { DocumentData } from '../../types/document';
+import { getStaticFontClass, getFontFamilyCss, FONT_FAMILY_CSS_MAP } from '../../utils/fontClassMap';
+import {
+  METADATA_ROW_STYLE,
+  METADATA_LEFT_STYLE,
+  METADATA_RIGHT_STYLE,
+  ResumeDescriptionBlock,
+} from './resumeTemplateUtils';
 
 export const PremiumCreativeLeadResumeTemplate: React.FC<{ data: DocumentData }> = ({ data }) => {
   const {
@@ -17,13 +24,15 @@ export const PremiumCreativeLeadResumeTemplate: React.FC<{ data: DocumentData }>
   } = data;
   const terracotta = customization.primaryColor || '#c2410c'; // Burnt Terracotta
   const darkCharcoal = customization.secondaryColor || '#1c1917'; // Warm Black
-  const fontClass = customization.fontFamily ? `font-${customization.fontFamily}` : 'font-playfair';
+  const fontClass = getStaticFontClass(customization.fontFamily, 'playfair');
+  const fontFamilyCss = getFontFamilyCss(customization.fontFamily, 'playfair');
   const baseFontSize =
     customization.fontSize === 'sm' ? 'text-[12px]' : customization.fontSize === 'lg' ? 'text-[15px]' : 'text-[13px]';
 
   return (
     <div
       className={`document-page-sheet p-10 bg-[#faf8f5] text-stone-900 shadow-sm relative ${baseFontSize}`}
+      style={{ fontFamily: FONT_FAMILY_CSS_MAP.sans }}
     >
       <div
         className="absolute left-0 top-0 bottom-0 w-2.5 pointer-events-none"
@@ -31,12 +40,12 @@ export const PremiumCreativeLeadResumeTemplate: React.FC<{ data: DocumentData }>
       />
 
       <div className="pb-6 mb-6 border-b border-stone-300">
-        <div className="flex justify-between items-start">
-          <div>
+        <div className="flex justify-between items-start" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', columnGap: '16px' }}>
+          <div style={METADATA_LEFT_STYLE}>
             <span className="text-[11px] font-bold uppercase tracking-[0.25em] text-orange-700 block mb-1">
               Creative Portfolio & Resume
             </span>
-            <h1 className={`text-4xl font-black tracking-tight text-stone-900 ${fontClass}`}>
+            <h1 className={`text-4xl font-black tracking-tight text-stone-900 ${fontClass}`} style={{ fontFamily: fontFamilyCss }}>
               {personal.fullName || 'CREATIVE DIRECTOR'}
             </h1>
             <p className="text-sm font-semibold text-stone-600 mt-1 font-sans no-justify">
@@ -70,33 +79,26 @@ export const PremiumCreativeLeadResumeTemplate: React.FC<{ data: DocumentData }>
               </h2>
               <div className="space-y-4 font-sans">
                 {experience.map((exp) => (
-                  <div key={exp.id}>
-                    <div className="flex justify-between items-baseline">
-                      <span className="font-bold text-sm text-stone-900">{exp.jobTitle}</span>
-                      <span className="text-xs text-stone-500">{exp.startDate} – {(exp.currentlyWorking && (!exp.endDate || exp.endDate.trim().toLowerCase() === 'present')) ? 'Present' : (exp.endDate || 'Present')}</span>
+                  <div key={exp.id} data-entry="true">
+                    <div className="flex justify-between items-baseline" style={METADATA_ROW_STYLE}>
+                      <span className="font-bold text-sm text-stone-900" style={METADATA_LEFT_STYLE}>{exp.jobTitle}</span>
+                      <span className="text-xs text-stone-500" style={METADATA_RIGHT_STYLE}>{exp.startDate} – {(exp.currentlyWorking && (!exp.endDate || exp.endDate.trim().toLowerCase() === 'present')) ? 'Present' : (exp.endDate || 'Present')}</span>
                     </div>
                     <div className="text-xs font-semibold text-orange-800">{exp.company} {exp.location ? `• ${exp.location}` : ''}</div>
-                    {exp.description && (
-                      exp.description.includes('\n') || exp.description.trim().startsWith('-') || exp.description.trim().startsWith('•') ? (
-                        <div className="mt-1 space-y-1 text-xs text-stone-700">
-                          {exp.description
-                            .split('\n')
-                            .map((l) => l.trim().replace(/^[-•*]\s*/, ''))
-                            .filter(Boolean)
-                            .map((line, idx) => (
-                              <div key={idx} className="flex items-start gap-1.5 leading-relaxed">
-                                <span className="text-stone-400 select-none">•</span>
-                                <span>{line}</span>
-                              </div>
-                            ))}
-                        </div>
-                      ) : (
-                        <p className="text-xs text-stone-700 mt-1 whitespace-pre-line leading-relaxed">{exp.description}</p>
-                      )
-                    )}
+                    <ResumeDescriptionBlock
+                      text={exp.description}
+                      wrapperClassName="mt-1 space-y-1 text-xs text-stone-700"
+                      markerClassName="text-stone-400"
+                      paragraphClassName="text-xs text-stone-700 mt-1 whitespace-pre-line leading-relaxed"
+                    />
                     {exp.achievements && (
                       <div className="text-xs text-stone-700 mt-1 pl-3 border-l-2 border-orange-300">
-                        {exp.achievements}
+                        <ResumeDescriptionBlock
+                          text={exp.achievements}
+                          wrapperClassName="space-y-1 text-xs text-stone-700"
+                          markerClassName="text-stone-400"
+                          paragraphClassName="text-xs text-stone-700 whitespace-pre-line leading-relaxed"
+                        />
                       </div>
                     )}
                   </div>
@@ -164,9 +166,9 @@ export const PremiumCreativeLeadResumeTemplate: React.FC<{ data: DocumentData }>
                 {certifications.map((c) => (
                   <div key={c.id}>
                     <div className="font-semibold text-stone-900">{c.name}</div>
-                    <div className="text-stone-500 text-[11.5px] flex flex-wrap justify-between items-baseline gap-1">
-                      <span>{c.issuer}</span>
-                      {c.issueDate && <span className="text-stone-400 font-mono text-[10.5px]">{c.issueDate}</span>}
+                    <div className="text-stone-500 text-[11.5px] flex flex-wrap justify-between items-baseline gap-1" style={METADATA_ROW_STYLE}>
+                      <span style={METADATA_LEFT_STYLE}>{c.issuer}</span>
+                      {c.issueDate && <span className="text-stone-400 font-mono text-[10.5px]" style={METADATA_RIGHT_STYLE}>{c.issueDate}</span>}
                     </div>
                     {c.credentialId && (
                       <div className="text-[10px] text-stone-400 font-mono">ID: {c.credentialId}</div>
@@ -203,9 +205,9 @@ export const PremiumCreativeLeadResumeTemplate: React.FC<{ data: DocumentData }>
                   {sec.items && sec.items.length > 0 ? (
                     <div className="space-y-1 text-xs">
                       {sec.items.map((i) => (
-                        <div key={i.id} className="flex justify-between text-[11.5px]">
-                          <span className="text-stone-500 font-medium">{i.key}:</span>
-                          <span className="font-semibold text-stone-900">{i.value}</span>
+                        <div key={i.id} className="flex justify-between text-[11.5px]" style={METADATA_ROW_STYLE}>
+                          <span className="text-stone-500 font-medium" style={METADATA_LEFT_STYLE}>{i.key}:</span>
+                          <span className="font-semibold text-stone-900" style={METADATA_RIGHT_STYLE}>{i.value}</span>
                         </div>
                       ))}
                     </div>

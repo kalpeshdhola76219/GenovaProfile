@@ -1,5 +1,6 @@
 import { DocumentData, DocumentType } from '../types/document';
 import { createEmptyDocument, sampleBiodataDocument, sampleResumeDocument, sampleCoverLetterDocument } from '../data/sampleData';
+import { sanitizeDocumentTextFields } from '../utils/textSanitizer';
 
 const STORAGE_KEY = 'genovadoc_documents_v1';
 const LEGACY_STORAGE_KEY = 'biocv_documents_v1';
@@ -135,7 +136,7 @@ export const sanitizeDocument = (doc: any): DocumentData => {
     customization.justifyText = true;
   }
 
-  return {
+  return sanitizeDocumentTextFields({
     ...defaults,
     ...doc,
     templateId: normalizedTemplateId,
@@ -159,7 +160,7 @@ export const sanitizeDocument = (doc: any): DocumentData => {
       typeof doc.showExecutiveMetrics === 'boolean'
         ? doc.showExecutiveMetrics
         : defaults.showExecutiveMetrics,
-  };
+  });
 };
 
 export const storageService = {

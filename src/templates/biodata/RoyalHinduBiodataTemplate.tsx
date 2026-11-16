@@ -1,5 +1,6 @@
 import React from 'react';
 import { DocumentData } from '../../types/document';
+import { getStaticFontClass } from '../../utils/fontClassMap';
 import {
   User,
   Users,
@@ -24,7 +25,7 @@ export const RoyalHinduBiodataTemplate: React.FC<{ data: DocumentData }> = ({ da
 
   const maroon = customization.primaryColor || '#7a1414'; // Traditional Deep Maroon
   const gold = customization.accentColor || '#b45309'; // Warm Royal Gold / Amber
-  const fontClass = customization.fontFamily ? `font-${customization.fontFamily}` : 'font-cormorant';
+  const fontClass = getStaticFontClass(customization.fontFamily, 'cormorant');
   const baseFontSize =
     customization.fontSize === 'sm' ? 'text-[11px]' : customization.fontSize === 'lg' ? 'text-[13px]' : 'text-[12px]';
 

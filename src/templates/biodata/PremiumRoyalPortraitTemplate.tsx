@@ -1,12 +1,13 @@
 import React from 'react';
 import { DocumentData } from '../../types/document';
+import { getStaticFontClass } from '../../utils/fontClassMap';
 import { getBiodataSections } from './biodataFields';
 
 export const PremiumRoyalPortraitTemplate: React.FC<{ data: DocumentData }> = ({ data }) => {
   const { personal, customSections, customization } = data;
   const primary = customization.primaryColor || '#064e3b';
   const gold = customization.secondaryColor || '#b45309';
-  const fontClass = customization.fontFamily ? `font-${customization.fontFamily}` : 'font-cinzel';
+  const fontClass = getStaticFontClass(customization.fontFamily, 'cinzel');
   const baseFontSize =
     customization.fontSize === 'sm' ? 'text-[12px]' : customization.fontSize === 'lg' ? 'text-[15px]' : 'text-[13px]';
 

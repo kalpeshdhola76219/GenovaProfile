@@ -277,7 +277,7 @@ const MultiPagePaginatedDocumentPreview: React.FC<PaginatedDocumentPreviewProps>
                     style={{
                       position: 'relative',
                       transform: idx > 0 ? `translateY(-${page.startY}px)` : 'none',
-                      width: '800px',
+                      width: '100%',
                     }}
                   >
                     <TemplateComponent data={data} />

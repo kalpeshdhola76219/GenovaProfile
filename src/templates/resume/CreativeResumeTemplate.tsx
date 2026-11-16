@@ -1,5 +1,13 @@
 import React from 'react';
 import { DocumentData } from '../../types/document';
+import { FONT_FAMILY_CSS_MAP } from '../../utils/fontClassMap';
+import {
+  CONTACT_ROW_STYLE,
+  METADATA_LEFT_STYLE,
+  METADATA_RIGHT_STYLE,
+  METADATA_ROW_STYLE,
+  ResumeDescriptionBlock,
+} from './resumeTemplateUtils';
 
 export const CreativeResumeTemplate: React.FC<{ data: DocumentData }> = ({ data }) => {
   const { personal, contact, summary, experience, education, skills, projects, certifications, achievements, customSections, customization } = data;
@@ -9,6 +17,7 @@ export const CreativeResumeTemplate: React.FC<{ data: DocumentData }> = ({ data 
     <div
       className="document-page-sheet p-8 font-jakarta text-slate-800 bg-white"
       style={{
+        fontFamily: FONT_FAMILY_CSS_MAP.jakarta,
         fontSize: customization.fontSize === 'sm' ? '12px' : customization.fontSize === 'lg' ? '15px' : '13px',
       }}
     >
@@ -21,7 +30,7 @@ export const CreativeResumeTemplate: React.FC<{ data: DocumentData }> = ({ data 
           <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">
             {personal.fullName || 'Full Name'}
           </h1>
-          <div className="text-xs text-slate-600 mt-1 flex flex-wrap gap-x-4 no-justify">
+          <div className="text-xs text-slate-600 mt-1 flex flex-wrap gap-x-4 no-justify" style={CONTACT_ROW_STYLE}>
             {contact.email && <span>{contact.email}</span>}
             {contact.phone && <span>&bull; {contact.phone}</span>}
             {(contact.city || contact.state || contact.country) && <span>&bull; {[contact.city, contact.state, contact.country].filter(Boolean).join(', ')}</span>}
@@ -45,30 +54,21 @@ export const CreativeResumeTemplate: React.FC<{ data: DocumentData }> = ({ data 
           </h2>
           <div className="space-y-3.5">
             {experience.map((exp) => (
-              <div key={exp.id} className="pl-3 border-l-2 border-orange-200">
-                <div className="flex justify-between items-baseline text-xs font-bold">
-                  <span className="text-slate-900">{exp.jobTitle} &bull; <span className="text-orange-600">{exp.company}</span></span>
-                  <span className="text-slate-400 text-[11px]">{exp.startDate} - {(exp.currentlyWorking && (!exp.endDate || exp.endDate.trim().toLowerCase() === 'present')) ? 'Present' : (exp.endDate || 'Present')}</span>
+              <div key={exp.id} data-entry className="pl-3 border-l-2 border-orange-200">
+                <div className="flex justify-between items-baseline text-xs font-bold" style={METADATA_ROW_STYLE}>
+                  <span className="text-slate-900" style={METADATA_LEFT_STYLE}>{exp.jobTitle} &bull; <span className="text-orange-600">{exp.company}</span></span>
+                  <span className="text-slate-400 text-[11px]" style={METADATA_RIGHT_STYLE}>{exp.startDate} - {(exp.currentlyWorking && (!exp.endDate || exp.endDate.trim().toLowerCase() === 'present')) ? 'Present' : (exp.endDate || 'Present')}</span>
                 </div>
-                {exp.description && (
-                  exp.description.includes('\n') || exp.description.trim().startsWith('-') || exp.description.trim().startsWith('•') ? (
-                    <div className="mt-1 space-y-1 text-xs text-slate-700">
-                      {exp.description
-                        .split('\n')
-                        .map((l) => l.trim().replace(/^[-•*]\s*/, ''))
-                        .filter(Boolean)
-                        .map((line, idx) => (
-                          <div key={idx} className="flex items-start gap-1.5 leading-relaxed">
-                            <span className="text-slate-400 select-none">•</span>
-                            <span>{line}</span>
-                          </div>
-                        ))}
-                    </div>
-                  ) : (
-                    <p className="text-xs text-slate-700 mt-1 whitespace-pre-line leading-relaxed">{exp.description}</p>
-                  )
-                )}
-                {exp.achievements && <p className="text-xs text-slate-600 mt-0.5 whitespace-pre-line">{exp.achievements}</p>}
+                <ResumeDescriptionBlock
+                  text={exp.description}
+                  wrapperClassName="mt-1 space-y-1 text-xs text-slate-700"
+                  paragraphClassName="text-xs text-slate-700 mt-1 whitespace-pre-line leading-relaxed"
+                />
+                <ResumeDescriptionBlock
+                  text={exp.achievements}
+                  wrapperClassName="mt-1 space-y-1 text-xs text-slate-600"
+                  paragraphClassName="text-xs text-slate-600 mt-0.5 whitespace-pre-line"
+                />
               </div>
             ))}
           </div>
@@ -130,9 +130,9 @@ export const CreativeResumeTemplate: React.FC<{ data: DocumentData }> = ({ data 
             {certifications.map((c) => (
               <div key={c.id} className="p-2 rounded-lg border border-slate-200 bg-slate-50/40">
                 <div className="font-bold text-slate-900">{c.name}</div>
-                <div className="text-slate-500 text-[11px] flex justify-between items-center mt-0.5">
-                  <span>{c.issuer}</span>
-                  {c.issueDate && <span className="text-slate-400 font-mono text-[10px]">{c.issueDate}</span>}
+                <div className="text-slate-500 text-[11px] flex justify-between items-center mt-0.5" style={METADATA_ROW_STYLE}>
+                  <span style={METADATA_LEFT_STYLE}>{c.issuer}</span>
+                  {c.issueDate && <span className="text-slate-400 font-mono text-[10px]" style={METADATA_RIGHT_STYLE}>{c.issueDate}</span>}
                 </div>
               </div>
             ))}

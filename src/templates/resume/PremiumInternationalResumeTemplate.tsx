@@ -1,5 +1,12 @@
 import React from 'react';
 import { DocumentData } from '../../types/document';
+import { getStaticFontClass, getFontFamilyCss, FONT_FAMILY_CSS_MAP } from '../../utils/fontClassMap';
+import {
+  METADATA_ROW_STYLE,
+  METADATA_LEFT_STYLE,
+  METADATA_RIGHT_STYLE,
+  ResumeDescriptionBlock,
+} from './resumeTemplateUtils';
 
 export const PremiumInternationalResumeTemplate: React.FC<{ data: DocumentData }> = ({ data }) => {
   const {
@@ -17,7 +24,8 @@ export const PremiumInternationalResumeTemplate: React.FC<{ data: DocumentData }
   } = data;
 
   const primary = customization.primaryColor || '#1e3a8a';
-  const fontClass = customization.fontFamily ? `font-${customization.fontFamily}` : 'font-jakarta';
+  const fontClass = getStaticFontClass(customization.fontFamily, 'jakarta');
+  const fontFamilyCss = getFontFamilyCss(customization.fontFamily, 'jakarta');
   const baseFontSize =
     customization.fontSize === 'sm' ? 'text-[12px]' : customization.fontSize === 'lg' ? 'text-[15px]' : 'text-[13px]';
 
@@ -32,15 +40,16 @@ export const PremiumInternationalResumeTemplate: React.FC<{ data: DocumentData }
   return (
     <div
       className={`document-page-sheet flex flex-col bg-white text-slate-800 shadow-sm ${baseFontSize}`}
+      style={{ fontFamily: FONT_FAMILY_CSS_MAP.jakarta }}
     >
       {/* Header Banner */}
       <div
         className="p-8 text-white flex justify-between items-center"
-        style={{ backgroundColor: primary }}
+        style={{ backgroundColor: primary, display: 'flex', justifyContent: 'space-between', alignItems: 'center', columnGap: '16px' }}
       >
-        <div className="flex items-center gap-5">
+        <div className="flex items-center gap-5" style={METADATA_LEFT_STYLE}>
           <div>
-            <h1 className={`text-2xl font-extrabold uppercase tracking-wide text-white ${fontClass}`}>
+            <h1 className={`text-2xl font-extrabold uppercase tracking-wide text-white ${fontClass}`} style={{ fontFamily: fontFamilyCss }}>
               {displayFullName || 'FULL NAME'}
             </h1>
             {displayTitle && (
@@ -72,9 +81,9 @@ export const PremiumInternationalResumeTemplate: React.FC<{ data: DocumentData }
               </h2>
               <div className="space-y-1.5 text-xs">
                 {skills.map((s) => (
-                  <div key={s.id} className="flex justify-between items-center">
-                    <span className="font-medium text-slate-700">{s.name}</span>
-                    <span className="text-[10px] text-slate-400 capitalize">{s.level || 'Expert'}</span>
+                  <div key={s.id} className="flex justify-between items-center" style={METADATA_ROW_STYLE}>
+                    <span className="font-medium text-slate-700" style={METADATA_LEFT_STYLE}>{s.name}</span>
+                    <span className="text-[10px] text-slate-400 capitalize" style={METADATA_RIGHT_STYLE}>{s.level || 'Expert'}</span>
                   </div>
                 ))}
               </div>
@@ -152,38 +161,29 @@ export const PremiumInternationalResumeTemplate: React.FC<{ data: DocumentData }
               </h2>
               <div className="space-y-4">
                 {experience.map((exp) => (
-                  <div key={exp.id} className="relative pl-4 border-l-2" style={{ borderColor: primary }}>
-                    <div className="flex justify-between items-baseline">
-                      <div className="font-bold text-sm text-slate-900">{exp.jobTitle}</div>
-                      <div className="text-xs text-slate-500 font-medium">
+                  <div key={exp.id} data-entry="true" className="relative pl-4 border-l-2" style={{ borderColor: primary }}>
+                    <div className="flex justify-between items-baseline" style={METADATA_ROW_STYLE}>
+                      <div className="font-bold text-sm text-slate-900" style={METADATA_LEFT_STYLE}>{exp.jobTitle}</div>
+                      <div className="text-xs text-slate-500 font-medium" style={METADATA_RIGHT_STYLE}>
                         {exp.startDate} – {(exp.currentlyWorking && (!exp.endDate || exp.endDate.trim().toLowerCase() === 'present')) ? 'Present' : (exp.endDate || 'Present')}
                       </div>
                     </div>
                     <div className="text-xs font-semibold text-slate-600 mb-1">
                       {exp.company} {exp.location ? `• ${exp.location}` : ''}
                     </div>
-                    {exp.description && (
-                      exp.description.includes('\n') || exp.description.trim().startsWith('-') || exp.description.trim().startsWith('•') ? (
-                        <div className="mt-1 space-y-1 text-xs text-slate-700">
-                          {exp.description
-                            .split('\n')
-                            .map((l) => l.trim().replace(/^[-•*]\s*/, ''))
-                            .filter(Boolean)
-                            .map((line, idx) => (
-                              <div key={idx} className="flex items-start gap-1.5 leading-relaxed">
-                                <span className="text-slate-400 select-none">•</span>
-                                <span>{line}</span>
-                              </div>
-                            ))}
-                        </div>
-                      ) : (
-                        <p className="text-xs text-slate-700 mt-1 whitespace-pre-line leading-relaxed">{exp.description}</p>
-                      )
-                    )}
+                    <ResumeDescriptionBlock
+                      text={exp.description}
+                      wrapperClassName="mt-1 space-y-1 text-xs text-slate-700"
+                      markerClassName="text-slate-400"
+                      paragraphClassName="text-xs text-slate-700 mt-1 whitespace-pre-line leading-relaxed"
+                    />
                     {exp.achievements && (
-                      <div className="text-xs text-slate-800 mt-1 whitespace-pre-line leading-relaxed">
-                        {exp.achievements}
-                      </div>
+                      <ResumeDescriptionBlock
+                        text={exp.achievements}
+                        wrapperClassName="mt-1 space-y-1 text-xs text-slate-800"
+                        markerClassName="text-slate-500"
+                        paragraphClassName="text-xs text-slate-800 mt-1 whitespace-pre-line leading-relaxed"
+                      />
                     )}
                   </div>
                 ))}
@@ -198,10 +198,10 @@ export const PremiumInternationalResumeTemplate: React.FC<{ data: DocumentData }
               </h2>
               <div className="space-y-2.5">
                 {projects.map((p) => (
-                  <div key={p.id} className="text-xs">
-                    <div className="flex justify-between items-baseline">
-                      <span className="font-bold text-slate-900">{p.name}</span>
-                      {p.role && <span className="text-slate-500 text-[11px]">{p.role}</span>}
+                  <div key={p.id} data-entry="true" className="text-xs">
+                    <div className="flex justify-between items-baseline" style={METADATA_ROW_STYLE}>
+                      <span className="font-bold text-slate-900" style={METADATA_LEFT_STYLE}>{p.name}</span>
+                      {p.role && <span className="text-slate-500 text-[11px]" style={METADATA_RIGHT_STYLE}>{p.role}</span>}
                     </div>
                     {p.technologies && <div className="text-[11px] text-slate-500">Tech: {p.technologies}</div>}
                     {p.description && <p className="text-slate-600 mt-0.5">{p.description}</p>}

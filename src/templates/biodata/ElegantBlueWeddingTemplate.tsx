@@ -1,5 +1,6 @@
 import React from 'react';
 import { DocumentData } from '../../types/document';
+import { getStaticFontClass } from '../../utils/fontClassMap';
 import {
   GaneshaVector,
   WeddingRingsVector,
@@ -21,7 +22,7 @@ export const ElegantBlueWeddingTemplate: React.FC<{ data: DocumentData }> = ({ d
 
   const royalNavy = customization.primaryColor || '#0c4a6e';
   const gold = customization.accentColor || '#b45309';
-  const fontClass = customization.fontFamily ? `font-${customization.fontFamily}` : 'font-cormorant';
+  const fontClass = getStaticFontClass(customization.fontFamily, 'cormorant');
   const baseFontSize =
     customization.fontSize === 'sm' ? 'text-[11px]' : customization.fontSize === 'lg' ? 'text-[13px]' : 'text-[12px]';
 

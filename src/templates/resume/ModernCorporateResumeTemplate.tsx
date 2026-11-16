@@ -1,5 +1,13 @@
 import React from 'react';
 import { DocumentData } from '../../types/document';
+import { FONT_FAMILY_CSS_MAP } from '../../utils/fontClassMap';
+import {
+  CONTACT_ROW_STYLE,
+  METADATA_LEFT_STYLE,
+  METADATA_RIGHT_STYLE,
+  METADATA_ROW_STYLE,
+  ResumeDescriptionBlock,
+} from './resumeTemplateUtils';
 
 export const ModernCorporateResumeTemplate: React.FC<{ data: DocumentData }> = ({ data }) => {
   const { personal, contact, summary, experience, education, skills, projects, certifications, achievements, customSections, customization } = data;
@@ -21,6 +29,7 @@ export const ModernCorporateResumeTemplate: React.FC<{ data: DocumentData }> = (
     <div
       className="document-page-sheet p-8 font-jakarta text-slate-800 bg-white"
       style={{
+        fontFamily: FONT_FAMILY_CSS_MAP.jakarta,
         fontSize: customization.fontSize === 'sm' ? '12px' : customization.fontSize === 'lg' ? '15px' : '13px',
       }}
     >
@@ -33,7 +42,7 @@ export const ModernCorporateResumeTemplate: React.FC<{ data: DocumentData }> = (
           <p className="text-sm font-medium text-blue-300 mt-0.5 no-justify">
             {displayTitle}
           </p>
-          <div className="text-xs text-slate-300 mt-2 flex flex-wrap gap-x-4 gap-y-1 no-justify">
+          <div className="text-xs text-slate-300 mt-2 flex flex-wrap gap-x-4 gap-y-1 no-justify" style={CONTACT_ROW_STYLE}>
             {displayEmail && <span>✉ {displayEmail}</span>}
             {displayPhone && <span>✆ {displayPhone}</span>}
             {displayLocation && <span>📍 {displayLocation}</span>}
@@ -59,35 +68,22 @@ export const ModernCorporateResumeTemplate: React.FC<{ data: DocumentData }> = (
             </h2>
             <div className="space-y-4">
               {displayExperience.map((exp) => (
-                <div key={exp.id}>
-                  <div className="flex justify-between items-baseline text-xs">
-                    <span className="font-bold text-slate-900">{exp.jobTitle}</span>
-                    <span className="text-slate-500 font-medium text-[11px]">{exp.startDate} - {(exp.currentlyWorking && (!exp.endDate || exp.endDate.trim().toLowerCase() === 'present')) ? 'Present' : (exp.endDate || 'Present')}</span>
+                <div key={exp.id} data-entry>
+                  <div className="flex justify-between items-baseline text-xs" style={METADATA_ROW_STYLE}>
+                    <span className="font-bold text-slate-900" style={METADATA_LEFT_STYLE}>{exp.jobTitle}</span>
+                    <span className="text-slate-500 font-medium text-[11px]" style={METADATA_RIGHT_STYLE}>{exp.startDate} - {(exp.currentlyWorking && (!exp.endDate || exp.endDate.trim().toLowerCase() === 'present')) ? 'Present' : (exp.endDate || 'Present')}</span>
                   </div>
-                  <div className="text-xs font-semibold text-blue-800">{exp.company} {exp.location ? `  ${exp.location}` : ''}</div>
-                  {exp.description && (
-                    exp.description.includes('\n') || exp.description.trim().startsWith('-') || exp.description.trim().startsWith('•') ? (
-                      <div className="mt-1 space-y-1 text-xs text-slate-700">
-                        {exp.description
-                          .split('\n')
-                          .map((l) => l.trim().replace(/^[-•*]\s*/, ''))
-                          .filter(Boolean)
-                          .map((line, idx) => (
-                            <div key={idx} className="flex items-start gap-1.5 leading-relaxed">
-                              <span className="text-slate-400 select-none">•</span>
-                              <span>{line}</span>
-                            </div>
-                          ))}
-                      </div>
-                    ) : (
-                      <p className="text-xs text-slate-700 mt-1 whitespace-pre-line leading-relaxed">{exp.description}</p>
-                    )
-                  )}
-                  {exp.achievements && (
-                    <div className="text-xs text-slate-600 mt-1 whitespace-pre-line bg-slate-50 p-2 rounded border border-slate-100">
-                      {exp.achievements}
-                    </div>
-                  )}
+                  <div className="text-xs font-semibold text-blue-800">{exp.company} {exp.location ? `• ${exp.location}` : ''}</div>
+                  <ResumeDescriptionBlock
+                    text={exp.description}
+                    wrapperClassName="mt-1 space-y-1 text-xs text-slate-700"
+                    paragraphClassName="text-xs text-slate-700 mt-1 whitespace-pre-line leading-relaxed"
+                  />
+                  <ResumeDescriptionBlock
+                    text={exp.achievements}
+                    wrapperClassName="mt-1 space-y-1 text-xs text-slate-600 bg-slate-50 p-2 rounded border border-slate-100"
+                    paragraphClassName="text-xs text-slate-600 mt-1 whitespace-pre-line bg-slate-50 p-2 rounded border border-slate-100"
+                  />
                 </div>
               ))}
             </div>
@@ -100,10 +96,10 @@ export const ModernCorporateResumeTemplate: React.FC<{ data: DocumentData }> = (
               </h2>
               <div className="space-y-3">
                 {projects.map((proj) => (
-                  <div key={proj.id} className="text-xs">
-                    <div className="flex justify-between font-bold">
-                      <span>{proj.name}</span>
-                      {proj.link && <span className="font-mono text-[11px] text-blue-700">{proj.link}</span>}
+                  <div key={proj.id} data-entry className="text-xs">
+                    <div className="flex justify-between items-baseline font-bold" style={METADATA_ROW_STYLE}>
+                      <span style={METADATA_LEFT_STYLE}>{proj.name}</span>
+                      {proj.link && <span className="font-mono text-[11px] text-blue-700" style={METADATA_RIGHT_STYLE}>{proj.link}</span>}
                     </div>
                     {proj.technologies && <div className="text-[11px] text-slate-500">Tech: {proj.technologies}</div>}
                     <p className="text-slate-700 mt-0.5">{proj.description}</p>

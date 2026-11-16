@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useLayoutEffect, useRef } from 'react';
 import { DocumentCustomization } from '../../types/document';
 import { MappedCoverLetterData } from '../../utils/mapCoverLetterData';
+import { getStaticFontClass } from '../../utils/fontClassMap';
 
 interface CoverLetterPreviewContextValue {
   isExportMode: boolean;
@@ -49,8 +50,7 @@ export function getCoverLetterSheetTypography(
   customization?: DocumentCustomization,
   defaultFont: DocumentCustomization['fontFamily'] = 'jakarta'
 ) {
-  const fontFamily = customization?.fontFamily || defaultFont;
-  const fontClass = `font-${fontFamily}`;
+  const fontClass = getStaticFontClass(customization?.fontFamily, defaultFont);
   const paddingClass =
     customization?.margins === 'compact'
       ? 'p-10'
@@ -114,12 +114,27 @@ export const CoverLetterContactBar: React.FC<{
       className={`cl-contact-bar cl-meta flex flex-wrap items-center ${
         center ? 'justify-center' : ''
       } gap-y-0.5 break-words ${className}`}
+      style={{
+        display: 'flex',
+        flexWrap: 'wrap',
+        alignItems: 'center',
+        justifyContent: center ? 'center' : undefined,
+        rowGap: '2px',
+      }}
     >
       {items.map((item, idx) => (
-        <span key={idx} className="cl-contact-item inline-flex items-center">
+        <span
+          key={idx}
+          className="cl-contact-item inline-flex items-center"
+          style={{ display: 'inline-flex', alignItems: 'center' }}
+        >
           <span>{item}</span>
           {idx < items.length - 1 && (
-            <span className={`cl-contact-sep mx-2 select-none ${separatorClassName}`} aria-hidden="true">
+            <span
+              className={`cl-contact-sep mx-2 select-none ${separatorClassName}`}
+              style={{ marginLeft: '8px', marginRight: '8px' }}
+              aria-hidden="true"
+            >
               {separator}
             </span>
           )}

@@ -1,5 +1,14 @@
 import React from 'react';
 import { DocumentData } from '../../types/document';
+import { FONT_FAMILY_CSS_MAP } from '../../utils/fontClassMap';
+import {
+  BULLET_LIST_STYLE,
+  METADATA_LEFT_STYLE,
+  METADATA_RIGHT_STYLE,
+  METADATA_ROW_STYLE,
+  ResumeBulletItem,
+  ResumeDescriptionBlock,
+} from './resumeTemplateUtils';
 
 export const CleanResumeTemplate: React.FC<{ data: DocumentData }> = ({ data }) => {
   const { personal, contact, summary, experience, education, skills, projects, certifications, achievements, customSections, customization } = data;
@@ -8,11 +17,12 @@ export const CleanResumeTemplate: React.FC<{ data: DocumentData }> = ({ data }) 
     <div
       className="document-page-sheet p-8 font-jakarta text-slate-800 bg-white"
       style={{
+        fontFamily: FONT_FAMILY_CSS_MAP.jakarta,
         fontSize: customization.fontSize === 'sm' ? '12px' : customization.fontSize === 'lg' ? '15px' : '13px',
       }}
     >
-      <div className="flex justify-between items-end border-b pb-4 mb-5 border-slate-200">
-        <div>
+      <div className="flex justify-between items-end border-b pb-4 mb-5 border-slate-200" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', columnGap: '16px' }}>
+        <div style={METADATA_LEFT_STYLE}>
           <h1 className="text-2xl font-bold tracking-tight text-slate-900">
             {personal.fullName || 'Full Name'}
           </h1>
@@ -20,7 +30,7 @@ export const CleanResumeTemplate: React.FC<{ data: DocumentData }> = ({ data }) 
             {personal.professionalTitle || 'Software Engineer'}
           </p>
         </div>
-        <div className="text-right text-xs text-slate-500 no-justify">
+        <div className="text-right text-xs text-slate-500 no-justify" style={{ flexShrink: 0 }}>
           <div>{contact.email} {contact.phone ? `• ${contact.phone}` : ''}</div>
           <div>{[contact.city, contact.state, contact.country].filter(Boolean).join(', ')} {contact.linkedin ? `• ${contact.linkedin}` : ''} {(contact.portfolio || contact.website) ? `• ${contact.portfolio || contact.website}` : ''}</div>
         </div>
@@ -39,30 +49,21 @@ export const CleanResumeTemplate: React.FC<{ data: DocumentData }> = ({ data }) 
           </h2>
           <div className="space-y-3">
             {experience.map((exp) => (
-              <div key={exp.id}>
-                <div className="flex justify-between items-baseline text-xs">
-                  <span className="font-bold text-slate-900">{exp.jobTitle}, {exp.company}</span>
-                  <span className="text-slate-500 text-[11px]">{exp.startDate} - {(exp.currentlyWorking && (!exp.endDate || exp.endDate.trim().toLowerCase() === 'present')) ? 'Present' : (exp.endDate || 'Present')}</span>
+              <div key={exp.id} data-entry>
+                <div className="flex justify-between items-baseline text-xs" style={METADATA_ROW_STYLE}>
+                  <span className="font-bold text-slate-900" style={METADATA_LEFT_STYLE}>{exp.jobTitle}, {exp.company}</span>
+                  <span className="text-slate-500 text-[11px]" style={METADATA_RIGHT_STYLE}>{exp.startDate} - {(exp.currentlyWorking && (!exp.endDate || exp.endDate.trim().toLowerCase() === 'present')) ? 'Present' : (exp.endDate || 'Present')}</span>
                 </div>
-                {exp.description && (
-                  exp.description.includes('\n') || exp.description.trim().startsWith('-') || exp.description.trim().startsWith('•') ? (
-                    <div className="mt-1 space-y-1 text-xs text-slate-700">
-                      {exp.description
-                        .split('\n')
-                        .map((l) => l.trim().replace(/^[-•*]\s*/, ''))
-                        .filter(Boolean)
-                        .map((line, idx) => (
-                          <div key={idx} className="flex items-start gap-1.5 leading-relaxed">
-                            <span className="text-slate-400 select-none">•</span>
-                            <span>{line}</span>
-                          </div>
-                        ))}
-                    </div>
-                  ) : (
-                    <p className="text-xs text-slate-700 mt-1 whitespace-pre-line leading-relaxed">{exp.description}</p>
-                  )
-                )}
-                {exp.achievements && <p className="text-xs text-slate-600 mt-0.5 whitespace-pre-line">{exp.achievements}</p>}
+                <ResumeDescriptionBlock
+                  text={exp.description}
+                  wrapperClassName="mt-1 space-y-1 text-xs text-slate-700"
+                  paragraphClassName="text-xs text-slate-700 mt-1 whitespace-pre-line leading-relaxed"
+                />
+                <ResumeDescriptionBlock
+                  text={exp.achievements}
+                  wrapperClassName="mt-1 space-y-1 text-xs text-slate-600"
+                  paragraphClassName="text-xs text-slate-600 mt-0.5 whitespace-pre-line"
+                />
               </div>
             ))}
           </div>
@@ -105,10 +106,10 @@ export const CleanResumeTemplate: React.FC<{ data: DocumentData }> = ({ data }) 
           </h2>
           <div className="space-y-1.5 text-xs">
             {projects.map((p) => (
-              <div key={p.id}>
-                <div className="flex justify-between font-bold">
-                  <span>{p.name}</span>
-                  {p.link && <span className="font-normal text-slate-500">{p.link}</span>}
+              <div key={p.id} data-entry>
+                <div className="flex justify-between items-baseline font-bold" style={METADATA_ROW_STYLE}>
+                  <span style={METADATA_LEFT_STYLE}>{p.name}</span>
+                  {p.link && <span className="font-normal text-slate-500" style={METADATA_RIGHT_STYLE}>{p.link}</span>}
                 </div>
                 <p className="text-slate-600">{p.description}</p>
               </div>
@@ -122,12 +123,12 @@ export const CleanResumeTemplate: React.FC<{ data: DocumentData }> = ({ data }) 
           <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-200 pb-0.5 mb-1">
             Certifications & Honors
           </h2>
-          <div className="text-xs text-slate-700 space-y-0.5">
+          <div className="text-xs text-slate-700 space-y-0.5" style={BULLET_LIST_STYLE}>
             {certifications.map((c) => (
-              <div key={c.id}>• {c.name} ({c.issuer})</div>
+              <ResumeBulletItem key={c.id}>{c.name} ({c.issuer})</ResumeBulletItem>
             ))}
             {achievements.map((a) => (
-              <div key={a.id}>• {a.title}: {a.description}</div>
+              <ResumeBulletItem key={a.id}>{a.title}: {a.description}</ResumeBulletItem>
             ))}
           </div>
         </div>

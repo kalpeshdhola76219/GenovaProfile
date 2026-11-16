@@ -1,5 +1,6 @@
 import React from 'react';
 import { DocumentData } from '../../types/document';
+import { getStaticFontClass } from '../../utils/fontClassMap';
 import { GaneshaVector, ToranArchPattern } from './decorativeAssets';
 import { User, Phone, Mail, MapPin, Heart } from 'lucide-react';
 
@@ -9,7 +10,7 @@ export const RoyalVedicQRTemplate: React.FC<{ data: DocumentData }> = ({ data })
   const deepMaroon = customization.primaryColor || '#6b1111';
   const saffron = customization.secondaryColor || '#b45309';
   const gold = customization.accentColor || '#c29b38';
-  const fontClass = customization.fontFamily ? `font-${customization.fontFamily}` : 'font-cormorant';
+  const fontClass = getStaticFontClass(customization.fontFamily, 'cormorant');
   const baseFontSize =
     customization.fontSize === 'sm' ? 'text-[11.5px]' : customization.fontSize === 'lg' ? 'text-[13.5px]' : 'text-[12.5px]';
 

@@ -1,5 +1,13 @@
 import React from 'react';
 import { DocumentData } from '../../types/document';
+import { getStaticFontClass, getFontFamilyCss, FONT_FAMILY_CSS_MAP } from '../../utils/fontClassMap';
+import {
+  METADATA_ROW_STYLE,
+  METADATA_LEFT_STYLE,
+  METADATA_RIGHT_STYLE,
+  CONTACT_CENTER_ROW_STYLE,
+  ResumeDescriptionBlock,
+} from './resumeTemplateUtils';
 
 export const PremiumConsultantResumeTemplate: React.FC<{ data: DocumentData }> = ({ data }) => {
   const {
@@ -18,22 +26,24 @@ export const PremiumConsultantResumeTemplate: React.FC<{ data: DocumentData }> =
 
   const navy = customization.primaryColor || '#172554'; // Deep Oxford Navy
   const charcoal = customization.secondaryColor || '#334155'; // Clean Slate
-  const fontClass = customization.fontFamily ? `font-${customization.fontFamily}` : 'font-cormorant';
+  const fontClass = getStaticFontClass(customization.fontFamily, 'cormorant');
+  const fontFamilyCss = getFontFamilyCss(customization.fontFamily, 'cormorant');
   const baseFontSize =
     customization.fontSize === 'sm' ? 'text-[12px]' : customization.fontSize === 'lg' ? 'text-[15px]' : 'text-[13px]';
 
   return (
     <div
       className={`document-page-sheet p-10 bg-white text-stone-900 shadow-sm ${baseFontSize}`}
+      style={{ fontFamily: FONT_FAMILY_CSS_MAP.sans }}
     >
       <div className="text-center pb-5 mb-5 border-b-2" style={{ borderColor: navy }}>
-        <h1 className={`text-3xl font-extrabold uppercase tracking-widest text-slate-900 ${fontClass}`}>
+        <h1 className={`text-3xl font-extrabold uppercase tracking-widest text-slate-900 ${fontClass}`} style={{ fontFamily: fontFamilyCss }}>
           {personal.fullName || 'STRATEGY CONSULTANT'}
         </h1>
         <p className="text-xs font-semibold uppercase tracking-widest text-slate-600 mt-1 font-sans">
           {personal.professionalTitle || 'Engagement Manager | Management & Strategy Consulting'}
         </p>
-        <div className="flex flex-wrap items-center justify-center gap-3 mt-2 text-xs text-slate-600 font-sans no-justify">
+        <div className="flex flex-wrap items-center justify-center gap-3 mt-2 text-xs text-slate-600 font-sans no-justify" style={CONTACT_CENTER_ROW_STYLE}>
           {contact.email && <span>{contact.email}</span>}
           {contact.phone && <span>• {contact.phone}</span>}
           {(contact.city || contact.state || contact.country) && (
@@ -60,12 +70,12 @@ export const PremiumConsultantResumeTemplate: React.FC<{ data: DocumentData }> =
           </h2>
           <div className="space-y-4">
             {experience.map((exp) => (
-              <div key={exp.id}>
-                <div className="flex justify-between items-baseline">
-                  <span className="font-bold text-sm text-slate-900">
+              <div key={exp.id} data-entry="true">
+                <div className="flex justify-between items-baseline" style={METADATA_ROW_STYLE}>
+                  <span className="font-bold text-sm text-slate-900" style={METADATA_LEFT_STYLE}>
                     {exp.company} • <span className="font-semibold text-slate-700">{exp.jobTitle}</span>
                   </span>
-                  <span className="text-xs text-slate-500 font-medium">
+                  <span className="text-xs text-slate-500 font-medium" style={METADATA_RIGHT_STYLE}>
                     {exp.location ? `${exp.location} | ` : ''}
                     {exp.startDate} –{' '}
                     {exp.currentlyWorking && (!exp.endDate || exp.endDate.trim().toLowerCase() === 'present')
@@ -73,30 +83,20 @@ export const PremiumConsultantResumeTemplate: React.FC<{ data: DocumentData }> =
                       : exp.endDate || 'Present'}
                   </span>
                 </div>
-                {exp.description &&
-                  (exp.description.includes('\n') ||
-                  exp.description.trim().startsWith('-') ||
-                  exp.description.trim().startsWith('•') ? (
-                    <div className="mt-1 space-y-1 text-xs text-slate-700">
-                      {exp.description
-                        .split('\n')
-                        .map((l) => l.trim().replace(/^[-•*]\s*/, ''))
-                        .filter(Boolean)
-                        .map((line, idx) => (
-                          <div key={idx} className="flex items-start gap-1.5 leading-relaxed">
-                            <span className="text-slate-400 select-none">•</span>
-                            <span>{line}</span>
-                          </div>
-                        ))}
-                    </div>
-                  ) : (
-                    <p className="text-xs text-slate-700 mt-1 whitespace-pre-line leading-relaxed">{exp.description}</p>
-                  ))}
+                <ResumeDescriptionBlock
+                  text={exp.description}
+                  wrapperClassName="mt-1 space-y-1 text-xs text-slate-700"
+                  markerClassName="text-slate-400"
+                  paragraphClassName="text-xs text-slate-700 mt-1 whitespace-pre-line leading-relaxed"
+                />
                 {exp.achievements && (
                   <div className="text-xs text-slate-800 mt-1.5 pl-4 border-l-2 border-slate-300 space-y-1">
-                    {exp.achievements.split('\n').map((line, idx) => (
-                      <p key={idx} className="leading-relaxed">{line}</p>
-                    ))}
+                    <ResumeDescriptionBlock
+                      text={exp.achievements}
+                      wrapperClassName="space-y-1 text-xs text-slate-800"
+                      markerClassName="text-slate-500"
+                      paragraphClassName="text-xs text-slate-800 whitespace-pre-line leading-relaxed"
+                    />
                   </div>
                 )}
               </div>
@@ -112,12 +112,12 @@ export const PremiumConsultantResumeTemplate: React.FC<{ data: DocumentData }> =
           </h2>
           <div className="space-y-2 text-xs">
             {education.map((e) => (
-              <div key={e.id} className="flex justify-between items-baseline">
-                <div>
+              <div key={e.id} className="flex justify-between items-baseline" style={METADATA_ROW_STYLE}>
+                <div style={METADATA_LEFT_STYLE}>
                   <span className="font-bold text-slate-900">{e.institute}</span>
                   <span className="text-slate-600"> — {e.degree}</span>
                 </div>
-                <div className="text-slate-500">
+                <div className="text-slate-500" style={METADATA_RIGHT_STYLE}>
                   {e.endYear}
                   {e.score ? ` • ${/^[0-9./\s]+$/.test(e.score.trim()) ? `GPA: ${e.score.trim()}` : e.score.trim()}` : ''}
                 </div>
@@ -134,10 +134,10 @@ export const PremiumConsultantResumeTemplate: React.FC<{ data: DocumentData }> =
           </h2>
           <div className="space-y-3 text-xs">
             {projects.map((p) => (
-              <div key={p.id}>
-                <div className="flex justify-between font-bold text-slate-900">
-                  <span>{p.name}</span>
-                  {p.technologies && <span className="font-normal text-slate-500 text-[11px]">{p.technologies}</span>}
+              <div key={p.id} data-entry="true">
+                <div className="flex justify-between font-bold text-slate-900" style={METADATA_ROW_STYLE}>
+                  <span style={METADATA_LEFT_STYLE}>{p.name}</span>
+                  {p.technologies && <span className="font-normal text-slate-500 text-[11px]" style={METADATA_RIGHT_STYLE}>{p.technologies}</span>}
                 </div>
                 {p.description && <p className="text-slate-700 mt-0.5 leading-relaxed">{p.description}</p>}
               </div>
@@ -192,9 +192,9 @@ export const PremiumConsultantResumeTemplate: React.FC<{ data: DocumentData }> =
               {sec.items && sec.items.length > 0 ? (
                 <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
                   {sec.items.map((i) => (
-                    <div key={i.id} className="flex justify-between items-baseline py-0.5 border-b border-slate-100">
-                      <span className="text-slate-500 font-medium">{i.key}:</span>
-                      <span className="font-semibold text-slate-900">{i.value}</span>
+                    <div key={i.id} className="flex justify-between items-baseline py-0.5 border-b border-slate-100" style={METADATA_ROW_STYLE}>
+                      <span className="text-slate-500 font-medium" style={METADATA_LEFT_STYLE}>{i.key}:</span>
+                      <span className="font-semibold text-slate-900" style={METADATA_RIGHT_STYLE}>{i.value}</span>
                     </div>
                   ))}
                 </div>

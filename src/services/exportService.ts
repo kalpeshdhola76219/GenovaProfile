@@ -370,8 +370,12 @@ export function sanitizeClonedDocumentForExport(
     clonedTarget.style.transform = 'none';
     clonedTarget.style.transition = 'none';
     clonedTarget.style.zoom = '1';
-    clonedTarget.style.width = liveTarget.style.width || `${liveTarget.offsetWidth || 800}px`;
-    clonedTarget.style.height = liveTarget.style.height || `${liveTarget.offsetHeight || 1131}px`;
+    clonedTarget.style.margin = '0';
+    clonedTarget.style.boxShadow = 'none';
+    clonedTarget.style.width = '794px';
+    clonedTarget.style.maxWidth = '794px';
+    clonedTarget.style.minWidth = '794px';
+    clonedTarget.style.height = liveTarget.style.height || `${liveTarget.offsetHeight || 1123}px`;
     clonedTarget.style.boxSizing = 'border-box';
     clonedTarget.style.wordBreak = 'normal';
     clonedTarget.style.overflowWrap = 'break-word';
@@ -404,8 +408,10 @@ async function ensureFontsLoadedForElement(element: HTMLElement): Promise<void> 
         if (familyAttr.includes(knownFont)) {
           fontRequests.add(`${fontStyle} ${weight} 16px "${knownFont}"`);
           fontRequests.add(`normal 400 16px "${knownFont}"`);
+          fontRequests.add(`normal 500 16px "${knownFont}"`);
           fontRequests.add(`normal 600 16px "${knownFont}"`);
           fontRequests.add(`normal 700 16px "${knownFont}"`);
+          fontRequests.add(`normal 800 16px "${knownFont}"`);
         }
       }
     } catch {}
@@ -730,10 +736,15 @@ export async function generatePdfBlob(
       }
 
       await waitForDocumentReadyForExport(sheet);
+      if (typeof document !== 'undefined' && document.fonts) {
+        await document.fonts.ready;
+      }
 
       const isBiodata =
         sheet.getAttribute('data-document-type') === 'biodata' ||
         sheet.hasAttribute('data-one-page-fit');
+      const isCoverLetter = sheet.getAttribute('data-document-type') === 'cover-letter';
+      const isPaginatedSheet = sheet.classList.contains('a4-page-sheet') || sheet.hasAttribute('data-page-index');
 
       const computedSheetBg = sanitizeModernColorString(
         sheet.style.backgroundColor || window.getComputedStyle(sheet).backgroundColor || '#ffffff'
@@ -746,46 +757,66 @@ export async function generatePdfBlob(
       const canvas = await html2canvas(sheet, {
         scale: EXPORT_CONFIG.desktopScale,
         useCORS: true,
+        allowTaint: false,
         logging: false,
-        backgroundColor: safeBgColor,
+        backgroundColor: '#ffffff',
         imageTimeout: 15000,
-        windowWidth: Math.max(1280, typeof window !== 'undefined' ? window.innerWidth : 1280),
+        windowWidth: 1200,
         onclone: (clonedDoc: Document, clonedElement: HTMLElement) => {
+          if (isCoverLetter) {
+            rebuildCoverLetterBodyLinesForExport(clonedDoc, clonedElement, sheet);
+          }
+
           sanitizeClonedDocumentForExport(clonedDoc, clonedElement, sheet);
 
-          if (isBiodata) {
-            clonedElement.style.width = '800px';
-            clonedElement.style.height = '1131px';
-            clonedElement.style.minWidth = '800px';
-            clonedElement.style.maxWidth = '800px';
-            clonedElement.style.minHeight = '1131px';
-            clonedElement.style.maxHeight = '1131px';
+          // Enforce exact desktop A4 width (794px) and clean zero-transform clone layout
+          clonedElement.style.width = '794px';
+          clonedElement.style.maxWidth = '794px';
+          clonedElement.style.minWidth = '794px';
+          clonedElement.style.transform = 'none';
+          clonedElement.style.margin = '0';
+          clonedElement.style.boxShadow = 'none';
+          clonedElement.style.backgroundColor = safeBgColor;
+          clonedElement.style.boxSizing = 'border-box';
+
+          if (isCoverLetter) {
+            clonedElement.style.height = '1123px';
+            clonedElement.style.minHeight = '1123px';
+            clonedElement.style.maxHeight = '1123px';
             clonedElement.style.overflow = 'hidden';
-            clonedElement.style.backgroundColor = safeBgColor;
-            clonedElement.style.boxSizing = 'border-box';
+
+            const clStage = clonedElement.querySelector('.cl-one-page-stage') as HTMLElement | null;
+            if (clStage) {
+              clStage.style.transform = `scale(${794 / 800})`;
+              clStage.style.transformOrigin = 'top left';
+            }
+          } else if (isBiodata) {
+            clonedElement.style.height = '1123px';
+            clonedElement.style.minHeight = '1123px';
+            clonedElement.style.maxHeight = '1123px';
+            clonedElement.style.overflow = 'hidden';
 
             const stage = clonedElement.querySelector('.one-page-stage') as HTMLElement | null;
             const liveStage = sheet.querySelector('.one-page-stage') as HTMLElement | null;
             if (stage && liveStage) {
+              const liveScaleAttr = Number(sheet.getAttribute('data-scale') || '1');
+              const liveScale = Number.isFinite(liveScaleAttr) && liveScaleAttr > 0 ? liveScaleAttr : 1;
               stage.style.width = liveStage.style.width;
               stage.style.height = liveStage.style.height;
-              stage.style.transform = liveStage.style.transform;
+              stage.style.transform = `scale(${liveScale * (794 / 800)})`;
               stage.style.transformOrigin = 'top left';
             }
-          }
-
-          if (sheet.getAttribute('data-document-type') === 'cover-letter') {
-            rebuildCoverLetterBodyLinesForExport(clonedDoc, clonedElement, sheet);
+          } else if (isPaginatedSheet) {
+            clonedElement.style.height = '1123px';
+            clonedElement.style.minHeight = '1123px';
+            clonedElement.style.maxHeight = '1123px';
+            clonedElement.style.overflow = 'hidden';
           }
         },
       });
 
       const pageImgData = canvas.toDataURL('image/png');
-      if (isBiodata) {
-        pdf.addImage(pageImgData, 'PNG', 0, 0, 210, 297, undefined, 'FAST');
-      } else {
-        pdf.addImage(pageImgData, 'PNG', 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
-      }
+      pdf.addImage(pageImgData, 'PNG', 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
     }
 
     return pdf.output('blob');
@@ -831,9 +862,15 @@ export async function generatePngBlob(
     }
 
     await waitForDocumentReadyForExport(targetElement);
+    if (typeof document !== 'undefined' && document.fonts) {
+      await document.fonts.ready;
+    }
+
     const isBiodata =
       targetElement.getAttribute('data-document-type') === 'biodata' ||
       targetElement.hasAttribute('data-one-page-fit');
+    const isCoverLetter = targetElement.getAttribute('data-document-type') === 'cover-letter';
+    const isPaginatedSheet = targetElement.classList.contains('a4-page-sheet') || targetElement.hasAttribute('data-page-index');
 
     const computedSheetBg = sanitizeModernColorString(
       targetElement.style.backgroundColor || window.getComputedStyle(targetElement).backgroundColor || '#ffffff'
@@ -846,36 +883,59 @@ export async function generatePngBlob(
     const canvas = await html2canvas(targetElement, {
       scale: EXPORT_CONFIG.desktopScale,
       useCORS: true,
+      allowTaint: false,
       logging: false,
-      backgroundColor: safeBgColor,
+      backgroundColor: '#ffffff',
       imageTimeout: 15000,
-      windowWidth: Math.max(1280, typeof window !== 'undefined' ? window.innerWidth : 1280),
+      windowWidth: 1200,
       onclone: (clonedDoc: Document, clonedElement: HTMLElement) => {
+        if (isCoverLetter) {
+          rebuildCoverLetterBodyLinesForExport(clonedDoc, clonedElement, targetElement);
+        }
+
         sanitizeClonedDocumentForExport(clonedDoc, clonedElement, targetElement);
 
-        if (isBiodata) {
-          clonedElement.style.width = '800px';
-          clonedElement.style.height = '1131px';
-          clonedElement.style.minWidth = '800px';
-          clonedElement.style.maxWidth = '800px';
-          clonedElement.style.minHeight = '1131px';
-          clonedElement.style.maxHeight = '1131px';
+        clonedElement.style.width = '794px';
+        clonedElement.style.maxWidth = '794px';
+        clonedElement.style.minWidth = '794px';
+        clonedElement.style.transform = 'none';
+        clonedElement.style.margin = '0';
+        clonedElement.style.boxShadow = 'none';
+        clonedElement.style.backgroundColor = safeBgColor;
+        clonedElement.style.boxSizing = 'border-box';
+
+        if (isCoverLetter) {
+          clonedElement.style.height = '1123px';
+          clonedElement.style.minHeight = '1123px';
+          clonedElement.style.maxHeight = '1123px';
           clonedElement.style.overflow = 'hidden';
-          clonedElement.style.backgroundColor = safeBgColor;
-          clonedElement.style.boxSizing = 'border-box';
+
+          const clStage = clonedElement.querySelector('.cl-one-page-stage') as HTMLElement | null;
+          if (clStage) {
+            clStage.style.transform = `scale(${794 / 800})`;
+            clStage.style.transformOrigin = 'top left';
+          }
+        } else if (isBiodata) {
+          clonedElement.style.height = '1123px';
+          clonedElement.style.minHeight = '1123px';
+          clonedElement.style.maxHeight = '1123px';
+          clonedElement.style.overflow = 'hidden';
 
           const stage = clonedElement.querySelector('.one-page-stage') as HTMLElement | null;
           const liveStage = targetElement.querySelector('.one-page-stage') as HTMLElement | null;
           if (stage && liveStage) {
+            const liveScaleAttr = Number(targetElement.getAttribute('data-scale') || '1');
+            const liveScale = Number.isFinite(liveScaleAttr) && liveScaleAttr > 0 ? liveScaleAttr : 1;
             stage.style.width = liveStage.style.width;
             stage.style.height = liveStage.style.height;
-            stage.style.transform = liveStage.style.transform;
+            stage.style.transform = `scale(${liveScale * (794 / 800)})`;
             stage.style.transformOrigin = 'top left';
           }
-        }
-
-        if (targetElement.getAttribute('data-document-type') === 'cover-letter') {
-          rebuildCoverLetterBodyLinesForExport(clonedDoc, clonedElement, targetElement);
+        } else if (isPaginatedSheet) {
+          clonedElement.style.height = '1123px';
+          clonedElement.style.minHeight = '1123px';
+          clonedElement.style.maxHeight = '1123px';
+          clonedElement.style.overflow = 'hidden';
         }
       },
     });

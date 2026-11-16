@@ -1,5 +1,14 @@
 import React from 'react';
 import { DocumentData } from '../../types/document';
+import { FONT_FAMILY_CSS_MAP } from '../../utils/fontClassMap';
+import {
+  BULLET_LIST_STYLE,
+  METADATA_LEFT_STYLE,
+  METADATA_RIGHT_STYLE,
+  METADATA_ROW_STYLE,
+  ResumeBulletItem,
+  ResumeDescriptionBlock,
+} from './resumeTemplateUtils';
 
 export const FinanceProfessionalResumeTemplate: React.FC<{ data: DocumentData }> = ({ data }) => {
   const { personal, contact, summary, experience, education, skills, projects, certifications, achievements, customSections, customization } = data;
@@ -9,11 +18,12 @@ export const FinanceProfessionalResumeTemplate: React.FC<{ data: DocumentData }>
     <div
       className="document-page-sheet p-8 font-jakarta text-slate-900 bg-white"
       style={{
+        fontFamily: FONT_FAMILY_CSS_MAP.jakarta,
         fontSize: customization.fontSize === 'sm' ? '12px' : customization.fontSize === 'lg' ? '15px' : '13px',
       }}
     >
-      <div className="border-b-2 border-emerald-900 pb-3 mb-4 flex justify-between items-baseline">
-        <div>
+      <div className="border-b-2 border-emerald-900 pb-3 mb-4 flex justify-between items-baseline" style={METADATA_ROW_STYLE}>
+        <div style={METADATA_LEFT_STYLE}>
           <h1 className="text-2xl font-black tracking-tight text-emerald-950 uppercase">
             {personal.fullName || 'FULL NAME'}
           </h1>
@@ -21,7 +31,7 @@ export const FinanceProfessionalResumeTemplate: React.FC<{ data: DocumentData }>
             {personal.professionalTitle || 'Finance & Investment Analyst / Quant'}
           </p>
         </div>
-        <div className="text-right text-xs text-slate-600 font-mono no-justify">
+        <div className="text-right text-xs text-slate-600 font-mono no-justify" style={{ flexShrink: 0 }}>
           <div>{contact.phone} | {contact.email}</div>
           <div>{[contact.city, contact.state, contact.country].filter(Boolean).join(', ')} {contact.linkedin ? `| ${contact.linkedin}` : ''} {(contact.portfolio || contact.website) ? `| ${contact.portfolio || contact.website}` : ''}</div>
         </div>
@@ -40,35 +50,22 @@ export const FinanceProfessionalResumeTemplate: React.FC<{ data: DocumentData }>
           </h2>
           <div className="space-y-3">
             {experience.map((exp) => (
-              <div key={exp.id}>
-                <div className="flex justify-between items-baseline text-xs font-bold">
-                  <span>{exp.jobTitle}, <span className="font-semibold text-emerald-900">{exp.company}</span></span>
-                  <span className="font-mono text-[11px] text-slate-600">{exp.startDate} - {(exp.currentlyWorking && (!exp.endDate || exp.endDate.trim().toLowerCase() === 'present')) ? 'Present' : (exp.endDate || 'Present')}</span>
+              <div key={exp.id} data-entry>
+                <div className="flex justify-between items-baseline text-xs font-bold" style={METADATA_ROW_STYLE}>
+                  <span style={METADATA_LEFT_STYLE}>{exp.jobTitle}, <span className="font-semibold text-emerald-900">{exp.company}</span></span>
+                  <span className="font-mono text-[11px] text-slate-600" style={METADATA_RIGHT_STYLE}>{exp.startDate} - {(exp.currentlyWorking && (!exp.endDate || exp.endDate.trim().toLowerCase() === 'present')) ? 'Present' : (exp.endDate || 'Present')}</span>
                 </div>
                 {exp.location && <div className="text-[11px] text-slate-500 italic">{exp.location}</div>}
-                {exp.description && (
-                  exp.description.includes('\n') || exp.description.trim().startsWith('-') || exp.description.trim().startsWith('•') ? (
-                    <div className="mt-1 space-y-1 text-xs text-slate-700">
-                      {exp.description
-                        .split('\n')
-                        .map((l) => l.trim().replace(/^[-•*]\s*/, ''))
-                        .filter(Boolean)
-                        .map((line, idx) => (
-                          <div key={idx} className="flex items-start gap-1.5 leading-relaxed">
-                            <span className="text-slate-400 select-none">•</span>
-                            <span>{line}</span>
-                          </div>
-                        ))}
-                    </div>
-                  ) : (
-                    <p className="text-xs text-slate-700 mt-1 whitespace-pre-line leading-relaxed">{exp.description}</p>
-                  )
-                )}
-                {exp.achievements && (
-                  <div className="text-xs text-slate-700 mt-0.5 whitespace-pre-line leading-relaxed pl-2 border-l border-emerald-300">
-                    {exp.achievements}
-                  </div>
-                )}
+                <ResumeDescriptionBlock
+                  text={exp.description}
+                  wrapperClassName="mt-1 space-y-1 text-xs text-slate-700"
+                  paragraphClassName="text-xs text-slate-700 mt-1 whitespace-pre-line leading-relaxed"
+                />
+                <ResumeDescriptionBlock
+                  text={exp.achievements}
+                  wrapperClassName="mt-0.5 space-y-1 text-xs text-slate-700 pl-2 border-l border-emerald-300"
+                  paragraphClassName="text-xs text-slate-700 mt-0.5 whitespace-pre-line leading-relaxed pl-2 border-l border-emerald-300"
+                />
               </div>
             ))}
           </div>
@@ -82,10 +79,10 @@ export const FinanceProfessionalResumeTemplate: React.FC<{ data: DocumentData }>
           </h2>
           <div className="space-y-2 text-xs">
             {projects.map((p) => (
-              <div key={p.id}>
-                <div className="flex justify-between font-bold text-slate-900">
-                  <span>{p.name}</span>
-                  {p.technologies && <span className="font-normal text-slate-500 font-mono text-[11px]">{p.technologies}</span>}
+              <div key={p.id} data-entry>
+                <div className="flex justify-between items-baseline font-bold text-slate-900" style={METADATA_ROW_STYLE}>
+                  <span style={METADATA_LEFT_STYLE}>{p.name}</span>
+                  {p.technologies && <span className="font-normal text-slate-500 font-mono text-[11px]" style={METADATA_RIGHT_STYLE}>{p.technologies}</span>}
                 </div>
                 {p.description && <p className="text-slate-700 mt-0.5 leading-relaxed">{p.description}</p>}
               </div>
@@ -128,12 +125,16 @@ export const FinanceProfessionalResumeTemplate: React.FC<{ data: DocumentData }>
           <h2 className="text-xs font-bold uppercase tracking-wider text-emerald-950 bg-emerald-50 px-2 py-0.5 mb-1.5 border-l-4 border-emerald-800">
             Certifications (CFA / FRM / Licensures)
           </h2>
-          <div className="text-xs space-y-1 text-slate-800">
+          <div className="text-xs space-y-1 text-slate-800" style={BULLET_LIST_STYLE}>
             {certifications.map((c) => (
-              <div key={c.id}>&bull; <strong>{c.name}</strong> &bull; {c.issuer}</div>
+              <ResumeBulletItem key={c.id} markerClassName="text-emerald-700">
+                <strong>{c.name}</strong> &bull; {c.issuer}
+              </ResumeBulletItem>
             ))}
             {achievements.map((a) => (
-              <div key={a.id}>&bull; <strong>{a.title}</strong>: {a.description}</div>
+              <ResumeBulletItem key={a.id} markerClassName="text-emerald-700">
+                <strong>{a.title}</strong>: {a.description}
+              </ResumeBulletItem>
             ))}
           </div>
         </div>

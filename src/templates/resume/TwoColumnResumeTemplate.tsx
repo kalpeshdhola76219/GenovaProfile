@@ -1,5 +1,13 @@
 import React from 'react';
 import { DocumentData } from '../../types/document';
+import { FONT_FAMILY_CSS_MAP } from '../../utils/fontClassMap';
+import {
+  METADATA_ROW_STYLE,
+  METADATA_LEFT_STYLE,
+  METADATA_RIGHT_STYLE,
+  ResumeBulletItem,
+  ResumeDescriptionBlock,
+} from './resumeTemplateUtils';
 
 export const TwoColumnResumeTemplate: React.FC<{ data: DocumentData }> = ({ data }) => {
   const { personal, contact, summary, experience, education, skills, projects, certifications, achievements, customSections, customization } = data;
@@ -9,6 +17,7 @@ export const TwoColumnResumeTemplate: React.FC<{ data: DocumentData }> = ({ data
     <div
       className="document-page-sheet font-jakarta text-slate-800 flex"
       style={{
+        fontFamily: FONT_FAMILY_CSS_MAP.jakarta,
         fontSize: customization.fontSize === 'sm' ? '12px' : customization.fontSize === 'lg' ? '15px' : '13px',
       }}
     >
@@ -79,33 +88,26 @@ export const TwoColumnResumeTemplate: React.FC<{ data: DocumentData }> = ({ data
             </h2>
             <div className="space-y-3.5">
               {experience.map((exp) => (
-                <div key={exp.id}>
-                  <div className="flex justify-between items-baseline text-xs font-bold">
-                    <span className="text-slate-900">{exp.jobTitle}</span>
-                    <span className="text-slate-500 font-normal text-[11px]">{exp.startDate} - {(exp.currentlyWorking && (!exp.endDate || exp.endDate.trim().toLowerCase() === 'present')) ? 'Present' : (exp.endDate || 'Present')}</span>
+                <div key={exp.id} data-entry="true">
+                  <div className="flex justify-between items-baseline text-xs font-bold" style={METADATA_ROW_STYLE}>
+                    <span className="text-slate-900" style={METADATA_LEFT_STYLE}>{exp.jobTitle}</span>
+                    <span className="text-slate-500 font-normal text-[11px]" style={METADATA_RIGHT_STYLE}>{exp.startDate} - {(exp.currentlyWorking && (!exp.endDate || exp.endDate.trim().toLowerCase() === 'present')) ? 'Present' : (exp.endDate || 'Present')}</span>
                   </div>
                   <div className="text-xs font-medium text-sky-800">{exp.company} {exp.location ? `• ${exp.location}` : ''}</div>
-                  {exp.description && (
-                    exp.description.includes('\n') || exp.description.trim().startsWith('-') || exp.description.trim().startsWith('•') ? (
-                      <div className="mt-1 space-y-1 text-xs text-slate-700">
-                        {exp.description
-                          .split('\n')
-                          .map((l) => l.trim().replace(/^[-•*]\s*/, ''))
-                          .filter(Boolean)
-                          .map((line, idx) => (
-                            <div key={idx} className="flex items-start gap-1.5 leading-relaxed">
-                              <span className="text-slate-400 select-none">•</span>
-                              <span>{line}</span>
-                            </div>
-                          ))}
-                      </div>
-                    ) : (
-                      <p className="text-xs text-slate-700 mt-1 whitespace-pre-line leading-relaxed">{exp.description}</p>
-                    )
-                  )}
+                  <ResumeDescriptionBlock
+                    text={exp.description}
+                    wrapperClassName="mt-1 space-y-1 text-xs text-slate-700"
+                    markerClassName="text-slate-400"
+                    paragraphClassName="text-xs text-slate-700 mt-1 whitespace-pre-line leading-relaxed"
+                  />
                   {exp.achievements && (
                     <div className="text-xs text-slate-600 mt-1 whitespace-pre-line bg-slate-50 p-2 rounded">
-                      {exp.achievements}
+                      <ResumeDescriptionBlock
+                        text={exp.achievements}
+                        wrapperClassName="space-y-1 text-xs text-slate-600"
+                        markerClassName="text-slate-400"
+                        paragraphClassName="text-xs text-slate-600 whitespace-pre-line leading-relaxed"
+                      />
                     </div>
                   )}
                 </div>
@@ -120,10 +122,10 @@ export const TwoColumnResumeTemplate: React.FC<{ data: DocumentData }> = ({ data
             </h2>
             <div className="space-y-2 text-xs">
               {projects.map((proj) => (
-                <div key={proj.id}>
-                  <div className="font-bold flex justify-between">
-                    <span>{proj.name}</span>
-                    {proj.link && <span className="text-sky-700 font-normal">{proj.link}</span>}
+                <div key={proj.id} data-entry="true">
+                  <div className="font-bold flex justify-between" style={METADATA_ROW_STYLE}>
+                    <span style={METADATA_LEFT_STYLE}>{proj.name}</span>
+                    {proj.link && <span className="text-sky-700 font-normal" style={METADATA_RIGHT_STYLE}>{proj.link}</span>}
                   </div>
                   {proj.technologies && <div className="text-[11px] text-slate-500">{proj.technologies}</div>}
                   <p className="text-slate-700 mt-0.5">{proj.description}</p>
@@ -139,10 +141,14 @@ export const TwoColumnResumeTemplate: React.FC<{ data: DocumentData }> = ({ data
             </h2>
             <div className="space-y-1 text-xs text-slate-700">
               {certifications.map((c) => (
-                <div key={c.id}>• <strong>{c.name}</strong> ({c.issuer})</div>
+                <ResumeBulletItem key={c.id} markerClassName="text-slate-400">
+                  <strong>{c.name}</strong> ({c.issuer})
+                </ResumeBulletItem>
               ))}
               {achievements.map((a) => (
-                <div key={a.id}>• <strong>{a.title}</strong>: {a.description}</div>
+                <ResumeBulletItem key={a.id} markerClassName="text-slate-400">
+                  <strong>{a.title}</strong>: {a.description}
+                </ResumeBulletItem>
               ))}
             </div>
           </div>

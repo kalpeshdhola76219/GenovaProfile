@@ -1,12 +1,13 @@
 import React from 'react';
 import { DocumentData } from '../../types/document';
+import { getStaticFontClass } from '../../utils/fontClassMap';
 import { getBiodataSections } from './biodataFields';
 
 export const ClassicIndianBiodataTemplate: React.FC<{ data: DocumentData }> = ({ data }) => {
   const sections = getBiodataSections(data);
   const { personal, marriage, customization } = data;
 
-  const fontClass = customization.fontFamily ? `font-${customization.fontFamily}` : 'font-jakarta';
+  const fontClass = getStaticFontClass(customization.fontFamily, 'jakarta');
   const baseFontSize =
     customization.fontSize === 'sm' ? 'text-[11px]' : customization.fontSize === 'lg' ? 'text-[13px]' : 'text-[12px]';
 

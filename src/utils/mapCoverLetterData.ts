@@ -6,6 +6,7 @@ import {
   CoverLetterType,
   DocumentData,
 } from '../types/document';
+import { sanitizeDisplayText } from './textSanitizer';
 
 export interface CoverLetterTypeConfig {
   id: CoverLetterType;
@@ -523,7 +524,7 @@ export interface MappedCoverLetterData {
 
 function cleanStr(val: unknown): string {
   if (val === null || val === undefined) return '';
-  const s = String(val).trim();
+  const s = sanitizeDisplayText(String(val)).trim();
   if (s === 'undefined' || s === 'null') return '';
   return s;
 }

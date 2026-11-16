@@ -357,6 +357,61 @@ function validateAndFormatIndianMobile(mobileInput: string): string {
   return cleaned;
 }
 
+const SERVER_SKIP_SANITIZE_KEYS = new Set([
+  'id',
+  'templateId',
+  'type',
+  'status',
+  'createdAt',
+  'updatedAt',
+  'profilePhoto',
+  'extraPhotos',
+  'signatureImage',
+  'qrCodeUrl',
+  'fontFamily',
+  'fontSize',
+  'headingSize',
+  'lineHeight',
+  'margins',
+  'sectionSpacing',
+  'primaryColor',
+  'accentColor',
+  'paperColor',
+  'nameStyle',
+  'dateFormat',
+  'coverLetterType',
+]);
+
+function sanitizeServerDocumentData<T>(node: T, currentKey?: string): T {
+  if (node === null || node === undefined) return node;
+  if (typeof node === 'string') {
+    if (
+      (currentKey && SERVER_SKIP_SANITIZE_KEYS.has(currentKey)) ||
+      node.startsWith('data:') ||
+      node.startsWith('blob:')
+    ) {
+      return node;
+    }
+    return node.replace(/\\{1,2}([$€£₹¥%#&_*])/g, '$1') as unknown as T;
+  }
+  if (Array.isArray(node)) {
+    return node.map((item) => sanitizeServerDocumentData(item)) as unknown as T;
+  }
+  if (typeof node === 'object') {
+    const record = node as Record<string, unknown>;
+    const out: Record<string, unknown> = {};
+    for (const key of Object.keys(record)) {
+      if (SERVER_SKIP_SANITIZE_KEYS.has(key)) {
+        out[key] = record[key];
+      } else {
+        out[key] = sanitizeServerDocumentData(record[key], key);
+      }
+    }
+    return out as T;
+  }
+  return node;
+}
+
 // ============================================================================
 // 1. INVISIBLE GUEST SESSIONS & DOCUMENT SYNC APIS
 // ============================================================================
@@ -452,7 +507,7 @@ app.post('/api/documents/sync', async (req, res) => {
     templateId,
     type: normalizedType,
     title: title || 'My Document',
-    documentData,
+    documentData: sanitizeServerDocumentData(documentData),
     status: computedStatus,
   });
 
@@ -581,7 +636,7 @@ app.post(['/api/payment/create-order', '/api/orders/create'], rateLimit(25, 6000
         templateId: templateInfo.id,
         type: resolvedDocType,
         title: resolvedTitle,
-        documentData: req.body.documentData || {},
+        documentData: sanitizeServerDocumentData(req.body.documentData || {}),
         status: 'draft',
       });
     } else {
@@ -592,7 +647,7 @@ app.post(['/api/payment/create-order', '/api/orders/create'], rateLimit(25, 6000
         templateId: templateInfo.id,
         type: normalizeDocumentType(templateInfo.documentType, templateInfo.id, docRecord.type),
         title: resolvedTitle || docRecord.title,
-        documentData: req.body.documentData || docRecord.documentData,
+        documentData: sanitizeServerDocumentData(req.body.documentData || docRecord.documentData),
         status: isPaid ? 'paid' : 'draft',
       });
     }
@@ -1182,13 +1237,15 @@ app.get('/api/documents/:id/data', async (req, res) => {
       }
     }
 
+    const sanitizedDocumentData = sanitizeServerDocumentData(doc.documentData);
+
     return res.json({
       success: true,
       documentId: doc.id,
       templateId: doc.templateId,
       type: doc.type,
       title: doc.title,
-      documentData: doc.documentData,
+      documentData: sanitizedDocumentData,
       status: doc.status,
       document: {
         id: doc.id,
@@ -1196,7 +1253,7 @@ app.get('/api/documents/:id/data', async (req, res) => {
         type: doc.type,
         templateId: doc.templateId,
         status: doc.status,
-        documentData: doc.documentData,
+        documentData: sanitizedDocumentData,
         createdAt: doc.createdAt,
         updatedAt: doc.updatedAt,
       },
