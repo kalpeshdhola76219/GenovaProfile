@@ -1,9 +1,10 @@
 import React from 'react';
 import { DocumentData } from '../../types/document';
 import { getStaticFontClass } from '../../utils/fontClassMap';
-import { getBiodataSections } from './biodataFields';
+import { getBiodataSections, sanitizeDocumentTextFields } from './biodataFields';
 
-export const PremiumRegalVelvetTemplate: React.FC<{ data: DocumentData }> = ({ data }) => {
+export const PremiumRegalVelvetTemplate: React.FC<{ data: DocumentData }> = ({ data: rawData }) => {
+  const data = sanitizeDocumentTextFields(rawData);
   const { personal, customSections, customization } = data;
   const regalEmerald = customization.primaryColor || '#064e3b';
   const royalGold = customization.secondaryColor || '#ca8a04';

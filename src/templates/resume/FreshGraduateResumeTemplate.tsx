@@ -7,12 +7,14 @@ import {
   METADATA_LEFT_STYLE,
   METADATA_RIGHT_STYLE,
   METADATA_ROW_STYLE,
+  METADATA_WIDE_RIGHT_STYLE,
   ResumeBulletItem,
   ResumeDescriptionBlock,
+  sanitizeDocumentTextFields,
 } from './resumeTemplateUtils';
 
 export const FreshGraduateResumeTemplate: React.FC<{ data: DocumentData }> = ({ data }) => {
-  const { personal, contact, summary, experience, education, skills, projects, certifications, achievements, customSections, customization } = data;
+  const { personal, contact, summary, experience, education, skills, projects, certifications, achievements, customSections, customization } = sanitizeDocumentTextFields(data);
   const primary = customization.primaryColor || '#1d4ed8'; // Royal Blue
 
   return (
@@ -57,7 +59,7 @@ export const FreshGraduateResumeTemplate: React.FC<{ data: DocumentData }> = ({ 
           <div className="space-y-2 text-xs">
             {education.map((e) => (
               <div key={e.id} data-entry>
-                <div className="flex justify-between items-baseline font-bold text-slate-900" style={METADATA_ROW_STYLE}>
+                <div className="font-bold text-slate-900" style={METADATA_ROW_STYLE}>
                   <span style={METADATA_LEFT_STYLE}>{e.degree} &bull; {e.institute}{e.score ? ` • ${/^[0-9./\s]+$/.test(e.score.trim()) ? `GPA: ${e.score.trim()}` : e.score.trim()}` : ''}</span>
                   <span className="text-slate-500 font-normal" style={METADATA_RIGHT_STYLE}>{e.endYear}</span>
                 </div>
@@ -77,9 +79,9 @@ export const FreshGraduateResumeTemplate: React.FC<{ data: DocumentData }> = ({ 
           <div className="space-y-2 text-xs">
             {projects.map((p) => (
               <div key={p.id} data-entry>
-                <div className="flex justify-between items-baseline font-bold" style={METADATA_ROW_STYLE}>
+                <div className="font-bold" style={METADATA_ROW_STYLE}>
                   <span style={METADATA_LEFT_STYLE}>{p.name}</span>
-                  {p.link && <span className="text-blue-700 font-normal" style={METADATA_RIGHT_STYLE}>{p.link}</span>}
+                  {p.link && <span className="text-blue-700 font-normal" style={METADATA_WIDE_RIGHT_STYLE}>{p.link}</span>}
                 </div>
                 {p.technologies && <div className="text-[11px] text-slate-500 italic">Tools: {p.technologies}</div>}
                 <p className="text-slate-700 mt-0.5">{p.description}</p>
@@ -114,7 +116,7 @@ export const FreshGraduateResumeTemplate: React.FC<{ data: DocumentData }> = ({ 
           <div className="space-y-2 text-xs">
             {experience.map((exp) => (
               <div key={exp.id} data-entry>
-                <div className="flex justify-between items-baseline font-bold" style={METADATA_ROW_STYLE}>
+                <div className="font-bold" style={METADATA_ROW_STYLE}>
                   <span style={METADATA_LEFT_STYLE}>{exp.jobTitle} at {exp.company}</span>
                   <span className="text-slate-500 font-normal" style={METADATA_RIGHT_STYLE}>{exp.startDate} - {(exp.currentlyWorking && (!exp.endDate || exp.endDate.trim().toLowerCase() === 'present')) ? 'Present' : (exp.endDate || 'Present')}</span>
                 </div>

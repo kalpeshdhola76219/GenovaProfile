@@ -1,8 +1,18 @@
 import React from 'react';
 import { DocumentData } from '../../types/document';
-import { getBiodataSections } from './biodataFields';
+import {
+  BIODATA_HEADER_LEFT_STYLE,
+  BIODATA_HEADER_RIGHT_STYLE,
+  BIODATA_HEADER_ROW_STYLE,
+  BIODATA_LEFT_STYLE,
+  BIODATA_RIGHT_STYLE,
+  BIODATA_ROW_STYLE,
+  getBiodataSections,
+  sanitizeDocumentTextFields,
+} from './biodataFields';
 
-export const MinimalProfessionalBiodataTemplate: React.FC<{ data: DocumentData }> = ({ data }) => {
+export const MinimalProfessionalBiodataTemplate: React.FC<{ data: DocumentData }> = ({ data: rawData }) => {
+  const data = sanitizeDocumentTextFields(rawData);
   const { personal, customSections, customization } = data;
   const sections = getBiodataSections(data);
 
@@ -13,8 +23,8 @@ export const MinimalProfessionalBiodataTemplate: React.FC<{ data: DocumentData }
         fontSize: customization.fontSize === 'sm' ? '13px' : customization.fontSize === 'lg' ? '16px' : '14px',
       }}
     >
-      <div className="flex justify-between items-start border-b-2 border-slate-900 pb-4 mb-6">
-        <div>
+      <div className="border-b-2 border-slate-900 pb-4 mb-6" style={BIODATA_HEADER_ROW_STYLE}>
+        <div style={BIODATA_HEADER_LEFT_STYLE}>
           <span className="text-[11px] font-bold tracking-widest uppercase text-blue-600">Matrimonial Profile</span>
           <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 mt-0.5 font-matrimonial-heading">
             {personal.fullName || 'Full Name'}
@@ -24,13 +34,15 @@ export const MinimalProfessionalBiodataTemplate: React.FC<{ data: DocumentData }
           )}
         </div>
         {customization.showPhoto !== false && personal.profilePhoto && (
-          <img
-            src={personal.profilePhoto}
-            alt={personal.fullName}
-            crossOrigin="anonymous"
-            referrerPolicy="no-referrer"
-            className="w-24 h-28 object-cover object-top rounded-lg shadow-sm border border-slate-200"
-          />
+          <div style={{ ...BIODATA_HEADER_RIGHT_STYLE, width: '104px' }}>
+            <img
+              src={personal.profilePhoto}
+              alt={personal.fullName}
+              crossOrigin="anonymous"
+              referrerPolicy="no-referrer"
+              className="w-24 h-28 object-cover object-top rounded-lg shadow-sm border border-slate-200 inline-block"
+            />
+          </div>
         )}
       </div>
 
@@ -43,9 +55,9 @@ export const MinimalProfessionalBiodataTemplate: React.FC<{ data: DocumentData }
               </h2>
               <div className="space-y-1.5 text-xs">
                 {sections.personal.map((item) => (
-                  <div key={item.key} className="flex justify-between gap-2">
-                    <span className="text-slate-500 shrink-0">{item.label}:</span>
-                    <span className="font-semibold text-slate-900 text-right">{item.value}</span>
+                  <div key={item.key} style={BIODATA_ROW_STYLE}>
+                    <span className="text-slate-500" style={{ ...BIODATA_LEFT_STYLE, width: '44%' }}>{item.label}:</span>
+                    <span className="font-semibold text-slate-900" style={{ ...BIODATA_RIGHT_STYLE, width: '56%' }}>{item.value}</span>
                   </div>
                 ))}
               </div>
@@ -59,9 +71,9 @@ export const MinimalProfessionalBiodataTemplate: React.FC<{ data: DocumentData }
               </h2>
               <div className="space-y-1.5 text-xs">
                 {sections.astrology.map((item) => (
-                  <div key={item.key} className="flex justify-between gap-2">
-                    <span className="text-slate-500 shrink-0">{item.label}:</span>
-                    <span className="font-semibold text-slate-900 text-right">{item.value}</span>
+                  <div key={item.key} style={BIODATA_ROW_STYLE}>
+                    <span className="text-slate-500" style={{ ...BIODATA_LEFT_STYLE, width: '44%' }}>{item.label}:</span>
+                    <span className="font-semibold text-slate-900" style={{ ...BIODATA_RIGHT_STYLE, width: '56%' }}>{item.value}</span>
                   </div>
                 ))}
               </div>

@@ -1,5 +1,47 @@
+import React from 'react';
 import { DocumentData } from '../../types/document';
-import { sanitizeText } from '../../utils/textSanitizer';
+import { sanitizeDocumentTextFields, sanitizeText } from '../../utils/textSanitizer';
+
+export { sanitizeDocumentTextFields, sanitizeText };
+
+export const BIODATA_HEADER_ROW_STYLE: React.CSSProperties = {
+  display: 'table',
+  width: '100%',
+  borderCollapse: 'collapse',
+};
+
+export const BIODATA_HEADER_LEFT_STYLE: React.CSSProperties = {
+  display: 'table-cell',
+  verticalAlign: 'top',
+  textAlign: 'left',
+  paddingRight: '16px',
+};
+
+export const BIODATA_HEADER_RIGHT_STYLE: React.CSSProperties = {
+  display: 'table-cell',
+  verticalAlign: 'top',
+  textAlign: 'right',
+};
+
+export const BIODATA_ROW_STYLE: React.CSSProperties = {
+  display: 'table',
+  width: '100%',
+  tableLayout: 'fixed',
+  borderCollapse: 'collapse',
+};
+
+export const BIODATA_LEFT_STYLE: React.CSSProperties = {
+  display: 'table-cell',
+  verticalAlign: 'top',
+  textAlign: 'left',
+  paddingRight: '12px',
+};
+
+export const BIODATA_RIGHT_STYLE: React.CSSProperties = {
+  display: 'table-cell',
+  verticalAlign: 'top',
+  textAlign: 'right',
+};
 
 /**
  * Maximum character limits for matrimonial biodata fields to prevent layout overflows
@@ -128,7 +170,8 @@ function addField(
  * Automatically computes age from date of birth when age is empty.
  * Skips empty fields and formats multi-item fields cleanly.
  */
-export function getBiodataSections(data: DocumentData): BiodataSections {
+export function getBiodataSections(rawData: DocumentData): BiodataSections {
+  const data = sanitizeDocumentTextFields(rawData);
   const personalData = data?.personal || ({} as DocumentData['personal']);
   const familyData = data?.family || ({} as DocumentData['family']);
   const marriageData = data?.marriage || ({} as DocumentData['marriage']);

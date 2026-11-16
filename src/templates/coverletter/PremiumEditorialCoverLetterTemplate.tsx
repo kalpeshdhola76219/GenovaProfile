@@ -2,12 +2,16 @@ import React from 'react';
 import { DocumentData } from '../../types/document';
 import { mapCoverLetterData, MappedCoverLetterData } from '../../utils/mapCoverLetterData';
 import {
+  CL_METADATA_LEFT_STYLE,
+  CL_METADATA_RIGHT_STYLE,
+  CL_METADATA_ROW_STYLE,
   CoverLetterBodyBlocks,
   CoverLetterClosingBlock,
   CoverLetterContactBar,
   CoverLetterDetailsBlock,
   CoverLetterSampleText,
   getCoverLetterSheetTypography,
+  sanitizeDocumentTextFields,
   shouldShowCoverLetterSlot,
   useCoverLetterPreviewMode,
 } from './CoverLetterTemplateHelpers';
@@ -15,7 +19,8 @@ import {
 export const PremiumEditorialCoverLetterTemplate: React.FC<{
   data: DocumentData;
   mapped?: MappedCoverLetterData;
-}> = ({ data, mapped: propMapped }) => {
+}> = ({ data: rawData, mapped: propMapped }) => {
+  const data = sanitizeDocumentTextFields(rawData);
   const mapped = propMapped || mapCoverLetterData(data);
   const { isExportMode, previewMode } = useCoverLetterPreviewMode();
   const primaryColor = data.customization?.primaryColor || '#292524';
@@ -116,8 +121,8 @@ export const PremiumEditorialCoverLetterTemplate: React.FC<{
 
       {/* Date & Recipient */}
       {(showRecipient || mapped.date) && (
-        <div className="cl-recipient-block flex items-start justify-between gap-6 mb-6 font-sans cl-meta">
-          <div className="text-stone-800 space-y-0.5 break-words flex-1">
+        <div className="cl-recipient-block mb-6 font-sans cl-meta" style={CL_METADATA_ROW_STYLE}>
+          <div className="text-stone-800 space-y-0.5 break-words" style={CL_METADATA_LEFT_STYLE}>
             {showRecipient && (
               <>
                 {showHmName && (
@@ -158,7 +163,7 @@ export const PremiumEditorialCoverLetterTemplate: React.FC<{
           </div>
 
           {mapped.date && (
-            <div className="text-right font-medium text-stone-500 shrink-0">
+            <div className="text-right font-medium text-stone-500" style={CL_METADATA_RIGHT_STYLE}>
               <div>{mapped.date}</div>
               {mapped.recipient.jobReferenceId && (
                 <div className="cl-meta text-stone-500 mt-0.5">

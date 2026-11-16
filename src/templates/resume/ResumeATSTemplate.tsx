@@ -6,6 +6,7 @@ import {
   METADATA_ROW_STYLE,
   METADATA_LEFT_STYLE,
   METADATA_RIGHT_STYLE,
+  METADATA_WIDE_RIGHT_STYLE,
   CONTACT_ROW_STYLE,
   ResumeDescriptionBlock,
   sanitizeDocumentTextFields,
@@ -115,7 +116,7 @@ export const ResumeATSTemplate: React.FC<{ data: DocumentData }> = ({ data }) =>
           <div className="space-y-3">
             {experience.map((exp, idx) => (
               <div key={exp.id || idx} data-entry="true">
-                <div className="flex justify-between items-baseline text-xs" style={METADATA_ROW_STYLE}>
+                <div className="text-xs" style={METADATA_ROW_STYLE}>
                   <span className="font-bold text-slate-900" style={METADATA_LEFT_STYLE}>{exp.jobTitle || 'Role'}</span>
                   <span className="text-slate-500 font-medium" style={METADATA_RIGHT_STYLE}>
                     {exp.startDate || ''} –{' '}
@@ -124,7 +125,7 @@ export const ResumeATSTemplate: React.FC<{ data: DocumentData }> = ({ data }) =>
                       : exp.endDate || 'Present'}
                   </span>
                 </div>
-                <div className="flex justify-between text-xs text-slate-600 italic" style={METADATA_ROW_STYLE}>
+                <div className="text-xs text-slate-600 italic" style={METADATA_ROW_STYLE}>
                   <span style={METADATA_LEFT_STYLE}>{exp.company}{exp.location ? ` • ${exp.location}` : ''}</span>
                 </div>
                 <ResumeDescriptionBlock
@@ -156,13 +157,13 @@ export const ResumeATSTemplate: React.FC<{ data: DocumentData }> = ({ data }) =>
           <div className="space-y-2">
             {education.map((edu, idx) => (
               <div key={edu.id || idx} data-entry="true" className="text-xs">
-                <div className="flex justify-between font-bold text-slate-900" style={METADATA_ROW_STYLE}>
+                <div className="font-bold text-slate-900" style={METADATA_ROW_STYLE}>
                   <span style={METADATA_LEFT_STYLE}>{edu.degree}</span>
                   <span className="text-slate-500 font-normal" style={METADATA_RIGHT_STYLE}>
                     {edu.startYear || ''}{edu.startYear && edu.endYear ? ' – ' : ''}{edu.endYear || ''}
                   </span>
                 </div>
-                <div className="text-slate-600 flex justify-between" style={METADATA_ROW_STYLE}>
+                <div className="text-slate-600" style={METADATA_ROW_STYLE}>
                   <span style={METADATA_LEFT_STYLE}>
                     {[edu.institute, edu.location].filter(Boolean).join(', ')}
                     {edu.score ? ` • ${/^[0-9./\s]+$/.test(edu.score.trim()) ? `GPA: ${edu.score.trim()}` : edu.score.trim()}` : ''}
@@ -208,7 +209,7 @@ export const ResumeATSTemplate: React.FC<{ data: DocumentData }> = ({ data }) =>
           <div className="space-y-2">
             {projects.map((proj, idx) => (
               <div key={proj.id || idx} data-entry="true" className="text-xs">
-                <div className="flex justify-between font-bold text-slate-900" style={METADATA_ROW_STYLE}>
+                <div className="font-bold text-slate-900" style={METADATA_ROW_STYLE}>
                   <span style={METADATA_LEFT_STYLE}>{proj.name}</span>
                   {proj.link && (
                     <a
@@ -243,7 +244,7 @@ export const ResumeATSTemplate: React.FC<{ data: DocumentData }> = ({ data }) =>
           </h2>
           <div className="space-y-1 text-xs">
             {certifications.map((cert, idx) => (
-              <div key={cert.id || idx} className="flex justify-between" style={METADATA_ROW_STYLE}>
+              <div key={cert.id || idx} style={METADATA_ROW_STYLE}>
                 <span className="font-semibold text-slate-800" style={METADATA_LEFT_STYLE}>
                   {cert.name} {cert.issuer ? `— ${cert.issuer}` : ''}
                 </span>
@@ -268,9 +269,9 @@ export const ResumeATSTemplate: React.FC<{ data: DocumentData }> = ({ data }) =>
               {sec.items && sec.items.length > 0 ? (
                 <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
                   {sec.items.map((i) => (
-                    <div key={i.id} className="flex justify-between items-baseline py-0.5 border-b border-slate-100" style={METADATA_ROW_STYLE}>
+                    <div key={i.id} className="py-0.5 border-b border-slate-100" style={METADATA_ROW_STYLE}>
                       <span className="text-slate-500 font-medium" style={METADATA_LEFT_STYLE}>{i.key}:</span>
-                      <span className="font-semibold text-slate-900" style={METADATA_RIGHT_STYLE}>{i.value}</span>
+                      <span className="font-semibold text-slate-900" style={METADATA_WIDE_RIGHT_STYLE}>{i.value}</span>
                     </div>
                   ))}
                 </div>

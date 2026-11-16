@@ -2,14 +2,19 @@ import React from 'react';
 import { DocumentData } from '../../types/document';
 import { getStaticFontClass, getFontFamilyCss, FONT_FAMILY_CSS_MAP } from '../../utils/fontClassMap';
 import {
+  HEADER_LEFT_STYLE,
+  HEADER_RIGHT_STYLE,
+  HEADER_ROW_STYLE,
   METADATA_ROW_STYLE,
   METADATA_LEFT_STYLE,
   METADATA_RIGHT_STYLE,
+  METADATA_WIDE_RIGHT_STYLE,
   ResumeDescriptionBlock,
+  sanitizeDocumentTextFields,
 } from './resumeTemplateUtils';
 
 export const PremiumMinimalExecutiveResumeTemplate: React.FC<{ data: DocumentData }> = ({ data }) => {
-  const { personal, contact, summary, experience, education, skills, projects, certifications, achievements, customSections, customization } = data;
+  const { personal, contact, summary, experience, education, skills, projects, certifications, achievements, customSections, customization } = sanitizeDocumentTextFields(data);
   const primary = customization.primaryColor || '#0f172a'; // Deep Executive Slate
   const fontClass = getStaticFontClass(customization.fontFamily, 'cormorant');
   const fontFamilyCss = getFontFamilyCss(customization.fontFamily, 'cormorant');
@@ -34,8 +39,8 @@ export const PremiumMinimalExecutiveResumeTemplate: React.FC<{ data: DocumentDat
       style={{ fontFamily: FONT_FAMILY_CSS_MAP.sans }}
     >
       <div className="border-b-2 pb-5 mb-6" style={{ borderColor: primary }}>
-        <div className="flex justify-between items-start" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', columnGap: '16px' }}>
-          <div style={METADATA_LEFT_STYLE}>
+        <div style={HEADER_ROW_STYLE}>
+          <div style={HEADER_LEFT_STYLE}>
             <h1 className={`text-3xl font-extrabold uppercase tracking-wider text-slate-950 ${fontClass}`} style={{ fontFamily: fontFamilyCss }}>
               {displayFullName || 'FULL NAME'}
             </h1>
@@ -45,7 +50,7 @@ export const PremiumMinimalExecutiveResumeTemplate: React.FC<{ data: DocumentDat
               </p>
             )}
           </div>
-          <div className="text-right text-xs text-slate-600 space-y-0.5 font-sans no-justify" style={{ flexShrink: 0 }}>
+          <div className="text-right text-xs text-slate-600 space-y-0.5 font-sans no-justify" style={HEADER_RIGHT_STYLE}>
             {displayEmail && <div>{displayEmail}</div>}
             {displayPhone && <div>{displayPhone}</div>}
             {displayLocation && <div>{displayLocation}</div>}
@@ -87,7 +92,7 @@ export const PremiumMinimalExecutiveResumeTemplate: React.FC<{ data: DocumentDat
           <div className="space-y-4 font-sans">
             {displayExperience.map((exp) => (
               <div key={exp.id} data-entry="true">
-                <div className="flex justify-between items-baseline" style={METADATA_ROW_STYLE}>
+                <div style={METADATA_ROW_STYLE}>
                   <span className="font-bold text-sm text-slate-950" style={METADATA_LEFT_STYLE}>
                     {exp.jobTitle} {exp.company ? <><span className="font-normal text-slate-500">|</span> <span className="font-semibold text-slate-700">{exp.company}</span></> : ''}
                   </span>
@@ -125,9 +130,9 @@ export const PremiumMinimalExecutiveResumeTemplate: React.FC<{ data: DocumentDat
           <div className="space-y-3">
             {projects.map((p) => (
               <div key={p.id} data-entry="true" className="text-xs">
-                <div className="flex justify-between items-baseline" style={METADATA_ROW_STYLE}>
+                <div style={METADATA_ROW_STYLE}>
                   <span className="font-bold text-slate-900" style={METADATA_LEFT_STYLE}>{p.name} {p.role ? `(${p.role})` : ''}</span>
-                  {p.link && <span className="text-slate-500 font-normal text-[11px]" style={METADATA_RIGHT_STYLE}>{p.link}</span>}
+                  {p.link && <span className="text-slate-500 font-normal text-[11px]" style={METADATA_WIDE_RIGHT_STYLE}>{p.link}</span>}
                 </div>
                 {p.technologies && <div className="text-[11px] text-slate-500 font-medium">Scope & Tools: {p.technologies}</div>}
                 {p.description && <p className="text-slate-700 mt-0.5 leading-relaxed">{p.description}</p>}

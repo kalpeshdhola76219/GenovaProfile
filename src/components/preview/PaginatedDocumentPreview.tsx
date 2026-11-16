@@ -263,6 +263,7 @@ const MultiPagePaginatedDocumentPreview: React.FC<PaginatedDocumentPreviewProps>
               >
                 {/* Content Viewport Window */}
                 <div
+                  data-page-viewport="true"
                   style={{
                     position: 'relative',
                     overflow: 'hidden',
@@ -278,6 +279,7 @@ const MultiPagePaginatedDocumentPreview: React.FC<PaginatedDocumentPreviewProps>
                   }}
                 >
                   <div
+                    data-page-flow="true"
                     style={{
                       position: 'relative',
                       transform: idx > 0 ? `translateY(-${page.startY}px)` : 'none',

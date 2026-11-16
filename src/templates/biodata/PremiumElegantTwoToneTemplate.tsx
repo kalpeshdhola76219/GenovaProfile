@@ -1,9 +1,16 @@
 import React from 'react';
 import { DocumentData } from '../../types/document';
 import { getStaticFontClass } from '../../utils/fontClassMap';
-import { getBiodataSections } from './biodataFields';
+import {
+  BIODATA_LEFT_STYLE,
+  BIODATA_RIGHT_STYLE,
+  BIODATA_ROW_STYLE,
+  getBiodataSections,
+  sanitizeDocumentTextFields,
+} from './biodataFields';
 
-export const PremiumElegantTwoToneTemplate: React.FC<{ data: DocumentData }> = ({ data }) => {
+export const PremiumElegantTwoToneTemplate: React.FC<{ data: DocumentData }> = ({ data: rawData }) => {
+  const data = sanitizeDocumentTextFields(rawData);
   const { personal, customSections, customization } = data;
   const sapphireNavy = customization.primaryColor || '#0f172a';
   const champagneGold = customization.secondaryColor || '#d97706';
@@ -63,9 +70,9 @@ export const PremiumElegantTwoToneTemplate: React.FC<{ data: DocumentData }> = (
               </h3>
               <div className="space-y-1.5 text-xs text-stone-200">
                 {sections.personal.map((item) => (
-                  <div key={item.key} className="flex justify-between gap-2">
-                    <span className="text-stone-300">{item.label}:</span>
-                    <strong className="text-white text-right">{item.value}</strong>
+                  <div key={item.key} style={BIODATA_ROW_STYLE}>
+                    <span className="text-stone-300" style={{ ...BIODATA_LEFT_STYLE, width: '44%' }}>{item.label}:</span>
+                    <strong className="text-white" style={{ ...BIODATA_RIGHT_STYLE, width: '56%' }}>{item.value}</strong>
                   </div>
                 ))}
               </div>
@@ -79,9 +86,9 @@ export const PremiumElegantTwoToneTemplate: React.FC<{ data: DocumentData }> = (
               </h3>
               <div className="space-y-1.5 text-xs text-stone-200">
                 {sections.astrology.map((item) => (
-                  <div key={item.key} className="flex justify-between gap-2">
-                    <span className="text-stone-300">{item.label}:</span>
-                    <strong className="text-white text-right">{item.value}</strong>
+                  <div key={item.key} style={BIODATA_ROW_STYLE}>
+                    <span className="text-stone-300" style={{ ...BIODATA_LEFT_STYLE, width: '44%' }}>{item.label}:</span>
+                    <strong className="text-white" style={{ ...BIODATA_RIGHT_STYLE, width: '56%' }}>{item.value}</strong>
                   </div>
                 ))}
               </div>

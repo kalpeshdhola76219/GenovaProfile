@@ -17,9 +17,16 @@ import {
   CornerFiligreeVector,
   DiyaLampVector,
 } from './decorativeAssets';
-import { getBiodataSections } from './biodataFields';
+import {
+  BIODATA_HEADER_LEFT_STYLE,
+  BIODATA_HEADER_RIGHT_STYLE,
+  BIODATA_HEADER_ROW_STYLE,
+  getBiodataSections,
+  sanitizeDocumentTextFields,
+} from './biodataFields';
 
-export const RoyalHinduBiodataTemplate: React.FC<{ data: DocumentData }> = ({ data }) => {
+export const RoyalHinduBiodataTemplate: React.FC<{ data: DocumentData }> = ({ data: rawData }) => {
+  const data = sanitizeDocumentTextFields(rawData);
   const sections = getBiodataSections(data);
   const { personal, customization } = data;
 
@@ -90,43 +97,45 @@ export const RoyalHinduBiodataTemplate: React.FC<{ data: DocumentData }> = ({ da
       </div>
 
       {/* Top Header Section */}
-      <div className="relative z-10 flex items-center justify-between mb-3 px-2">
+      <div className="relative z-10 mb-3 px-2" style={BIODATA_HEADER_ROW_STYLE}>
         {/* Left Side: Circular Photo with Concentric Rings */}
         {customization.showPhoto !== false && (
-          <div className="relative shrink-0 w-32 h-32 mr-4">
-            {personal.profilePhoto ? (
-              <div className="relative w-full h-full flex items-center justify-center">
-                <div
-                  className="absolute inset-0 rounded-full border-2"
-                  style={{ borderColor: gold }}
-                />
-                <div
-                  className="absolute inset-1.5 rounded-full border"
-                  style={{ borderColor: `${gold}66` }}
-                />
-                <div className="w-28 h-28 rounded-full overflow-hidden shadow-md bg-amber-50">
-                  <img
-                    src={personal.profilePhoto}
-                    alt={personal.fullName || 'Candidate'}
-                    crossOrigin="anonymous"
-                    referrerPolicy="no-referrer"
-                    className="w-full h-full object-cover object-top"
+          <div style={{ ...BIODATA_HEADER_LEFT_STYLE, verticalAlign: 'middle', width: '144px', paddingRight: '16px' }}>
+            <div className="relative w-32 h-32">
+              {personal.profilePhoto ? (
+                <div className="relative w-full h-full flex items-center justify-center">
+                  <div
+                    className="absolute inset-0 rounded-full border-2"
+                    style={{ borderColor: gold }}
                   />
+                  <div
+                    className="absolute inset-1.5 rounded-full border"
+                    style={{ borderColor: `${gold}66` }}
+                  />
+                  <div className="w-28 h-28 rounded-full overflow-hidden shadow-md bg-amber-50">
+                    <img
+                      src={personal.profilePhoto}
+                      alt={personal.fullName || 'Candidate'}
+                      crossOrigin="anonymous"
+                      referrerPolicy="no-referrer"
+                      className="w-full h-full object-cover object-top"
+                    />
+                  </div>
                 </div>
-              </div>
-            ) : (
-              <div
-                className="w-28 h-28 rounded-full border-2 border-dashed flex items-center justify-center text-amber-700 bg-amber-50"
-                style={{ borderColor: gold }}
-              >
-                <User size={32} />
-              </div>
-            )}
+              ) : (
+                <div
+                  className="w-28 h-28 rounded-full border-2 border-dashed flex items-center justify-center text-amber-700 bg-amber-50"
+                  style={{ borderColor: gold }}
+                >
+                  <User size={32} />
+                </div>
+              )}
+            </div>
           </div>
         )}
 
         {/* Right Side: Royal Hindu Title */}
-        <div className="flex-1 text-center pr-4">
+        <div className="text-center pr-4" style={{ display: 'table-cell', verticalAlign: 'middle' }}>
           <div className="flex justify-center mb-0.5">
             <LotusVector size={32} color={gold} />
           </div>
@@ -357,16 +366,19 @@ export const RoyalHinduBiodataTemplate: React.FC<{ data: DocumentData }> = ({ da
 
       {/* Bottom Footer Section: Ganesha + Sacred Om + Blessing Note */}
       <div
-        className="relative z-10 rounded-lg p-2.5 flex items-center justify-between border mt-auto"
+        className="relative z-10 rounded-lg p-2.5 border mt-auto"
         style={{
+          ...BIODATA_HEADER_ROW_STYLE,
           backgroundColor: '#faede1',
           borderColor: `${gold}55`,
         }}
       >
-        <div className="w-12 h-12 flex items-center justify-center">
-          <GaneshaVector size={38} color={maroon} variant="line" />
+        <div style={{ display: 'table-cell', verticalAlign: 'middle', width: '48px', textAlign: 'center' }}>
+          <div className="w-12 h-12 flex items-center justify-center">
+            <GaneshaVector size={38} color={maroon} variant="line" />
+          </div>
         </div>
-        <div className="text-center px-4">
+        <div className="text-center px-4" style={{ display: 'table-cell', verticalAlign: 'middle' }}>
           <p className="text-[11px] font-semibold text-zinc-800 font-serif">
             Thank you for visiting my profile.
           </p>
@@ -379,8 +391,10 @@ export const RoyalHinduBiodataTemplate: React.FC<{ data: DocumentData }> = ({ da
             <span className="text-xs text-amber-600">卐</span>
           </div>
         </div>
-        <div className="w-12 h-12 flex items-center justify-center">
-          <OmLotusVector size={38} color={maroon} />
+        <div style={{ ...BIODATA_HEADER_RIGHT_STYLE, verticalAlign: 'middle', width: '48px', textAlign: 'center' }}>
+          <div className="w-12 h-12 flex items-center justify-center">
+            <OmLotusVector size={38} color={maroon} />
+          </div>
         </div>
       </div>
     </div>

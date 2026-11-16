@@ -3,6 +3,9 @@ import { DocumentData } from '../../types/document';
 import { FONT_FAMILY_CSS_MAP } from '../../utils/fontClassMap';
 import {
   BULLET_LIST_STYLE,
+  HEADER_LEFT_STYLE,
+  HEADER_RIGHT_STYLE,
+  HEADER_ROW_STYLE,
   METADATA_LEFT_STYLE,
   METADATA_RIGHT_STYLE,
   METADATA_ROW_STYLE,
@@ -22,8 +25,8 @@ export const CleanResumeTemplate: React.FC<{ data: DocumentData }> = ({ data }) 
         fontSize: customization.fontSize === 'sm' ? '12px' : customization.fontSize === 'lg' ? '15px' : '13px',
       }}
     >
-      <div className="flex justify-between items-start border-b pb-4 mb-5 border-slate-200" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', width: '100%', gap: '16px', columnGap: '16px' }}>
-        <div style={METADATA_LEFT_STYLE}>
+      <div className="border-b pb-4 mb-5 border-slate-200" style={HEADER_ROW_STYLE}>
+        <div style={HEADER_LEFT_STYLE}>
           <h1 className="text-2xl font-bold tracking-tight text-slate-900">
             {personal.fullName || 'Full Name'}
           </h1>
@@ -31,7 +34,7 @@ export const CleanResumeTemplate: React.FC<{ data: DocumentData }> = ({ data }) 
             {personal.professionalTitle || 'Software Engineer'}
           </p>
         </div>
-        <div className="text-right text-xs text-slate-500 no-justify" style={{ flexShrink: 0 }}>
+        <div className="text-right text-xs text-slate-500 no-justify" style={HEADER_RIGHT_STYLE}>
           <div>{contact.email} {contact.phone ? `• ${contact.phone}` : ''}</div>
           <div>{[contact.city, contact.state, contact.country].filter(Boolean).join(', ')} {contact.linkedin ? `• ${contact.linkedin}` : ''} {(contact.portfolio || contact.website) ? `• ${contact.portfolio || contact.website}` : ''}</div>
         </div>
@@ -51,7 +54,7 @@ export const CleanResumeTemplate: React.FC<{ data: DocumentData }> = ({ data }) 
           <div className="space-y-3">
             {experience.map((exp) => (
               <div key={exp.id} data-entry>
-                <div className="flex justify-between items-baseline text-xs" style={METADATA_ROW_STYLE}>
+                <div className="text-xs" style={METADATA_ROW_STYLE}>
                   <span className="font-bold text-slate-900" style={METADATA_LEFT_STYLE}>{exp.jobTitle}, {exp.company}</span>
                   <span className="text-slate-500 text-[11px]" style={METADATA_RIGHT_STYLE}>{exp.startDate} - {(exp.currentlyWorking && (!exp.endDate || exp.endDate.trim().toLowerCase() === 'present')) ? 'Present' : (exp.endDate || 'Present')}</span>
                 </div>
@@ -108,7 +111,7 @@ export const CleanResumeTemplate: React.FC<{ data: DocumentData }> = ({ data }) 
           <div className="space-y-1.5 text-xs">
             {projects.map((p) => (
               <div key={p.id} data-entry>
-                <div className="flex justify-between items-baseline font-bold" style={METADATA_ROW_STYLE}>
+                <div className="font-bold" style={METADATA_ROW_STYLE}>
                   <span style={METADATA_LEFT_STYLE}>{p.name}</span>
                   {p.link && <span className="font-normal text-slate-500" style={METADATA_RIGHT_STYLE}>{p.link}</span>}
                 </div>

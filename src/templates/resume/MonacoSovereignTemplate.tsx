@@ -2,10 +2,15 @@ import React from 'react';
 import { DocumentData } from '../../types/document';
 import { FONT_FAMILY_CSS_MAP } from '../../utils/fontClassMap';
 import {
+  HEADER_LEFT_STYLE,
+  HEADER_RIGHT_STYLE,
+  HEADER_ROW_STYLE,
   METADATA_ROW_STYLE,
   METADATA_LEFT_STYLE,
   METADATA_RIGHT_STYLE,
+  METADATA_WIDE_RIGHT_STYLE,
   ResumeDescriptionBlock,
+  sanitizeDocumentTextFields,
 } from './resumeTemplateUtils';
 
 export const MonacoSovereignTemplate: React.FC<{ data: DocumentData }> = ({ data }) => {
@@ -22,7 +27,7 @@ export const MonacoSovereignTemplate: React.FC<{ data: DocumentData }> = ({ data
     customization,
     executiveMetrics,
     showExecutiveMetrics,
-  } = data;
+  } = sanitizeDocumentTextFields(data);
   const primary = customization.primaryColor || '#0a0a0c'; // Sovereign Obsidian
   const gold = customization.accentColor || '#c5a059';    // Monaco Champagne Gold
 
@@ -49,8 +54,8 @@ export const MonacoSovereignTemplate: React.FC<{ data: DocumentData }> = ({ data
       <div className="h-1 w-full bg-gradient-to-r from-transparent via-[#c5a059] to-transparent mb-6"></div>
 
       {/* Hero Header */}
-      <div className="flex justify-between items-start border-b border-slate-200/80 pb-6 mb-6" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', columnGap: '16px' }}>
-        <div style={METADATA_LEFT_STYLE}>
+      <div className="border-b border-slate-200/80 pb-6 mb-6" style={HEADER_ROW_STYLE}>
+        <div style={HEADER_LEFT_STYLE}>
           <span className="text-[10px] uppercase tracking-[0.25em] font-extrabold text-[#c5a059] block mb-1">
             Global Leadership Dossier
           </span>
@@ -63,7 +68,7 @@ export const MonacoSovereignTemplate: React.FC<{ data: DocumentData }> = ({ data
         </div>
 
         {/* Global Coordinates */}
-        <div className="text-right text-xs text-slate-500 space-y-1 shrink-0 font-sans no-justify">
+        <div className="text-right text-xs text-slate-500 space-y-1 font-sans no-justify" style={HEADER_RIGHT_STYLE}>
           {contact.email && <div className="font-medium text-slate-800">{contact.email}</div>}
           {contact.phone && <div>{contact.phone}</div>}
           <div>
@@ -112,14 +117,16 @@ export const MonacoSovereignTemplate: React.FC<{ data: DocumentData }> = ({ data
         <div className="col-span-8 space-y-6">
           {experience.length > 0 && (
             <div>
-              <h2 className="text-xs font-black uppercase tracking-[0.18em] border-b border-slate-200 pb-1.5 mb-3 flex items-center justify-between" style={{ color: primary }}>
-                <span>Executive Experience</span>
-                <span className="w-1.5 h-1.5 rounded-full bg-[#c5a059]"></span>
+              <h2 className="text-xs font-black uppercase tracking-[0.18em] border-b border-slate-200 pb-1.5 mb-3" style={{ ...HEADER_ROW_STYLE, color: primary }}>
+                <span style={HEADER_LEFT_STYLE}>Executive Experience</span>
+                <span style={{ ...HEADER_RIGHT_STYLE, verticalAlign: 'middle' }}>
+                  <span className="inline-block w-1.5 h-1.5 rounded-full bg-[#c5a059]"></span>
+                </span>
               </h2>
               <div className="space-y-4">
                 {experience.map((exp) => (
                   <div key={exp.id} data-entry="true" className="relative pl-3 border-l border-slate-200 avoid-break">
-                    <div className="flex justify-between items-baseline" style={METADATA_ROW_STYLE}>
+                    <div style={METADATA_ROW_STYLE}>
                       <span className="font-extrabold text-slate-900 text-xs" style={METADATA_LEFT_STYLE}>{exp.jobTitle}</span>
                       <span className="text-[10px] font-semibold text-slate-400 font-mono" style={METADATA_RIGHT_STYLE}>
                         {exp.startDate} &ndash; {(exp.currentlyWorking && (!exp.endDate || exp.endDate.trim().toLowerCase() === 'present')) ? 'Present' : (exp.endDate || 'Present')}
@@ -153,16 +160,18 @@ export const MonacoSovereignTemplate: React.FC<{ data: DocumentData }> = ({ data
           {/* Strategic Projects / Engagements */}
           {projects.length > 0 && (
             <div className="avoid-break">
-              <h2 className="text-xs font-black uppercase tracking-[0.18em] border-b border-slate-200 pb-1.5 mb-3 flex items-center justify-between" style={{ color: primary }}>
-                <span>Key Engagements & Board Advisory</span>
-                <span className="w-1.5 h-1.5 rounded-full bg-[#c5a059]"></span>
+              <h2 className="text-xs font-black uppercase tracking-[0.18em] border-b border-slate-200 pb-1.5 mb-3" style={{ ...HEADER_ROW_STYLE, color: primary }}>
+                <span style={HEADER_LEFT_STYLE}>Key Engagements & Board Advisory</span>
+                <span style={{ ...HEADER_RIGHT_STYLE, verticalAlign: 'middle' }}>
+                  <span className="inline-block w-1.5 h-1.5 rounded-full bg-[#c5a059]"></span>
+                </span>
               </h2>
               <div className="space-y-3">
                 {projects.map((p) => (
                   <div key={p.id} data-entry="true" className="text-xs">
-                    <div className="flex justify-between font-bold text-slate-900" style={METADATA_ROW_STYLE}>
+                    <div className="font-bold text-slate-900" style={METADATA_ROW_STYLE}>
                       <span style={METADATA_LEFT_STYLE}>{p.name}</span>
-                      {p.link && <span className="text-[#c5a059] font-normal text-[11px]" style={METADATA_RIGHT_STYLE}>{p.link}</span>}
+                      {p.link && <span className="text-[#c5a059] font-normal text-[11px]" style={METADATA_WIDE_RIGHT_STYLE}>{p.link}</span>}
                     </div>
                     {p.technologies && <div className="text-[10px] text-slate-400 italic">Domain: {p.technologies}</div>}
                     <p className="text-slate-600 mt-0.5">{p.description}</p>
@@ -231,9 +240,9 @@ export const MonacoSovereignTemplate: React.FC<{ data: DocumentData }> = ({ data
               {sec.items ? (
                 <div className="space-y-1 text-xs">
                   {sec.items.map((i) => (
-                    <div key={i.id} className="flex justify-between text-[11px]" style={METADATA_ROW_STYLE}>
+                    <div key={i.id} className="text-[11px]" style={METADATA_ROW_STYLE}>
                       <span className="text-slate-500 font-medium" style={METADATA_LEFT_STYLE}>{i.key}:</span>
-                      <span className="font-semibold text-slate-800" style={METADATA_RIGHT_STYLE}>{i.value}</span>
+                      <span className="font-semibold text-slate-800" style={METADATA_WIDE_RIGHT_STYLE}>{i.value}</span>
                     </div>
                   ))}
                 </div>

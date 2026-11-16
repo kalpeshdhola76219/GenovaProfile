@@ -1,8 +1,15 @@
 import React from 'react';
 import { DocumentData } from '../../types/document';
-import { getBiodataSections } from './biodataFields';
+import {
+  BIODATA_LEFT_STYLE,
+  BIODATA_RIGHT_STYLE,
+  BIODATA_ROW_STYLE,
+  getBiodataSections,
+  sanitizeDocumentTextFields,
+} from './biodataFields';
 
-export const PhotoFocusedBiodataTemplate: React.FC<{ data: DocumentData }> = ({ data }) => {
+export const PhotoFocusedBiodataTemplate: React.FC<{ data: DocumentData }> = ({ data: rawData }) => {
+  const data = sanitizeDocumentTextFields(rawData);
   const { personal, customSections, customization } = data;
   const sections = getBiodataSections(data);
 
@@ -56,9 +63,9 @@ export const PhotoFocusedBiodataTemplate: React.FC<{ data: DocumentData }> = ({ 
               </h2>
               <div className="space-y-1.5 text-xs">
                 {sections.personal.map((item) => (
-                  <div key={item.key} className="flex justify-between gap-2">
-                    <span className="text-slate-500 shrink-0">{item.label}:</span>
-                    <span className="font-semibold text-slate-900 text-right">{item.value}</span>
+                  <div key={item.key} style={BIODATA_ROW_STYLE}>
+                    <span className="text-slate-500" style={{ ...BIODATA_LEFT_STYLE, width: '44%' }}>{item.label}:</span>
+                    <span className="font-semibold text-slate-900" style={{ ...BIODATA_RIGHT_STYLE, width: '56%' }}>{item.value}</span>
                   </div>
                 ))}
               </div>
@@ -72,9 +79,9 @@ export const PhotoFocusedBiodataTemplate: React.FC<{ data: DocumentData }> = ({ 
               </h2>
               <div className="space-y-1.5 text-xs">
                 {sections.astrology.map((item) => (
-                  <div key={item.key} className="flex justify-between gap-2">
-                    <span className="text-slate-500 shrink-0">{item.label}:</span>
-                    <span className="font-semibold text-slate-900 text-right">{item.value}</span>
+                  <div key={item.key} style={BIODATA_ROW_STYLE}>
+                    <span className="text-slate-500" style={{ ...BIODATA_LEFT_STYLE, width: '44%' }}>{item.label}:</span>
+                    <span className="font-semibold text-slate-900" style={{ ...BIODATA_RIGHT_STYLE, width: '56%' }}>{item.value}</span>
                   </div>
                 ))}
               </div>

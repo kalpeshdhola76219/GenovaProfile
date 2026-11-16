@@ -1,6 +1,7 @@
 import React, { useRef, useState, useEffect, useMemo } from 'react';
 import { TemplateMetadata, DocumentData } from '../../types/document';
 import { getPreviewDataForTemplate } from '../../data/previewSampleData';
+import { sanitizeDocumentTextFields } from '../../utils/textSanitizer';
 
 interface TemplatePreviewProps {
   template: TemplateMetadata;
@@ -155,7 +156,7 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({
             }}
             className="origin-top-left transition-transform duration-75"
           >
-            <TemplateComponent data={previewData} />
+            <TemplateComponent data={sanitizeDocumentTextFields(previewData)} />
           </div>
         </TemplateErrorBoundary>
       )}

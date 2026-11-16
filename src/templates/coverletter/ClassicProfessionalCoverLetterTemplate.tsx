@@ -8,6 +8,7 @@ import {
   CoverLetterDetailsBlock,
   CoverLetterSampleText,
   getCoverLetterSheetTypography,
+  sanitizeDocumentTextFields,
   shouldShowCoverLetterSlot,
   useCoverLetterPreviewMode,
 } from './CoverLetterTemplateHelpers';
@@ -15,7 +16,8 @@ import {
 export const ClassicProfessionalCoverLetterTemplate: React.FC<{
   data: DocumentData;
   mapped?: MappedCoverLetterData;
-}> = ({ data, mapped: propMapped }) => {
+}> = ({ data: rawData, mapped: propMapped }) => {
+  const data = sanitizeDocumentTextFields(rawData);
   const mapped = propMapped || mapCoverLetterData(data);
   const { isExportMode, previewMode } = useCoverLetterPreviewMode();
   const primary = data.customization.primaryColor || '#1e293b';

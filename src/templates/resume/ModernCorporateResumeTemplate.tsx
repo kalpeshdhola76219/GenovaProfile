@@ -6,11 +6,13 @@ import {
   METADATA_LEFT_STYLE,
   METADATA_RIGHT_STYLE,
   METADATA_ROW_STYLE,
+  METADATA_WIDE_RIGHT_STYLE,
   ResumeDescriptionBlock,
+  sanitizeDocumentTextFields,
 } from './resumeTemplateUtils';
 
 export const ModernCorporateResumeTemplate: React.FC<{ data: DocumentData }> = ({ data }) => {
-  const { personal, contact, summary, experience, education, skills, projects, certifications, achievements, customSections, customization } = data;
+  const { personal, contact, summary, experience, education, skills, projects, certifications, achievements, customSections, customization } = sanitizeDocumentTextFields(data);
   const primary = customization.primaryColor || '#1e3a8a'; // Corporate Navy
 
   const displayFullName = personal.fullName || '';
@@ -69,7 +71,7 @@ export const ModernCorporateResumeTemplate: React.FC<{ data: DocumentData }> = (
             <div className="space-y-4">
               {displayExperience.map((exp) => (
                 <div key={exp.id} data-entry>
-                  <div className="flex justify-between items-baseline text-xs" style={METADATA_ROW_STYLE}>
+                  <div className="text-xs" style={METADATA_ROW_STYLE}>
                     <span className="font-bold text-slate-900" style={METADATA_LEFT_STYLE}>{exp.jobTitle}</span>
                     <span className="text-slate-500 font-medium text-[11px]" style={METADATA_RIGHT_STYLE}>{exp.startDate} - {(exp.currentlyWorking && (!exp.endDate || exp.endDate.trim().toLowerCase() === 'present')) ? 'Present' : (exp.endDate || 'Present')}</span>
                   </div>
@@ -97,9 +99,9 @@ export const ModernCorporateResumeTemplate: React.FC<{ data: DocumentData }> = (
               <div className="space-y-3">
                 {projects.map((proj) => (
                   <div key={proj.id} data-entry className="text-xs">
-                    <div className="flex justify-between items-baseline font-bold" style={METADATA_ROW_STYLE}>
+                    <div className="font-bold" style={METADATA_ROW_STYLE}>
                       <span style={METADATA_LEFT_STYLE}>{proj.name}</span>
-                      {proj.link && <span className="font-mono text-[11px] text-blue-700" style={METADATA_RIGHT_STYLE}>{proj.link}</span>}
+                      {proj.link && <span className="font-mono text-[11px] text-blue-700" style={METADATA_WIDE_RIGHT_STYLE}>{proj.link}</span>}
                     </div>
                     {proj.technologies && <div className="text-[11px] text-slate-500">Tech: {proj.technologies}</div>}
                     <p className="text-slate-700 mt-0.5">{proj.description}</p>

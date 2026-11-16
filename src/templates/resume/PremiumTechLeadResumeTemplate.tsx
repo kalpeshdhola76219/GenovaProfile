@@ -2,10 +2,15 @@ import React from 'react';
 import { DocumentData } from '../../types/document';
 import { getStaticFontClass, getFontFamilyCss, FONT_FAMILY_CSS_MAP } from '../../utils/fontClassMap';
 import {
+  HEADER_LEFT_STYLE,
+  HEADER_RIGHT_STYLE,
+  HEADER_ROW_STYLE,
   METADATA_ROW_STYLE,
   METADATA_LEFT_STYLE,
   METADATA_RIGHT_STYLE,
+  METADATA_WIDE_RIGHT_STYLE,
   ResumeDescriptionBlock,
+  sanitizeDocumentTextFields,
 } from './resumeTemplateUtils';
 
 export const PremiumTechLeadResumeTemplate: React.FC<{ data: DocumentData }> = ({ data }) => {
@@ -21,7 +26,7 @@ export const PremiumTechLeadResumeTemplate: React.FC<{ data: DocumentData }> = (
     achievements = [],
     customSections = [],
     customization,
-  } = data;
+  } = sanitizeDocumentTextFields(data);
 
   const techIndigo = customization.primaryColor || '#312e81'; // Deep Silicon Indigo
   const cyanCode = customization.secondaryColor || '#0284c7'; // Code Cyan
@@ -36,8 +41,8 @@ export const PremiumTechLeadResumeTemplate: React.FC<{ data: DocumentData }> = (
       style={{ fontFamily: FONT_FAMILY_CSS_MAP.jakarta }}
     >
       {/* Header */}
-      <div className="flex justify-between items-start pb-5 mb-5 border-b-2 border-slate-900" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', columnGap: '16px' }}>
-        <div style={METADATA_LEFT_STYLE}>
+      <div className="pb-5 mb-5 border-b-2 border-slate-900" style={HEADER_ROW_STYLE}>
+        <div style={HEADER_LEFT_STYLE}>
           <h1 className={`text-3xl font-black uppercase tracking-tight text-slate-950 ${fontClass}`} style={{ fontFamily: fontFamilyCss }}>
             {personal.fullName || 'ENGINEERING ARCHITECT'}
           </h1>
@@ -45,7 +50,7 @@ export const PremiumTechLeadResumeTemplate: React.FC<{ data: DocumentData }> = (
             {personal.professionalTitle || 'Staff Software Engineer & Distributed Systems Lead'}
           </p>
         </div>
-        <div className="text-right text-xs font-mono text-slate-600 space-y-0.5 no-justify" style={{ flexShrink: 0 }}>
+        <div className="text-right text-xs font-mono text-slate-600 space-y-0.5 no-justify" style={HEADER_RIGHT_STYLE}>
           {contact.email && <div>{contact.email}</div>}
           {contact.phone && <div>{contact.phone}</div>}
           {(contact.portfolio || contact.website || contact.github) && (
@@ -93,7 +98,7 @@ export const PremiumTechLeadResumeTemplate: React.FC<{ data: DocumentData }> = (
           <div className="space-y-4">
             {experience.map((exp) => (
               <div key={exp.id} data-entry="true">
-                <div className="flex justify-between items-baseline" style={METADATA_ROW_STYLE}>
+                <div style={METADATA_ROW_STYLE}>
                   <span className="font-bold text-sm text-slate-950" style={METADATA_LEFT_STYLE}>
                     {exp.jobTitle} <span className="font-normal text-slate-400">@</span>{' '}
                     <span className="text-indigo-900 font-semibold">{exp.company}</span>
@@ -193,12 +198,12 @@ export const PremiumTechLeadResumeTemplate: React.FC<{ data: DocumentData }> = (
           </h2>
           <div className="space-y-1.5 text-xs">
             {achievements.map((a) => (
-              <div key={a.id} className="flex justify-between items-baseline" style={METADATA_ROW_STYLE}>
+              <div key={a.id} style={METADATA_ROW_STYLE}>
                 <div style={METADATA_LEFT_STYLE}>
                   <span className="font-semibold text-slate-900">{a.title}</span>
                   {a.description && <span className="text-slate-600 ml-1.5">— {a.description}</span>}
                 </div>
-                {a.date && <div className="text-xs font-mono text-slate-500 shrink-0 ml-2" style={METADATA_RIGHT_STYLE}>{a.date}</div>}
+                {a.date && <div className="text-xs font-mono text-slate-500" style={METADATA_RIGHT_STYLE}>{a.date}</div>}
               </div>
             ))}
           </div>
@@ -216,9 +221,9 @@ export const PremiumTechLeadResumeTemplate: React.FC<{ data: DocumentData }> = (
               {sec.items && sec.items.length > 0 ? (
                 <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
                   {sec.items.map((i) => (
-                    <div key={i.id} className="flex justify-between items-baseline py-0.5 border-b border-slate-100 font-mono" style={METADATA_ROW_STYLE}>
+                    <div key={i.id} className="py-0.5 border-b border-slate-100 font-mono" style={METADATA_ROW_STYLE}>
                       <span className="text-slate-500 text-[11px]" style={METADATA_LEFT_STYLE}>{i.key}:</span>
-                      <span className="font-medium text-slate-900 text-right" style={METADATA_RIGHT_STYLE}>{i.value}</span>
+                      <span className="font-medium text-slate-900" style={METADATA_WIDE_RIGHT_STYLE}>{i.value}</span>
                     </div>
                   ))}
                 </div>

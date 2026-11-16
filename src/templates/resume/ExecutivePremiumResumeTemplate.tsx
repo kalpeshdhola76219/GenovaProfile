@@ -3,15 +3,20 @@ import { DocumentData } from '../../types/document';
 import { FONT_FAMILY_CSS_MAP } from '../../utils/fontClassMap';
 import {
   BULLET_LIST_STYLE,
+  HEADER_LEFT_STYLE,
+  HEADER_RIGHT_STYLE,
+  HEADER_ROW_STYLE,
   METADATA_LEFT_STYLE,
   METADATA_RIGHT_STYLE,
   METADATA_ROW_STYLE,
+  METADATA_WIDE_RIGHT_STYLE,
   ResumeBulletItem,
   ResumeDescriptionBlock,
+  sanitizeDocumentTextFields,
 } from './resumeTemplateUtils';
 
 export const ExecutivePremiumResumeTemplate: React.FC<{ data: DocumentData }> = ({ data }) => {
-  const { personal, contact, summary, experience, education, skills, projects, certifications, achievements, customSections, customization } = data;
+  const { personal, contact, summary, experience, education, skills, projects, certifications, achievements, customSections, customization } = sanitizeDocumentTextFields(data);
 
   return (
     <div
@@ -21,8 +26,8 @@ export const ExecutivePremiumResumeTemplate: React.FC<{ data: DocumentData }> = 
         fontSize: customization.fontSize === 'sm' ? '13px' : customization.fontSize === 'lg' ? '16px' : '14px',
       }}
     >
-      <div className="flex justify-between items-start border-b-2 border-stone-800 pb-4 mb-5" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', columnGap: '16px' }}>
-        <div style={METADATA_LEFT_STYLE}>
+      <div className="border-b-2 border-stone-800 pb-4 mb-5" style={HEADER_ROW_STYLE}>
+        <div style={HEADER_LEFT_STYLE}>
           <h1 className="text-3xl font-extrabold uppercase tracking-widest text-stone-900 font-cinzel" style={{ fontFamily: FONT_FAMILY_CSS_MAP.cinzel }}>
             {personal.fullName || 'FULL NAME'}
           </h1>
@@ -30,7 +35,7 @@ export const ExecutivePremiumResumeTemplate: React.FC<{ data: DocumentData }> = 
             {personal.professionalTitle || 'Executive Officer & Strategic Advisor'}
           </p>
         </div>
-        <div className="text-right text-xs font-sans text-stone-600 space-y-0.5 no-justify" style={{ flexShrink: 0 }}>
+        <div className="text-right text-xs font-sans text-stone-600 space-y-0.5 no-justify" style={HEADER_RIGHT_STYLE}>
           {contact.email && <div>{contact.email}</div>}
           {contact.phone && <div>{contact.phone}</div>}
           {(contact.city || contact.state || contact.country) && <div>{[contact.city, contact.state, contact.country].filter(Boolean).join(', ')}</div>}
@@ -53,7 +58,7 @@ export const ExecutivePremiumResumeTemplate: React.FC<{ data: DocumentData }> = 
           <div className="space-y-4">
             {experience.map((exp) => (
               <div key={exp.id} data-entry>
-                <div className="flex justify-between items-baseline" style={METADATA_ROW_STYLE}>
+                <div style={METADATA_ROW_STYLE}>
                   <span className="font-bold text-base text-stone-950" style={METADATA_LEFT_STYLE}>{exp.jobTitle} • <span className="font-semibold text-stone-700">{exp.company}</span></span>
                   <span className="text-xs font-sans text-stone-500" style={METADATA_RIGHT_STYLE}>{exp.startDate} &ndash; {(exp.currentlyWorking && (!exp.endDate || exp.endDate.trim().toLowerCase() === 'present')) ? 'Present' : (exp.endDate || 'Present')}</span>
                 </div>
@@ -83,9 +88,9 @@ export const ExecutivePremiumResumeTemplate: React.FC<{ data: DocumentData }> = 
           <div className="space-y-2 text-xs">
             {projects.map((p) => (
               <div key={p.id} data-entry>
-                <div className="flex justify-between items-baseline font-bold text-stone-900" style={METADATA_ROW_STYLE}>
+                <div className="font-bold text-stone-900" style={METADATA_ROW_STYLE}>
                   <span style={METADATA_LEFT_STYLE}>{p.name}</span>
-                  {p.technologies && <span className="font-normal text-stone-500" style={METADATA_RIGHT_STYLE}>{p.technologies}</span>}
+                  {p.technologies && <span className="font-normal text-stone-500" style={METADATA_WIDE_RIGHT_STYLE}>{p.technologies}</span>}
                 </div>
                 {p.description && <p className="text-stone-700 mt-0.5 leading-relaxed">{p.description}</p>}
               </div>

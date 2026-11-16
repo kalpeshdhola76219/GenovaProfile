@@ -3,9 +3,13 @@ import { DocumentData } from '../../types/document';
 import { FONT_FAMILY_CSS_MAP } from '../../utils/fontClassMap';
 import {
   CONTACT_ROW_STYLE,
+  HEADER_LEFT_STYLE,
+  HEADER_RIGHT_STYLE,
+  HEADER_ROW_STYLE,
   METADATA_LEFT_STYLE,
   METADATA_RIGHT_STYLE,
   METADATA_ROW_STYLE,
+  METADATA_WIDE_RIGHT_STYLE,
   ResumeBulletItem,
   ResumeDescriptionBlock,
   sanitizeDocumentTextFields,
@@ -38,8 +42,8 @@ export const ATSProfessionalResumeTemplate: React.FC<{ data: DocumentData }> = (
     >
       {/* Header */}
       <div className="border-b-2 pb-4 mb-4" style={{ borderColor: primary }}>
-        <div className="flex justify-between items-baseline" style={METADATA_ROW_STYLE}>
-          <div style={METADATA_LEFT_STYLE}>
+        <div style={HEADER_ROW_STYLE}>
+          <div style={HEADER_LEFT_STYLE}>
             <h1 className="text-2xl font-black tracking-tight" style={{ color: primary }}>
               {personal.fullName || 'FULL NAME'}
             </h1>
@@ -47,7 +51,7 @@ export const ATSProfessionalResumeTemplate: React.FC<{ data: DocumentData }> = (
               {personal.professionalTitle || 'Software Engineer / Professional'}
             </p>
           </div>
-          <div className="text-right text-xs text-slate-600 space-y-0.5 no-justify" style={{ flexShrink: 0 }}>
+          <div className="text-right text-xs text-slate-600 space-y-0.5 no-justify" style={HEADER_RIGHT_STYLE}>
             {contact.email && <div>{contact.email}</div>}
             {contact.phone && <div>{contact.phone}</div>}
             {(contact.city || contact.state || contact.country) && <div>{[contact.city, contact.state, contact.country].filter(Boolean).join(', ')}</div>}
@@ -81,7 +85,7 @@ export const ATSProfessionalResumeTemplate: React.FC<{ data: DocumentData }> = (
           <div className="space-y-3">
             {experience.map((exp, idx) => (
               <div key={exp.id || `exp-${idx}`} data-entry>
-                <div className="flex justify-between items-baseline text-xs" style={METADATA_ROW_STYLE}>
+                <div className="text-xs" style={METADATA_ROW_STYLE}>
                   <span className="font-bold text-slate-900" style={METADATA_LEFT_STYLE}>{exp.jobTitle} &bull; <span className="font-medium text-slate-700">{exp.company}</span></span>
                   <span className="text-slate-500 font-mono text-[11px]" style={METADATA_RIGHT_STYLE}>{exp.startDate} &ndash; {(exp.currentlyWorking && (!exp.endDate || exp.endDate.trim().toLowerCase() === 'present')) ? 'Present' : (exp.endDate || 'Present')}</span>
                 </div>
@@ -139,7 +143,7 @@ export const ATSProfessionalResumeTemplate: React.FC<{ data: DocumentData }> = (
 
               return (
                 <div key={edu.id || `edu-${idx}`} data-entry className="text-xs">
-                  <div className="flex justify-between items-baseline" style={METADATA_ROW_STYLE}>
+                  <div style={METADATA_ROW_STYLE}>
                     <div style={METADATA_LEFT_STYLE}>
                       {hasDegree && (
                         <span className="font-bold text-slate-900">{edu.degree}</span>
@@ -189,9 +193,9 @@ export const ATSProfessionalResumeTemplate: React.FC<{ data: DocumentData }> = (
           <div className="space-y-2 text-xs">
             {projects.map((proj, idx) => (
               <div key={proj.id || `proj-${idx}`} data-entry className="text-xs">
-                <div className="flex justify-between items-baseline font-bold" style={METADATA_ROW_STYLE}>
+                <div className="font-bold" style={METADATA_ROW_STYLE}>
                   <span style={METADATA_LEFT_STYLE}>{proj.name} {proj.role ? `(${proj.role})` : ''}</span>
-                  {proj.link && <span className="font-mono text-[11px] font-normal text-blue-700" style={METADATA_RIGHT_STYLE}>{proj.link}</span>}
+                  {proj.link && <span className="font-mono text-[11px] font-normal text-blue-700" style={METADATA_WIDE_RIGHT_STYLE}>{proj.link}</span>}
                 </div>
                 {proj.technologies && <div className="text-[11px] text-slate-500 italic">Stack: {proj.technologies}</div>}
                 <p className="text-slate-700 mt-0.5">{proj.description}</p>

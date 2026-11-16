@@ -413,7 +413,7 @@ export const OnePageFit: React.FC<OnePageFitProps> = ({
             height: `${TARGET_A4_HEIGHT}px`,
           }}
         >
-          <TemplateComponent data={data} />
+          <TemplateComponent data={sanitizeDocumentTextFields(data)} />
         </div>
       </div>
 

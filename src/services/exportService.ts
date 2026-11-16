@@ -703,7 +703,20 @@ function layoutClonedMultiPageSheet(
   clonedDoc: Document,
   safeBgColor: string
 ): number {
-  // Unclip any preview window wrapper between clonedRoot and flowRoot (e.g. translateY / height clip)
+  // Unclip any preview window wrapper inside or above flowRoot (e.g. translateY / height clip)
+  const viewportEls = Array.from(
+    clonedRoot.querySelectorAll('[data-page-viewport="true"], [data-page-flow="true"]')
+  ) as HTMLElement[];
+  for (const vp of viewportEls) {
+    vp.style.overflow = 'visible';
+    vp.style.height = 'auto';
+    vp.style.minHeight = '0';
+    vp.style.maxHeight = 'none';
+    vp.style.marginTop = '0px';
+    vp.style.transform = 'none';
+    vp.style.width = '100%';
+  }
+
   let walker: HTMLElement | null = flowRoot;
   while (walker && walker !== clonedRoot) {
     walker.style.overflow = 'visible';

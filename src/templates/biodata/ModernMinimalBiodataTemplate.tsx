@@ -1,8 +1,18 @@
 import React from 'react';
 import { DocumentData } from '../../types/document';
-import { getBiodataSections } from './biodataFields';
+import {
+  BIODATA_HEADER_LEFT_STYLE,
+  BIODATA_HEADER_RIGHT_STYLE,
+  BIODATA_HEADER_ROW_STYLE,
+  BIODATA_LEFT_STYLE,
+  BIODATA_RIGHT_STYLE,
+  BIODATA_ROW_STYLE,
+  getBiodataSections,
+  sanitizeDocumentTextFields,
+} from './biodataFields';
 
-export const ModernMinimalBiodataTemplate: React.FC<{ data: DocumentData }> = ({ data }) => {
+export const ModernMinimalBiodataTemplate: React.FC<{ data: DocumentData }> = ({ data: rawData }) => {
+  const data = sanitizeDocumentTextFields(rawData);
   const { personal, customSections, customization } = data;
   const primary = customization.primaryColor || '#0f172a';
   const accent = customization.accentColor || '#0284c7';
@@ -15,8 +25,8 @@ export const ModernMinimalBiodataTemplate: React.FC<{ data: DocumentData }> = ({
         fontSize: customization.fontSize === 'sm' ? '13px' : customization.fontSize === 'lg' ? '16px' : '14px',
       }}
     >
-      <div className="flex justify-between items-end border-b pb-6 mb-8" style={{ borderColor: '#e2e8f0' }}>
-        <div>
+      <div className="border-b pb-6 mb-8" style={{ ...BIODATA_HEADER_ROW_STYLE, borderColor: '#e2e8f0' }}>
+        <div style={{ ...BIODATA_HEADER_LEFT_STYLE, verticalAlign: 'bottom' }}>
           <span className="text-xs uppercase tracking-widest font-semibold text-slate-400">Marriage Biodata</span>
           <h1 className="text-3xl font-extrabold tracking-tight mt-1 font-matrimonial-heading" style={{ color: primary }}>
             {personal.fullName || 'Full Name'}
@@ -26,13 +36,15 @@ export const ModernMinimalBiodataTemplate: React.FC<{ data: DocumentData }> = ({
           )}
         </div>
         {customization.showPhoto !== false && personal.profilePhoto && (
-          <img
-            src={personal.profilePhoto}
-            alt={personal.fullName}
-            crossOrigin="anonymous"
-            referrerPolicy="no-referrer"
-            className="w-24 h-28 object-cover object-top rounded-xl shadow-sm border border-slate-200"
-          />
+          <div style={{ ...BIODATA_HEADER_RIGHT_STYLE, verticalAlign: 'bottom', width: '104px' }}>
+            <img
+              src={personal.profilePhoto}
+              alt={personal.fullName}
+              crossOrigin="anonymous"
+              referrerPolicy="no-referrer"
+              className="w-24 h-28 object-cover object-top rounded-xl shadow-sm border border-slate-200 inline-block"
+            />
+          </div>
         )}
       </div>
 
@@ -46,9 +58,9 @@ export const ModernMinimalBiodataTemplate: React.FC<{ data: DocumentData }> = ({
               </h2>
               <div className="space-y-2 text-sm bg-slate-50 p-4 rounded-xl border border-slate-100">
                 {sections.personal.map((item) => (
-                  <div key={item.key} className="flex justify-between gap-2">
-                    <span className="text-slate-500 shrink-0">{item.label}:</span>
-                    <span className="font-medium text-slate-900 text-right">{item.value}</span>
+                  <div key={item.key} style={BIODATA_ROW_STYLE}>
+                    <span className="text-slate-500" style={{ ...BIODATA_LEFT_STYLE, width: '44%' }}>{item.label}:</span>
+                    <span className="font-medium text-slate-900" style={{ ...BIODATA_RIGHT_STYLE, width: '56%' }}>{item.value}</span>
                   </div>
                 ))}
               </div>
@@ -63,9 +75,9 @@ export const ModernMinimalBiodataTemplate: React.FC<{ data: DocumentData }> = ({
               </h2>
               <div className="space-y-2 text-sm bg-slate-50 p-4 rounded-xl border border-slate-100">
                 {sections.astrology.map((item) => (
-                  <div key={item.key} className="flex justify-between gap-2">
-                    <span className="text-slate-500 shrink-0">{item.label}:</span>
-                    <span className="font-medium text-slate-900 text-right">{item.value}</span>
+                  <div key={item.key} style={BIODATA_ROW_STYLE}>
+                    <span className="text-slate-500" style={{ ...BIODATA_LEFT_STYLE, width: '44%' }}>{item.label}:</span>
+                    <span className="font-medium text-slate-900" style={{ ...BIODATA_RIGHT_STYLE, width: '56%' }}>{item.value}</span>
                   </div>
                 ))}
               </div>
@@ -80,9 +92,9 @@ export const ModernMinimalBiodataTemplate: React.FC<{ data: DocumentData }> = ({
               </h2>
               <div className="space-y-2 text-sm bg-slate-50 p-4 rounded-xl border border-slate-100">
                 {sections.contact.map((item) => (
-                  <div key={item.key} className="flex justify-between gap-2">
-                    <span className="text-slate-500 shrink-0">{item.label}:</span>
-                    <span className="font-medium text-slate-900 text-right">{item.value}</span>
+                  <div key={item.key} style={BIODATA_ROW_STYLE}>
+                    <span className="text-slate-500" style={{ ...BIODATA_LEFT_STYLE, width: '44%' }}>{item.label}:</span>
+                    <span className="font-medium text-slate-900" style={{ ...BIODATA_RIGHT_STYLE, width: '56%' }}>{item.value}</span>
                   </div>
                 ))}
               </div>

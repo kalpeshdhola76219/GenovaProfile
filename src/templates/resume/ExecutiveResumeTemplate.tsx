@@ -7,12 +7,14 @@ import {
   METADATA_LEFT_STYLE,
   METADATA_RIGHT_STYLE,
   METADATA_ROW_STYLE,
+  METADATA_WIDE_RIGHT_STYLE,
   ResumeBulletItem,
   ResumeDescriptionBlock,
+  sanitizeDocumentTextFields,
 } from './resumeTemplateUtils';
 
 export const ExecutiveResumeTemplate: React.FC<{ data: DocumentData }> = ({ data }) => {
-  const { personal, contact, summary, experience, education, skills, projects, certifications, achievements, customSections, customization } = data;
+  const { personal, contact, summary, experience, education, skills, projects, certifications, achievements, customSections, customization } = sanitizeDocumentTextFields(data);
   const primary = customization.primaryColor || '#450a0a'; // Rich Burgundy / Charcoal
 
   return (
@@ -57,7 +59,7 @@ export const ExecutiveResumeTemplate: React.FC<{ data: DocumentData }> = ({ data
           <div className="space-y-4">
             {experience.map((exp) => (
               <div key={exp.id} data-entry>
-                <div className="flex justify-between items-baseline" style={METADATA_ROW_STYLE}>
+                <div style={METADATA_ROW_STYLE}>
                   <span className="font-bold text-stone-950 text-base" style={METADATA_LEFT_STYLE}>{exp.jobTitle} &bull; <span className="font-normal italic">{exp.company}</span></span>
                   <span className="text-xs font-sans text-stone-500" style={METADATA_RIGHT_STYLE}>{exp.startDate} &ndash; {(exp.currentlyWorking && (!exp.endDate || exp.endDate.trim().toLowerCase() === 'present')) ? 'Present' : (exp.endDate || 'Present')}</span>
                 </div>
@@ -87,9 +89,9 @@ export const ExecutiveResumeTemplate: React.FC<{ data: DocumentData }> = ({ data
           <div className="space-y-2 text-xs">
             {projects.map((p) => (
               <div key={p.id} data-entry>
-                <div className="flex justify-between items-baseline font-bold text-stone-900" style={METADATA_ROW_STYLE}>
+                <div className="font-bold text-stone-900" style={METADATA_ROW_STYLE}>
                   <span style={METADATA_LEFT_STYLE}>{p.name}</span>
-                  {p.technologies && <span className="font-normal text-stone-500" style={METADATA_RIGHT_STYLE}>{p.technologies}</span>}
+                  {p.technologies && <span className="font-normal text-stone-500" style={METADATA_WIDE_RIGHT_STYLE}>{p.technologies}</span>}
                 </div>
                 {p.description && <p className="text-stone-700 mt-0.5 leading-relaxed">{p.description}</p>}
               </div>

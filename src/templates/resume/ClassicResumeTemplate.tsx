@@ -7,12 +7,14 @@ import {
   METADATA_LEFT_STYLE,
   METADATA_RIGHT_STYLE,
   METADATA_ROW_STYLE,
+  METADATA_WIDE_RIGHT_STYLE,
   ResumeBulletItem,
   ResumeDescriptionBlock,
+  sanitizeDocumentTextFields,
 } from './resumeTemplateUtils';
 
 export const ClassicResumeTemplate: React.FC<{ data: DocumentData }> = ({ data }) => {
-  const { personal, contact, summary, experience, education, skills, projects, certifications, achievements, customSections, customization } = data;
+  const { personal, contact, summary, experience, education, skills, projects, certifications, achievements, customSections, customization } = sanitizeDocumentTextFields(data);
   return (
     <div
       className="document-page-sheet p-10 font-cormorant text-stone-900 bg-white"
@@ -54,7 +56,7 @@ export const ClassicResumeTemplate: React.FC<{ data: DocumentData }> = ({ data }
           <div className="space-y-3">
             {experience.map((exp) => (
               <div key={exp.id} data-entry>
-                <div className="flex justify-between items-baseline text-xs font-bold" style={METADATA_ROW_STYLE}>
+                <div className="text-xs font-bold" style={METADATA_ROW_STYLE}>
                   <span style={METADATA_LEFT_STYLE}>{exp.jobTitle}, <em>{exp.company}</em></span>
                   <span className="font-sans font-normal text-stone-500 text-[11px]" style={METADATA_RIGHT_STYLE}>{exp.startDate} – {(exp.currentlyWorking && (!exp.endDate || exp.endDate.trim().toLowerCase() === 'present')) ? 'Present' : (exp.endDate || 'Present')}</span>
                 </div>
@@ -113,9 +115,9 @@ export const ClassicResumeTemplate: React.FC<{ data: DocumentData }> = ({ data }
           <div className="space-y-1 text-xs">
             {projects.map((p) => (
               <div key={p.id} data-entry>
-                <div className="flex justify-between items-baseline font-bold" style={METADATA_ROW_STYLE}>
+                <div className="font-bold" style={METADATA_ROW_STYLE}>
                   <span style={METADATA_LEFT_STYLE}>{p.name}</span>
-                  {p.link && <span className="font-sans font-normal text-stone-500" style={METADATA_RIGHT_STYLE}>{p.link}</span>}
+                  {p.link && <span className="font-sans font-normal text-stone-500" style={METADATA_WIDE_RIGHT_STYLE}>{p.link}</span>}
                 </div>
                 <p className="text-stone-700">{p.description}</p>
               </div>

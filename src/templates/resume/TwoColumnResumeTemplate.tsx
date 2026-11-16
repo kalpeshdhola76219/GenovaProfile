@@ -5,12 +5,14 @@ import {
   METADATA_ROW_STYLE,
   METADATA_LEFT_STYLE,
   METADATA_RIGHT_STYLE,
+  METADATA_WIDE_RIGHT_STYLE,
   ResumeBulletItem,
   ResumeDescriptionBlock,
+  sanitizeDocumentTextFields,
 } from './resumeTemplateUtils';
 
 export const TwoColumnResumeTemplate: React.FC<{ data: DocumentData }> = ({ data }) => {
-  const { personal, contact, summary, experience, education, skills, projects, certifications, achievements, customSections, customization } = data;
+  const { personal, contact, summary, experience, education, skills, projects, certifications, achievements, customSections, customization } = sanitizeDocumentTextFields(data);
   const primary = customization.primaryColor || '#0f172a';
 
   return (
@@ -89,7 +91,7 @@ export const TwoColumnResumeTemplate: React.FC<{ data: DocumentData }> = ({ data
             <div className="space-y-3.5">
               {experience.map((exp) => (
                 <div key={exp.id} data-entry="true">
-                  <div className="flex justify-between items-baseline text-xs font-bold" style={METADATA_ROW_STYLE}>
+                  <div className="text-xs font-bold" style={METADATA_ROW_STYLE}>
                     <span className="text-slate-900" style={METADATA_LEFT_STYLE}>{exp.jobTitle}</span>
                     <span className="text-slate-500 font-normal text-[11px]" style={METADATA_RIGHT_STYLE}>{exp.startDate} - {(exp.currentlyWorking && (!exp.endDate || exp.endDate.trim().toLowerCase() === 'present')) ? 'Present' : (exp.endDate || 'Present')}</span>
                   </div>
@@ -123,9 +125,9 @@ export const TwoColumnResumeTemplate: React.FC<{ data: DocumentData }> = ({ data
             <div className="space-y-2 text-xs">
               {projects.map((proj) => (
                 <div key={proj.id} data-entry="true">
-                  <div className="font-bold flex justify-between" style={METADATA_ROW_STYLE}>
+                  <div className="font-bold" style={METADATA_ROW_STYLE}>
                     <span style={METADATA_LEFT_STYLE}>{proj.name}</span>
-                    {proj.link && <span className="text-sky-700 font-normal" style={METADATA_RIGHT_STYLE}>{proj.link}</span>}
+                    {proj.link && <span className="text-sky-700 font-normal" style={METADATA_WIDE_RIGHT_STYLE}>{proj.link}</span>}
                   </div>
                   {proj.technologies && <div className="text-[11px] text-slate-500">{proj.technologies}</div>}
                   <p className="text-slate-700 mt-0.5">{proj.description}</p>

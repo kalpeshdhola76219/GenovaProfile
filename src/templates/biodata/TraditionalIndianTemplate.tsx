@@ -1,8 +1,15 @@
 import React from 'react';
 import { DocumentData } from '../../types/document';
-import { getBiodataSections } from './biodataFields';
+import {
+  BIODATA_HEADER_LEFT_STYLE,
+  BIODATA_HEADER_RIGHT_STYLE,
+  BIODATA_HEADER_ROW_STYLE,
+  getBiodataSections,
+  sanitizeDocumentTextFields,
+} from './biodataFields';
 
-export const TraditionalIndianTemplate: React.FC<{ data: DocumentData }> = ({ data }) => {
+export const TraditionalIndianTemplate: React.FC<{ data: DocumentData }> = ({ data: rawData }) => {
+  const data = sanitizeDocumentTextFields(rawData);
   const { personal, customSections, customization } = data;
   const primary = customization.primaryColor || '#991b1b';
   const accent = customization.accentColor || '#b45309';
@@ -63,11 +70,11 @@ export const TraditionalIndianTemplate: React.FC<{ data: DocumentData }> = ({ da
         {personalItems.length > 0 && (
           <div className="flex-1">
             <div
-              className="border-b pb-1 mb-2 font-bold uppercase tracking-wider text-sm flex items-center justify-between"
-              style={{ color: primary, borderColor: accent }}
+              className="border-b pb-1 mb-2 font-bold uppercase tracking-wider text-sm"
+              style={{ ...BIODATA_HEADER_ROW_STYLE, color: primary, borderColor: accent }}
             >
-              <span>Personal Information</span>
-              <span className="text-xs font-normal capitalize text-slate-500">वैयक्तिक माहिती</span>
+              <span style={BIODATA_HEADER_LEFT_STYLE}>Personal Information</span>
+              <span className="text-xs font-normal capitalize text-slate-500" style={{ ...BIODATA_HEADER_RIGHT_STYLE, verticalAlign: 'middle' }}>वैयक्तिक माहिती</span>
             </div>
             <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-sm">
               {personalItems.map((item) => (
@@ -83,11 +90,11 @@ export const TraditionalIndianTemplate: React.FC<{ data: DocumentData }> = ({ da
       {sections.astrology.length > 0 && (
         <div className="mb-5 avoid-break">
           <div
-            className="border-b pb-1 mb-2 font-bold uppercase tracking-wider text-sm flex items-center justify-between"
-            style={{ color: primary, borderColor: accent }}
+            className="border-b pb-1 mb-2 font-bold uppercase tracking-wider text-sm"
+            style={{ ...BIODATA_HEADER_ROW_STYLE, color: primary, borderColor: accent }}
           >
-            <span>Astrological Details</span>
-            <span className="text-xs font-normal capitalize text-slate-500">कुंडली विवरण</span>
+            <span style={BIODATA_HEADER_LEFT_STYLE}>Astrological Details</span>
+            <span className="text-xs font-normal capitalize text-slate-500" style={{ ...BIODATA_HEADER_RIGHT_STYLE, verticalAlign: 'middle' }}>कुंडली विवरण</span>
           </div>
           <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-sm">
             {sections.astrology.map((item) => (
@@ -102,11 +109,11 @@ export const TraditionalIndianTemplate: React.FC<{ data: DocumentData }> = ({ da
       {sections.careerEducation.length > 0 && (
         <div className="mb-5 avoid-break">
           <div
-            className="border-b pb-1 mb-2 font-bold uppercase tracking-wider text-sm flex items-center justify-between"
-            style={{ color: primary, borderColor: accent }}
+            className="border-b pb-1 mb-2 font-bold uppercase tracking-wider text-sm"
+            style={{ ...BIODATA_HEADER_ROW_STYLE, color: primary, borderColor: accent }}
           >
-            <span>Education & Profession</span>
-            <span className="text-xs font-normal capitalize text-slate-500">शिक्षण आणि नोकरी</span>
+            <span style={BIODATA_HEADER_LEFT_STYLE}>Education & Profession</span>
+            <span className="text-xs font-normal capitalize text-slate-500" style={{ ...BIODATA_HEADER_RIGHT_STYLE, verticalAlign: 'middle' }}>शिक्षण आणि नोकरी</span>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-2 text-sm">
             {sections.careerEducation.map((item) => (
@@ -122,11 +129,11 @@ export const TraditionalIndianTemplate: React.FC<{ data: DocumentData }> = ({ da
       {sections.family.length > 0 && (
         <div className="mb-5 avoid-break">
           <div
-            className="border-b pb-1 mb-2 font-bold uppercase tracking-wider text-sm flex items-center justify-between"
-            style={{ color: primary, borderColor: accent }}
+            className="border-b pb-1 mb-2 font-bold uppercase tracking-wider text-sm"
+            style={{ ...BIODATA_HEADER_ROW_STYLE, color: primary, borderColor: accent }}
           >
-            <span>Family Details</span>
-            <span className="text-xs font-normal capitalize text-slate-500">कौटुंबिक माहिती</span>
+            <span style={BIODATA_HEADER_LEFT_STYLE}>Family Details</span>
+            <span className="text-xs font-normal capitalize text-slate-500" style={{ ...BIODATA_HEADER_RIGHT_STYLE, verticalAlign: 'middle' }}>कौटुंबिक माहिती</span>
           </div>
           <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-sm">
             {sections.family.map((item) => (

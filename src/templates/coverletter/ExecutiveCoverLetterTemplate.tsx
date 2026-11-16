@@ -2,11 +2,15 @@ import React from 'react';
 import { DocumentData } from '../../types/document';
 import { mapCoverLetterData, MappedCoverLetterData } from '../../utils/mapCoverLetterData';
 import {
+  CL_HEADER_LEFT_STYLE,
+  CL_HEADER_RIGHT_STYLE,
+  CL_HEADER_ROW_STYLE,
   CoverLetterBodyBlocks,
   CoverLetterClosingBlock,
   CoverLetterDetailsBlock,
   CoverLetterSampleText,
   getCoverLetterSheetTypography,
+  sanitizeDocumentTextFields,
   shouldShowCoverLetterSlot,
   useCoverLetterPreviewMode,
 } from './CoverLetterTemplateHelpers';
@@ -14,7 +18,8 @@ import {
 export const ExecutiveCoverLetterTemplate: React.FC<{
   data: DocumentData;
   mapped?: MappedCoverLetterData;
-}> = ({ data, mapped: propMapped }) => {
+}> = ({ data: rawData, mapped: propMapped }) => {
+  const data = sanitizeDocumentTextFields(rawData);
   const mapped = propMapped || mapCoverLetterData(data);
   const { isExportMode, previewMode } = useCoverLetterPreviewMode();
   const primaryColor = data.customization?.primaryColor || '#1c1917';
@@ -54,8 +59,8 @@ export const ExecutiveCoverLetterTemplate: React.FC<{
 
       {/* Split Editorial Executive Masthead */}
       {showHeader && (
-        <div className="cl-header-block flex items-start justify-between gap-8 pb-6 mb-6 border-b border-stone-300">
-          <div className="min-w-0 flex-1">
+        <div className="cl-header-block pb-6 mb-6 border-b border-stone-300" style={CL_HEADER_ROW_STYLE}>
+          <div className="min-w-0" style={CL_HEADER_LEFT_STYLE}>
             {showName && (
               <h1
                 className="cl-name font-bold tracking-tight break-words"
@@ -74,7 +79,10 @@ export const ExecutiveCoverLetterTemplate: React.FC<{
             )}
           </div>
 
-          <div className="text-right cl-meta text-stone-600 font-sans space-y-0.5 shrink-0 max-w-[260px] break-words">
+          <div
+            className="text-right cl-meta text-stone-600 font-sans space-y-0.5 max-w-[260px] break-words"
+            style={{ ...CL_HEADER_RIGHT_STYLE, whiteSpace: 'normal', maxWidth: '260px' }}
+          >
             {showPhone && (
               <div>
                 <CoverLetterSampleText value={mapped.sender.phone} sample="+91 98765 43210" required={!mapped.isEmailType} />

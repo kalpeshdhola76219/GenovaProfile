@@ -2,7 +2,51 @@ import React, { createContext, useContext, useLayoutEffect, useRef } from 'react
 import { DocumentCustomization } from '../../types/document';
 import { MappedCoverLetterData } from '../../utils/mapCoverLetterData';
 import { getStaticFontClass } from '../../utils/fontClassMap';
-import { sanitizeText } from '../../utils/textSanitizer';
+import { sanitizeDocumentTextFields, sanitizeText } from '../../utils/textSanitizer';
+
+export { sanitizeDocumentTextFields, sanitizeText };
+
+export const CL_METADATA_ROW_STYLE: React.CSSProperties = {
+  display: 'table',
+  width: '100%',
+  tableLayout: 'fixed',
+  borderCollapse: 'collapse',
+};
+
+export const CL_METADATA_LEFT_STYLE: React.CSSProperties = {
+  display: 'table-cell',
+  verticalAlign: 'top',
+  textAlign: 'left',
+  paddingRight: '12px',
+};
+
+export const CL_METADATA_RIGHT_STYLE: React.CSSProperties = {
+  display: 'table-cell',
+  verticalAlign: 'top',
+  textAlign: 'right',
+  width: '140px',
+  whiteSpace: 'nowrap',
+};
+
+export const CL_HEADER_ROW_STYLE: React.CSSProperties = {
+  display: 'table',
+  width: '100%',
+  borderCollapse: 'collapse',
+};
+
+export const CL_HEADER_LEFT_STYLE: React.CSSProperties = {
+  display: 'table-cell',
+  verticalAlign: 'top',
+  textAlign: 'left',
+  paddingRight: '16px',
+};
+
+export const CL_HEADER_RIGHT_STYLE: React.CSSProperties = {
+  display: 'table-cell',
+  verticalAlign: 'top',
+  textAlign: 'right',
+  whiteSpace: 'nowrap',
+};
 
 interface CoverLetterPreviewContextValue {
   isExportMode: boolean;

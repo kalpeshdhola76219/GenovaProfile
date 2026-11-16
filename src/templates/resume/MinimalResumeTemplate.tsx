@@ -3,15 +3,20 @@ import { DocumentData } from '../../types/document';
 import { FONT_FAMILY_CSS_MAP } from '../../utils/fontClassMap';
 import {
   BULLET_LIST_STYLE,
+  HEADER_LEFT_STYLE,
+  HEADER_RIGHT_STYLE,
+  HEADER_ROW_STYLE,
   METADATA_LEFT_STYLE,
   METADATA_RIGHT_STYLE,
   METADATA_ROW_STYLE,
+  METADATA_WIDE_RIGHT_STYLE,
   ResumeBulletItem,
   ResumeDescriptionBlock,
+  sanitizeDocumentTextFields,
 } from './resumeTemplateUtils';
 
 export const MinimalResumeTemplate: React.FC<{ data: DocumentData }> = ({ data }) => {
-  const { personal, contact, summary, experience, education, skills, projects, certifications, achievements, customSections, customization } = data;
+  const { personal, contact, summary, experience, education, skills, projects, certifications, achievements, customSections, customization } = sanitizeDocumentTextFields(data);
 
   return (
     <div
@@ -21,8 +26,8 @@ export const MinimalResumeTemplate: React.FC<{ data: DocumentData }> = ({ data }
         fontSize: customization.fontSize === 'sm' ? '12px' : customization.fontSize === 'lg' ? '15px' : '13px',
       }}
     >
-      <div className="flex justify-between items-baseline border-b border-slate-200 pb-5 mb-6" style={METADATA_ROW_STYLE}>
-        <div style={METADATA_LEFT_STYLE}>
+      <div className="border-b border-slate-200 pb-5 mb-6" style={HEADER_ROW_STYLE}>
+        <div style={HEADER_LEFT_STYLE}>
           <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">
             {personal.fullName || 'Full Name'}
           </h1>
@@ -30,7 +35,7 @@ export const MinimalResumeTemplate: React.FC<{ data: DocumentData }> = ({ data }
             {personal.professionalTitle || 'Software Engineer'}
           </p>
         </div>
-        <div className="text-right text-xs text-slate-500 space-y-0.5 no-justify" style={{ flexShrink: 0 }}>
+        <div className="text-right text-xs text-slate-500 space-y-0.5 no-justify" style={HEADER_RIGHT_STYLE}>
           {contact.email && <div>{contact.email}</div>}
           {contact.phone && <div>{contact.phone}</div>}
           {(contact.city || contact.state || contact.country) && <div>{[contact.city, contact.state, contact.country].filter(Boolean).join(', ')}</div>}
@@ -51,7 +56,7 @@ export const MinimalResumeTemplate: React.FC<{ data: DocumentData }> = ({ data }
           <div className="space-y-4">
             {experience.map((exp) => (
               <div key={exp.id} data-entry className="relative pl-4 border-l border-slate-200">
-                <div className="flex justify-between items-baseline text-xs" style={METADATA_ROW_STYLE}>
+                <div className="text-xs" style={METADATA_ROW_STYLE}>
                   <span className="font-semibold text-slate-900" style={METADATA_LEFT_STYLE}>{exp.jobTitle} <span className="text-slate-500 font-normal">at</span> {exp.company}</span>
                   <span className="text-[11px] text-slate-400" style={METADATA_RIGHT_STYLE}>{exp.startDate} &ndash; {(exp.currentlyWorking && (!exp.endDate || exp.endDate.trim().toLowerCase() === 'present')) ? 'Present' : (exp.endDate || 'Present')}</span>
                 </div>
@@ -102,9 +107,9 @@ export const MinimalResumeTemplate: React.FC<{ data: DocumentData }> = ({ data }
           <div className="space-y-2 text-xs">
             {projects.map((p) => (
               <div key={p.id} data-entry>
-                <div className="flex justify-between items-baseline font-semibold" style={METADATA_ROW_STYLE}>
+                <div className="font-semibold" style={METADATA_ROW_STYLE}>
                   <span style={METADATA_LEFT_STYLE}>{p.name}</span>
-                  {p.link && <span className="text-slate-400 font-normal" style={METADATA_RIGHT_STYLE}>{p.link}</span>}
+                  {p.link && <span className="text-slate-400 font-normal" style={METADATA_WIDE_RIGHT_STYLE}>{p.link}</span>}
                 </div>
                 <p className="text-slate-600 mt-0.5">{p.description}</p>
               </div>

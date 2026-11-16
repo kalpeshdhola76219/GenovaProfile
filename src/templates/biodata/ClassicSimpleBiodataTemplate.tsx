@@ -1,9 +1,16 @@
 import React from 'react';
 import { DocumentData } from '../../types/document';
 import { getStaticFontClass } from '../../utils/fontClassMap';
-import { getBiodataSections } from './biodataFields';
+import {
+  BIODATA_HEADER_LEFT_STYLE,
+  BIODATA_HEADER_RIGHT_STYLE,
+  BIODATA_HEADER_ROW_STYLE,
+  getBiodataSections,
+  sanitizeDocumentTextFields,
+} from './biodataFields';
 
-export const ClassicSimpleBiodataTemplate: React.FC<{ data: DocumentData }> = ({ data }) => {
+export const ClassicSimpleBiodataTemplate: React.FC<{ data: DocumentData }> = ({ data: rawData }) => {
+  const data = sanitizeDocumentTextFields(rawData);
   const sections = getBiodataSections(data);
   const { personal, marriage, customization } = data;
 
@@ -30,8 +37,8 @@ export const ClassicSimpleBiodataTemplate: React.FC<{ data: DocumentData }> = ({
       }}
     >
       {/* Header */}
-      <div className="border-b-2 border-slate-800 pb-3 mb-3 flex justify-between items-start shrink-0">
-        <div>
+      <div className="border-b-2 border-slate-800 pb-3 mb-3 shrink-0" style={BIODATA_HEADER_ROW_STYLE}>
+        <div style={BIODATA_HEADER_LEFT_STYLE}>
           <h1 className="text-2xl font-bold uppercase tracking-wider text-slate-900 font-matrimonial-heading">
             Matrimonial Profile
           </h1>
@@ -39,19 +46,17 @@ export const ClassicSimpleBiodataTemplate: React.FC<{ data: DocumentData }> = ({
             {personal.fullName || 'MATRIMONIAL BIODATA'}
           </p>
         </div>
-        {customization.showPhoto !== false && (
-          <div className="shrink-0">
-            {personal.profilePhoto ? (
-              <div className="w-24 h-28 border border-slate-300 p-1 bg-white">
-                <img
-                  src={personal.profilePhoto}
-                  alt={personal.fullName || 'Candidate'}
-                  crossOrigin="anonymous"
-                  referrerPolicy="no-referrer"
-                  className="w-full h-full object-cover object-top"
-                />
-              </div>
-            ) : null}
+        {customization.showPhoto !== false && personal.profilePhoto && (
+          <div style={{ ...BIODATA_HEADER_RIGHT_STYLE, width: '104px' }}>
+            <div className="w-24 h-28 border border-slate-300 p-1 bg-white inline-block">
+              <img
+                src={personal.profilePhoto}
+                alt={personal.fullName || 'Candidate'}
+                crossOrigin="anonymous"
+                referrerPolicy="no-referrer"
+                className="w-full h-full object-cover object-top"
+              />
+            </div>
           </div>
         )}
       </div>

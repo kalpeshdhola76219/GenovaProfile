@@ -2,12 +2,16 @@ import React from 'react';
 import { DocumentData } from '../../types/document';
 import { mapCoverLetterData, MappedCoverLetterData } from '../../utils/mapCoverLetterData';
 import {
+  CL_METADATA_LEFT_STYLE,
+  CL_METADATA_RIGHT_STYLE,
+  CL_METADATA_ROW_STYLE,
   CoverLetterBodyBlocks,
   CoverLetterClosingBlock,
   CoverLetterContactBar,
   CoverLetterDetailsBlock,
   CoverLetterSampleText,
   getCoverLetterSheetTypography,
+  sanitizeDocumentTextFields,
   shouldShowCoverLetterSlot,
   useCoverLetterPreviewMode,
 } from './CoverLetterTemplateHelpers';
@@ -15,7 +19,8 @@ import {
 export const TechLeadCoverLetterTemplate: React.FC<{
   data: DocumentData;
   mapped?: MappedCoverLetterData;
-}> = ({ data, mapped: propMapped }) => {
+}> = ({ data: rawData, mapped: propMapped }) => {
+  const data = sanitizeDocumentTextFields(rawData);
   const mapped = propMapped || mapCoverLetterData(data);
   const { isExportMode, previewMode } = useCoverLetterPreviewMode();
   const primaryColor = data.customization?.primaryColor || '#1e293b';
@@ -91,8 +96,8 @@ export const TechLeadCoverLetterTemplate: React.FC<{
           className="cl-header-block pb-5 mb-6"
           style={{ borderBottom: `2px solid ${primaryColor}` }}
         >
-          <div className="flex items-start justify-between gap-6">
-            <div className="min-w-0 flex-1">
+          <div style={CL_METADATA_ROW_STYLE}>
+            <div className="min-w-0" style={CL_METADATA_LEFT_STYLE}>
               {showName && (
                 <h1
                   className="cl-name font-extrabold tracking-tight break-words"
@@ -112,7 +117,7 @@ export const TechLeadCoverLetterTemplate: React.FC<{
             </div>
 
             {mapped.date && (
-              <div className="text-right font-jetbrains cl-meta text-slate-500 shrink-0 pt-1">
+              <div className="text-right font-jetbrains cl-meta text-slate-500 pt-1" style={CL_METADATA_RIGHT_STYLE}>
                 {mapped.date}
               </div>
             )}

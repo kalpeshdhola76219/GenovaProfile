@@ -3,15 +3,20 @@ import { DocumentData } from '../../types/document';
 import { FONT_FAMILY_CSS_MAP } from '../../utils/fontClassMap';
 import {
   BULLET_LIST_STYLE,
+  HEADER_LEFT_STYLE,
+  HEADER_RIGHT_STYLE,
+  HEADER_ROW_STYLE,
   METADATA_LEFT_STYLE,
   METADATA_RIGHT_STYLE,
   METADATA_ROW_STYLE,
+  METADATA_WIDE_RIGHT_STYLE,
   ResumeBulletItem,
   ResumeDescriptionBlock,
+  sanitizeDocumentTextFields,
 } from './resumeTemplateUtils';
 
 export const ITProfessionalResumeTemplate: React.FC<{ data: DocumentData }> = ({ data }) => {
-  const { personal, contact, summary, experience, education, skills, projects, certifications, achievements, customSections, customization } = data;
+  const { personal, contact, summary, experience, education, skills, projects, certifications, achievements, customSections, customization } = sanitizeDocumentTextFields(data);
 
   return (
     <div
@@ -21,8 +26,8 @@ export const ITProfessionalResumeTemplate: React.FC<{ data: DocumentData }> = ({
         fontSize: customization.fontSize === 'sm' ? '11px' : customization.fontSize === 'lg' ? '14px' : '12px',
       }}
     >
-      <div className="border-b-2 border-slate-900 pb-3 mb-4 flex justify-between items-baseline" style={METADATA_ROW_STYLE}>
-        <div style={METADATA_LEFT_STYLE}>
+      <div className="border-b-2 border-slate-900 pb-3 mb-4" style={HEADER_ROW_STYLE}>
+        <div style={HEADER_LEFT_STYLE}>
           <h1 className="text-2xl font-bold tracking-tight text-slate-900 font-sans" style={{ fontFamily: FONT_FAMILY_CSS_MAP.sans }}>
             {personal.fullName || 'FULL NAME'}
           </h1>
@@ -30,8 +35,8 @@ export const ITProfessionalResumeTemplate: React.FC<{ data: DocumentData }> = ({
             {personal.professionalTitle || 'Senior Software Engineer / DevOps Architect'}
           </p>
         </div>
-        <div className="text-right text-[11px] text-slate-600 no-justify" style={{ flexShrink: 0 }}>
-          <div>{contact.email} | {contact.phone}</div>
+        <div className="text-right text-[11px] text-slate-600 no-justify" style={HEADER_RIGHT_STYLE}>
+          <div>{[contact.email, contact.phone].filter(Boolean).join(' | ')}</div>
           <div>{[contact.city, contact.state, contact.country].filter(Boolean).join(', ')} {contact.linkedin ? `| ${contact.linkedin}` : ''} {(contact.portfolio || contact.website) ? `| ${contact.portfolio || contact.website}` : ''}</div>
         </div>
       </div>
@@ -65,7 +70,7 @@ export const ITProfessionalResumeTemplate: React.FC<{ data: DocumentData }> = ({
           <div className="space-y-3">
             {experience.map((exp) => (
               <div key={exp.id} data-entry>
-                <div className="flex justify-between items-baseline text-xs font-bold" style={METADATA_ROW_STYLE}>
+                <div className="text-xs font-bold" style={METADATA_ROW_STYLE}>
                   <span style={METADATA_LEFT_STYLE}>{exp.jobTitle} @ {exp.company}</span>
                   <span className="text-slate-500 font-normal text-[11px]" style={METADATA_RIGHT_STYLE}>{exp.startDate} - {(exp.currentlyWorking && (!exp.endDate || exp.endDate.trim().toLowerCase() === 'present')) ? 'Present' : (exp.endDate || 'Present')}</span>
                 </div>
@@ -93,9 +98,9 @@ export const ITProfessionalResumeTemplate: React.FC<{ data: DocumentData }> = ({
           <div className="space-y-2">
             {projects.map((proj) => (
               <div key={proj.id} data-entry className="text-xs">
-                <div className="flex justify-between items-baseline font-bold" style={METADATA_ROW_STYLE}>
+                <div className="font-bold" style={METADATA_ROW_STYLE}>
                   <span style={METADATA_LEFT_STYLE}>{proj.name}</span>
-                  {proj.link && <span className="text-indigo-600 font-normal" style={METADATA_RIGHT_STYLE}>{proj.link}</span>}
+                  {proj.link && <span className="text-indigo-600 font-normal" style={METADATA_WIDE_RIGHT_STYLE}>{proj.link}</span>}
                 </div>
                 {proj.technologies && <div className="text-[11px] text-slate-500">[{proj.technologies}]</div>}
                 <p className="text-slate-700 mt-0.5">{proj.description}</p>

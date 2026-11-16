@@ -1,8 +1,15 @@
 import React from 'react';
 import { DocumentData } from '../../types/document';
-import { getBiodataSections } from './biodataFields';
+import {
+  BIODATA_HEADER_LEFT_STYLE,
+  BIODATA_HEADER_RIGHT_STYLE,
+  BIODATA_HEADER_ROW_STYLE,
+  getBiodataSections,
+  sanitizeDocumentTextFields,
+} from './biodataFields';
 
-export const IslamicNikahBiodataTemplate: React.FC<{ data: DocumentData }> = ({ data }) => {
+export const IslamicNikahBiodataTemplate: React.FC<{ data: DocumentData }> = ({ data: rawData }) => {
+  const data = sanitizeDocumentTextFields(rawData);
   const { personal, customSections, customization } = data;
   const emerald = '#065f46';
   const gold = '#d97706';
@@ -56,9 +63,9 @@ export const IslamicNikahBiodataTemplate: React.FC<{ data: DocumentData }> = ({ 
         )}
         {personalItems.length > 0 && (
           <div className="flex-1 bg-white p-4 rounded-xl border shadow-xs" style={{ borderColor: '#a7f3d0' }}>
-            <h2 className="text-xs font-bold uppercase tracking-wider mb-2 font-cinzel text-emerald-900 border-b pb-1 border-emerald-100 flex items-center justify-between">
-              <span>Personal Details</span>
-              <span className="text-[10px] text-emerald-700 font-sans">Deen & Values</span>
+            <h2 className="text-xs font-bold uppercase tracking-wider mb-2 font-cinzel text-emerald-900 border-b pb-1 border-emerald-100" style={BIODATA_HEADER_ROW_STYLE}>
+              <span style={{ ...BIODATA_HEADER_LEFT_STYLE, verticalAlign: 'middle' }}>Personal Details</span>
+              <span className="text-[10px] text-emerald-700 font-sans" style={{ ...BIODATA_HEADER_RIGHT_STYLE, verticalAlign: 'middle' }}>Deen & Values</span>
             </h2>
             <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-xs">
               {personalItems.map((item) => (
@@ -175,15 +182,15 @@ export const IslamicNikahBiodataTemplate: React.FC<{ data: DocumentData }> = ({ 
       )}
 
       {sections.contact.length > 0 && (
-        <div className="pt-3 border-t-2 flex justify-between items-center text-xs" style={{ borderColor: gold }}>
-          <div className="text-stone-600 font-sans flex flex-wrap gap-3">
+        <div className="pt-3 border-t-2 text-xs" style={{ ...BIODATA_HEADER_ROW_STYLE, borderColor: gold }}>
+          <div className="text-stone-600 font-sans flex flex-wrap gap-3" style={{ ...BIODATA_HEADER_LEFT_STYLE, verticalAlign: 'middle' }}>
             {sections.contact.map((item) => (
               <span key={item.key}>
                 <strong>{item.label}:</strong> {item.value}
               </span>
             ))}
           </div>
-          <div className="text-emerald-800 font-bold uppercase tracking-widest text-[10px] font-sans shrink-0">
+          <div className="text-emerald-800 font-bold uppercase tracking-widest text-[10px] font-sans" style={{ ...BIODATA_HEADER_RIGHT_STYLE, verticalAlign: 'middle', width: '110px' }}>
             Alhamdulillah
           </div>
         </div>

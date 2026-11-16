@@ -7,12 +7,14 @@ import {
   METADATA_LEFT_STYLE,
   METADATA_RIGHT_STYLE,
   METADATA_ROW_STYLE,
+  METADATA_WIDE_RIGHT_STYLE,
   ResumeBulletItem,
   ResumeDescriptionBlock,
+  sanitizeDocumentTextFields,
 } from './resumeTemplateUtils';
 
 export const ATSBasicResumeTemplate: React.FC<{ data: DocumentData }> = ({ data }) => {
-  const { personal, contact, summary, experience, education, skills, projects, certifications, achievements, customSections, customization } = data;
+  const { personal, contact, summary, experience, education, skills, projects, certifications, achievements, customSections, customization } = sanitizeDocumentTextFields(data);
 
   return (
     <div
@@ -58,7 +60,7 @@ export const ATSBasicResumeTemplate: React.FC<{ data: DocumentData }> = ({ data 
           <div className="space-y-3">
             {experience.map((exp) => (
               <div key={exp.id} data-entry>
-                <div className="flex justify-between items-baseline text-xs font-bold" style={METADATA_ROW_STYLE}>
+                <div className="text-xs font-bold" style={METADATA_ROW_STYLE}>
                   <span style={METADATA_LEFT_STYLE}>{exp.jobTitle}, {exp.company}</span>
                   <span style={METADATA_RIGHT_STYLE}>{exp.startDate} - {(exp.currentlyWorking && (!exp.endDate || exp.endDate.trim().toLowerCase() === 'present')) ? 'Present' : (exp.endDate || 'Present')}</span>
                 </div>
@@ -89,7 +91,7 @@ export const ATSBasicResumeTemplate: React.FC<{ data: DocumentData }> = ({ data 
           <div className="space-y-2">
             {education.map((edu) => (
               <div key={edu.id} data-entry>
-                <div className="flex justify-between items-baseline text-xs font-bold" style={METADATA_ROW_STYLE}>
+                <div className="text-xs font-bold" style={METADATA_ROW_STYLE}>
                   <span style={METADATA_LEFT_STYLE}>{edu.degree} - {edu.institute}{edu.score ? ` • ${/^[0-9./\s]+$/.test(edu.score.trim()) ? `GPA: ${edu.score.trim()}` : edu.score.trim()}` : ''}</span>
                   <span style={METADATA_RIGHT_STYLE}>{edu.endYear}</span>
                 </div>
@@ -121,9 +123,9 @@ export const ATSBasicResumeTemplate: React.FC<{ data: DocumentData }> = ({ data 
           <div className="space-y-2">
             {projects.map((proj) => (
               <div key={proj.id} data-entry>
-                <div className="flex justify-between items-baseline text-xs font-bold" style={METADATA_ROW_STYLE}>
+                <div className="text-xs font-bold" style={METADATA_ROW_STYLE}>
                   <span style={METADATA_LEFT_STYLE}>{proj.name} {proj.role ? `(${proj.role})` : ''}</span>
-                  {proj.link && <span className="font-normal text-neutral-700" style={METADATA_RIGHT_STYLE}>{proj.link}</span>}
+                  {proj.link && <span className="font-normal text-neutral-700" style={METADATA_WIDE_RIGHT_STYLE}>{proj.link}</span>}
                 </div>
                 {proj.technologies && <div className="text-[11px] italic">Technologies: {proj.technologies}</div>}
                 <p className="text-xs mt-0.5">{proj.description}</p>

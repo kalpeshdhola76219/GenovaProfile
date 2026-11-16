@@ -1,9 +1,16 @@
 import React from 'react';
 import { DocumentData } from '../../types/document';
 import { getStaticFontClass } from '../../utils/fontClassMap';
-import { getBiodataSections } from './biodataFields';
+import {
+  BIODATA_LEFT_STYLE,
+  BIODATA_RIGHT_STYLE,
+  BIODATA_ROW_STYLE,
+  getBiodataSections,
+  sanitizeDocumentTextFields,
+} from './biodataFields';
 
-export const ContemporaryBiodataTemplate: React.FC<{ data: DocumentData }> = ({ data }) => {
+export const ContemporaryBiodataTemplate: React.FC<{ data: DocumentData }> = ({ data: rawData }) => {
+  const data = sanitizeDocumentTextFields(rawData);
   const sections = getBiodataSections(data);
   const { personal, marriage, customization } = data;
 
@@ -74,9 +81,9 @@ export const ContemporaryBiodataTemplate: React.FC<{ data: DocumentData }> = ({ 
               </h2>
               <div className="space-y-1 text-xs">
                 {personalItems.map((item) => (
-                  <div key={item.key} className="flex justify-between gap-3 border-b border-teal-100/60 pb-0.5" style={{ display: 'flex', justifyContent: 'space-between', columnGap: '12px' }}>
-                    <span className="text-slate-500 font-medium shrink-0">{item.label}:</span>
-                    <span className="font-semibold text-slate-900 text-right">{item.value}</span>
+                  <div key={item.key} className="border-b border-teal-100/60 pb-0.5" style={BIODATA_ROW_STYLE}>
+                    <span className="text-slate-500 font-medium" style={{ ...BIODATA_LEFT_STYLE, width: '44%' }}>{item.label}:</span>
+                    <span className="font-semibold text-slate-900" style={{ ...BIODATA_RIGHT_STYLE, width: '56%' }}>{item.value}</span>
                   </div>
                 ))}
               </div>
@@ -91,9 +98,9 @@ export const ContemporaryBiodataTemplate: React.FC<{ data: DocumentData }> = ({ 
               </h2>
               <div className="space-y-1 text-xs">
                 {astrologyItems.map((item) => (
-                  <div key={item.key} className="flex justify-between gap-3 border-b border-teal-100/60 pb-0.5" style={{ display: 'flex', justifyContent: 'space-between', columnGap: '12px' }}>
-                    <span className="text-slate-500 font-medium shrink-0">{item.label}:</span>
-                    <span className="font-semibold text-slate-900 text-right">{item.value}</span>
+                  <div key={item.key} className="border-b border-teal-100/60 pb-0.5" style={BIODATA_ROW_STYLE}>
+                    <span className="text-slate-500 font-medium" style={{ ...BIODATA_LEFT_STYLE, width: '44%' }}>{item.label}:</span>
+                    <span className="font-semibold text-slate-900" style={{ ...BIODATA_RIGHT_STYLE, width: '56%' }}>{item.value}</span>
                   </div>
                 ))}
               </div>
@@ -127,9 +134,9 @@ export const ContemporaryBiodataTemplate: React.FC<{ data: DocumentData }> = ({ 
               </h2>
               <div className="space-y-1 text-xs">
                 {careerItems.map((item) => (
-                  <div key={item.key} className="flex justify-between gap-3 border-b border-slate-200/60 pb-0.5" style={{ display: 'flex', justifyContent: 'space-between', columnGap: '12px' }}>
-                    <span className="text-slate-500 font-medium shrink-0">{item.label}:</span>
-                    <span className="font-semibold text-slate-900 text-right">{item.value}</span>
+                  <div key={item.key} className="border-b border-slate-200/60 pb-0.5" style={BIODATA_ROW_STYLE}>
+                    <span className="text-slate-500 font-medium" style={{ ...BIODATA_LEFT_STYLE, width: '44%' }}>{item.label}:</span>
+                    <span className="font-semibold text-slate-900" style={{ ...BIODATA_RIGHT_STYLE, width: '56%' }}>{item.value}</span>
                   </div>
                 ))}
               </div>
@@ -144,9 +151,9 @@ export const ContemporaryBiodataTemplate: React.FC<{ data: DocumentData }> = ({ 
               </h2>
               <div className="space-y-1 text-xs">
                 {familyItems.map((item) => (
-                  <div key={item.key} className="flex justify-between gap-3 border-b border-teal-100/60 pb-0.5" style={{ display: 'flex', justifyContent: 'space-between', columnGap: '12px' }}>
-                    <span className="text-slate-500 font-medium shrink-0">{item.label}:</span>
-                    <span className="font-semibold text-slate-900 text-right">{item.value}</span>
+                  <div key={item.key} className="border-b border-teal-100/60 pb-0.5" style={BIODATA_ROW_STYLE}>
+                    <span className="text-slate-500 font-medium" style={{ ...BIODATA_LEFT_STYLE, width: '44%' }}>{item.label}:</span>
+                    <span className="font-semibold text-slate-900" style={{ ...BIODATA_RIGHT_STYLE, width: '56%' }}>{item.value}</span>
                   </div>
                 ))}
               </div>
@@ -175,9 +182,9 @@ export const ContemporaryBiodataTemplate: React.FC<{ data: DocumentData }> = ({ 
               </h2>
               <div className="space-y-1 text-xs">
                 {contactItems.map((item) => (
-                  <div key={item.key} className="flex justify-between gap-3 border-b border-slate-200/60 pb-0.5" style={{ display: 'flex', justifyContent: 'space-between', columnGap: '12px' }}>
-                    <span className="text-slate-500 font-medium shrink-0">{item.label}:</span>
-                    <span className="font-semibold text-slate-900 text-right">{item.value}</span>
+                  <div key={item.key} className="border-b border-slate-200/60 pb-0.5" style={BIODATA_ROW_STYLE}>
+                    <span className="text-slate-500 font-medium" style={{ ...BIODATA_LEFT_STYLE, width: '44%' }}>{item.label}:</span>
+                    <span className="font-semibold text-slate-900" style={{ ...BIODATA_RIGHT_STYLE, width: '56%' }}>{item.value}</span>
                   </div>
                 ))}
               </div>

@@ -1,8 +1,15 @@
 import React from 'react';
 import { DocumentData } from '../../types/document';
-import { getBiodataSections } from './biodataFields';
+import {
+  BIODATA_HEADER_LEFT_STYLE,
+  BIODATA_HEADER_RIGHT_STYLE,
+  BIODATA_HEADER_ROW_STYLE,
+  getBiodataSections,
+  sanitizeDocumentTextFields,
+} from './biodataFields';
 
-export const ChristianWeddingBiodataTemplate: React.FC<{ data: DocumentData }> = ({ data }) => {
+export const ChristianWeddingBiodataTemplate: React.FC<{ data: DocumentData }> = ({ data: rawData }) => {
+  const data = sanitizeDocumentTextFields(rawData);
   const sections = getBiodataSections(data);
   const { personal, marriage, customization } = data;
 
@@ -62,9 +69,9 @@ export const ChristianWeddingBiodataTemplate: React.FC<{ data: DocumentData }> =
 
         {personalItems.length > 0 && (
           <div className="flex-1 bg-white p-3 rounded-xl border border-slate-200 shadow-xs">
-            <h2 className="text-xs font-bold uppercase tracking-wider mb-1.5 font-cinzel text-blue-900 border-b pb-1 border-slate-100 flex items-center justify-between">
-              <span>Personal Profile</span>
-              <span className="text-[10px] text-amber-700 font-sans">Sacred Covenant</span>
+            <h2 className="text-xs font-bold uppercase tracking-wider mb-1.5 font-cinzel text-blue-900 border-b pb-1 border-slate-100" style={BIODATA_HEADER_ROW_STYLE}>
+              <span style={{ ...BIODATA_HEADER_LEFT_STYLE, verticalAlign: 'middle' }}>Personal Profile</span>
+              <span className="text-[10px] text-amber-700 font-sans" style={{ ...BIODATA_HEADER_RIGHT_STYLE, verticalAlign: 'middle' }}>Sacred Covenant</span>
             </h2>
             <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
               {personalItems.map((item) => (
@@ -178,11 +185,11 @@ export const ChristianWeddingBiodataTemplate: React.FC<{ data: DocumentData }> =
       </div>
 
       {/* Footer Note */}
-      <div className="pt-2 mt-auto border-t-2 flex justify-between items-center text-xs shrink-0" style={{ borderColor: champagneGold }}>
-        <div className="text-stone-600 font-sans text-[11px] italic">
+      <div className="pt-2 mt-auto border-t-2 text-xs shrink-0" style={{ ...BIODATA_HEADER_ROW_STYLE, borderColor: champagneGold }}>
+        <div className="text-stone-600 font-sans text-[11px] italic" style={{ ...BIODATA_HEADER_LEFT_STYLE, verticalAlign: 'middle' }}>
           May Grace and Joy Fill This Union
         </div>
-        <div className="text-amber-800 font-bold uppercase tracking-widest text-[10px] font-sans">
+        <div className="text-amber-800 font-bold uppercase tracking-widest text-[10px] font-sans" style={{ ...BIODATA_HEADER_RIGHT_STYLE, verticalAlign: 'middle' }}>
           God Bless Our Union
         </div>
       </div>

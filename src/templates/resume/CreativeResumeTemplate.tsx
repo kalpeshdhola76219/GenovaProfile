@@ -7,10 +7,11 @@ import {
   METADATA_RIGHT_STYLE,
   METADATA_ROW_STYLE,
   ResumeDescriptionBlock,
+  sanitizeDocumentTextFields,
 } from './resumeTemplateUtils';
 
 export const CreativeResumeTemplate: React.FC<{ data: DocumentData }> = ({ data }) => {
-  const { personal, contact, summary, experience, education, skills, projects, certifications, achievements, customSections, customization } = data;
+  const { personal, contact, summary, experience, education, skills, projects, certifications, achievements, customSections, customization } = sanitizeDocumentTextFields(data);
   const accent = customization.accentColor || '#ea580c'; // Vibrant Terracotta / Orange
 
   return (
@@ -55,7 +56,7 @@ export const CreativeResumeTemplate: React.FC<{ data: DocumentData }> = ({ data 
           <div className="space-y-3.5">
             {experience.map((exp) => (
               <div key={exp.id} data-entry className="pl-3 border-l-2 border-orange-200">
-                <div className="flex justify-between items-baseline text-xs font-bold" style={METADATA_ROW_STYLE}>
+                <div className="text-xs font-bold" style={METADATA_ROW_STYLE}>
                   <span className="text-slate-900" style={METADATA_LEFT_STYLE}>{exp.jobTitle} &bull; <span className="text-orange-600">{exp.company}</span></span>
                   <span className="text-slate-400 text-[11px]" style={METADATA_RIGHT_STYLE}>{exp.startDate} - {(exp.currentlyWorking && (!exp.endDate || exp.endDate.trim().toLowerCase() === 'present')) ? 'Present' : (exp.endDate || 'Present')}</span>
                 </div>
@@ -130,7 +131,7 @@ export const CreativeResumeTemplate: React.FC<{ data: DocumentData }> = ({ data 
             {certifications.map((c) => (
               <div key={c.id} className="p-2 rounded-lg border border-slate-200 bg-slate-50/40">
                 <div className="font-bold text-slate-900">{c.name}</div>
-                <div className="text-slate-500 text-[11px] flex justify-between items-center mt-0.5" style={METADATA_ROW_STYLE}>
+                <div className="text-slate-500 text-[11px] mt-0.5" style={METADATA_ROW_STYLE}>
                   <span style={METADATA_LEFT_STYLE}>{c.issuer}</span>
                   {c.issueDate && <span className="text-slate-400 font-mono text-[10px]" style={METADATA_RIGHT_STYLE}>{c.issueDate}</span>}
                 </div>

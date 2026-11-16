@@ -5,8 +5,10 @@ import {
   METADATA_ROW_STYLE,
   METADATA_LEFT_STYLE,
   METADATA_RIGHT_STYLE,
+  METADATA_WIDE_RIGHT_STYLE,
   CONTACT_CENTER_ROW_STYLE,
   ResumeDescriptionBlock,
+  sanitizeDocumentTextFields,
 } from './resumeTemplateUtils';
 
 export const PremiumConsultantResumeTemplate: React.FC<{ data: DocumentData }> = ({ data }) => {
@@ -22,7 +24,7 @@ export const PremiumConsultantResumeTemplate: React.FC<{ data: DocumentData }> =
     achievements = [],
     customSections = [],
     customization,
-  } = data;
+  } = sanitizeDocumentTextFields(data);
 
   const navy = customization.primaryColor || '#172554'; // Deep Oxford Navy
   const charcoal = customization.secondaryColor || '#334155'; // Clean Slate
@@ -71,11 +73,11 @@ export const PremiumConsultantResumeTemplate: React.FC<{ data: DocumentData }> =
           <div className="space-y-4">
             {experience.map((exp) => (
               <div key={exp.id} data-entry="true">
-                <div className="flex justify-between items-baseline" style={METADATA_ROW_STYLE}>
+                <div style={METADATA_ROW_STYLE}>
                   <span className="font-bold text-sm text-slate-900" style={METADATA_LEFT_STYLE}>
                     {exp.company} • <span className="font-semibold text-slate-700">{exp.jobTitle}</span>
                   </span>
-                  <span className="text-xs text-slate-500 font-medium" style={METADATA_RIGHT_STYLE}>
+                  <span className="text-xs text-slate-500 font-medium" style={METADATA_WIDE_RIGHT_STYLE}>
                     {exp.location ? `${exp.location} | ` : ''}
                     {exp.startDate} –{' '}
                     {exp.currentlyWorking && (!exp.endDate || exp.endDate.trim().toLowerCase() === 'present')
@@ -112,7 +114,7 @@ export const PremiumConsultantResumeTemplate: React.FC<{ data: DocumentData }> =
           </h2>
           <div className="space-y-2 text-xs">
             {education.map((e) => (
-              <div key={e.id} className="flex justify-between items-baseline" style={METADATA_ROW_STYLE}>
+              <div key={e.id} style={METADATA_ROW_STYLE}>
                 <div style={METADATA_LEFT_STYLE}>
                   <span className="font-bold text-slate-900">{e.institute}</span>
                   <span className="text-slate-600"> — {e.degree}</span>
@@ -135,9 +137,9 @@ export const PremiumConsultantResumeTemplate: React.FC<{ data: DocumentData }> =
           <div className="space-y-3 text-xs">
             {projects.map((p) => (
               <div key={p.id} data-entry="true">
-                <div className="flex justify-between font-bold text-slate-900" style={METADATA_ROW_STYLE}>
+                <div className="font-bold text-slate-900" style={METADATA_ROW_STYLE}>
                   <span style={METADATA_LEFT_STYLE}>{p.name}</span>
-                  {p.technologies && <span className="font-normal text-slate-500 text-[11px]" style={METADATA_RIGHT_STYLE}>{p.technologies}</span>}
+                  {p.technologies && <span className="font-normal text-slate-500 text-[11px]" style={METADATA_WIDE_RIGHT_STYLE}>{p.technologies}</span>}
                 </div>
                 {p.description && <p className="text-slate-700 mt-0.5 leading-relaxed">{p.description}</p>}
               </div>
@@ -192,9 +194,9 @@ export const PremiumConsultantResumeTemplate: React.FC<{ data: DocumentData }> =
               {sec.items && sec.items.length > 0 ? (
                 <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
                   {sec.items.map((i) => (
-                    <div key={i.id} className="flex justify-between items-baseline py-0.5 border-b border-slate-100" style={METADATA_ROW_STYLE}>
+                    <div key={i.id} className="py-0.5 border-b border-slate-100" style={METADATA_ROW_STYLE}>
                       <span className="text-slate-500 font-medium" style={METADATA_LEFT_STYLE}>{i.key}:</span>
-                      <span className="font-semibold text-slate-900" style={METADATA_RIGHT_STYLE}>{i.value}</span>
+                      <span className="font-semibold text-slate-900" style={METADATA_WIDE_RIGHT_STYLE}>{i.value}</span>
                     </div>
                   ))}
                 </div>

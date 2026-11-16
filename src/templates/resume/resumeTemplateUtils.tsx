@@ -4,24 +4,54 @@ import { sanitizeDocumentTextFields, sanitizeText } from '../../utils/textSaniti
 export { sanitizeDocumentTextFields, sanitizeText };
 
 export const METADATA_ROW_STYLE: React.CSSProperties = {
-  display: 'flex',
-  justifyContent: 'space-between',
-  alignItems: 'flex-start',
+  display: 'table',
   width: '100%',
-  gap: '16px',
-  columnGap: '16px',
-  rowGap: '2px',
+  tableLayout: 'fixed',
+  borderCollapse: 'collapse',
 };
 
 export const METADATA_LEFT_STYLE: React.CSSProperties = {
-  flex: 1,
-  minWidth: 0,
+  display: 'table-cell',
+  verticalAlign: 'top',
+  textAlign: 'left',
+  paddingRight: '12px',
 };
 
 export const METADATA_RIGHT_STYLE: React.CSSProperties = {
-  flexShrink: 0,
-  whiteSpace: 'nowrap',
+  display: 'table-cell',
+  verticalAlign: 'top',
   textAlign: 'right',
+  width: '140px',
+  whiteSpace: 'nowrap',
+};
+
+export const METADATA_WIDE_RIGHT_STYLE: React.CSSProperties = {
+  display: 'table-cell',
+  verticalAlign: 'top',
+  textAlign: 'right',
+  width: '40%',
+  whiteSpace: 'normal',
+  overflowWrap: 'anywhere',
+};
+
+export const HEADER_ROW_STYLE: React.CSSProperties = {
+  display: 'table',
+  width: '100%',
+  borderCollapse: 'collapse',
+};
+
+export const HEADER_LEFT_STYLE: React.CSSProperties = {
+  display: 'table-cell',
+  verticalAlign: 'top',
+  textAlign: 'left',
+  paddingRight: '16px',
+};
+
+export const HEADER_RIGHT_STYLE: React.CSSProperties = {
+  display: 'table-cell',
+  verticalAlign: 'top',
+  textAlign: 'right',
+  whiteSpace: 'nowrap',
 };
 
 export const CONTACT_ROW_STYLE: React.CSSProperties = {

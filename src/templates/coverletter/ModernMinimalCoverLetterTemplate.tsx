@@ -2,12 +2,16 @@ import React from 'react';
 import { DocumentData } from '../../types/document';
 import { mapCoverLetterData, MappedCoverLetterData } from '../../utils/mapCoverLetterData';
 import {
+  CL_METADATA_LEFT_STYLE,
+  CL_METADATA_RIGHT_STYLE,
+  CL_METADATA_ROW_STYLE,
   CoverLetterBodyBlocks,
   CoverLetterClosingBlock,
   CoverLetterContactBar,
   CoverLetterDetailsBlock,
   CoverLetterSampleText,
   getCoverLetterSheetTypography,
+  sanitizeDocumentTextFields,
   shouldShowCoverLetterSlot,
   useCoverLetterPreviewMode,
 } from './CoverLetterTemplateHelpers';
@@ -15,7 +19,8 @@ import {
 export const ModernMinimalCoverLetterTemplate: React.FC<{
   data: DocumentData;
   mapped?: MappedCoverLetterData;
-}> = ({ data, mapped: propMapped }) => {
+}> = ({ data: rawData, mapped: propMapped }) => {
+  const data = sanitizeDocumentTextFields(rawData);
   const mapped = propMapped || mapCoverLetterData(data);
   const { isExportMode, previewMode } = useCoverLetterPreviewMode();
   const primaryColor = data.customization?.primaryColor || '#0284c7';
@@ -97,38 +102,43 @@ export const ModernMinimalCoverLetterTemplate: React.FC<{
       {/* Contemporary Minimal Header with Geometric Initials Mark */}
       {showHeader && (
         <div className="cl-header-block pb-5 mb-7 border-b border-slate-200">
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex items-center gap-3.5 min-w-0 flex-1">
-              {(mapped.sender.fullName || !isExportMode) && (
-                <div
-                  className="w-10 h-10 rounded-lg flex items-center justify-center text-white cl-meta font-bold tracking-wider shrink-0"
-                  style={{ backgroundColor: primaryColor }}
-                >
-                  {initials}
-                </div>
-              )}
-              <div className="min-w-0">
-                {showName && (
-                  <h1 className="cl-name font-bold tracking-tight text-slate-900 break-words">
-                    <CoverLetterSampleText value={mapped.sender.fullName} sample="Your Name" required />
-                  </h1>
-                )}
-                {showTitle && (
-                  <p
-                    className="cl-title font-semibold mt-0.5 break-words"
-                    style={{ color: primaryColor }}
+          <div style={CL_METADATA_ROW_STYLE}>
+            <div style={{ ...CL_METADATA_LEFT_STYLE, verticalAlign: 'middle' }}>
+              <div className="flex items-center gap-3.5 min-w-0">
+                {(mapped.sender.fullName || !isExportMode) && (
+                  <div
+                    className="w-10 h-10 rounded-lg flex items-center justify-center text-white cl-meta font-bold tracking-wider shrink-0"
+                    style={{ backgroundColor: primaryColor }}
                   >
-                    <CoverLetterSampleText
-                      value={mapped.sender.professionalTitle}
-                      sample="Your Professional Title"
-                    />
-                  </p>
+                    {initials}
+                  </div>
                 )}
+                <div className="min-w-0">
+                  {showName && (
+                    <h1 className="cl-name font-bold tracking-tight text-slate-900 break-words">
+                      <CoverLetterSampleText value={mapped.sender.fullName} sample="Your Name" required />
+                    </h1>
+                  )}
+                  {showTitle && (
+                    <p
+                      className="cl-title font-semibold mt-0.5 break-words"
+                      style={{ color: primaryColor }}
+                    >
+                      <CoverLetterSampleText
+                        value={mapped.sender.professionalTitle}
+                        sample="Your Professional Title"
+                      />
+                    </p>
+                  )}
+                </div>
               </div>
             </div>
 
             {mapped.date && (
-              <div className="text-right cl-meta font-medium text-slate-500 shrink-0">
+              <div
+                className="text-right cl-meta font-medium text-slate-500"
+                style={{ ...CL_METADATA_RIGHT_STYLE, verticalAlign: 'middle' }}
+              >
                 <div>{mapped.date}</div>
                 {mapped.recipient.jobReferenceId && (
                   <div className="cl-meta text-slate-500 mt-0.5">

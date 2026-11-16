@@ -3,15 +3,20 @@ import { DocumentData } from '../../types/document';
 import { FONT_FAMILY_CSS_MAP } from '../../utils/fontClassMap';
 import {
   BULLET_LIST_STYLE,
+  HEADER_LEFT_STYLE,
+  HEADER_RIGHT_STYLE,
+  HEADER_ROW_STYLE,
   METADATA_LEFT_STYLE,
   METADATA_RIGHT_STYLE,
   METADATA_ROW_STYLE,
+  METADATA_WIDE_RIGHT_STYLE,
   ResumeBulletItem,
   ResumeDescriptionBlock,
+  sanitizeDocumentTextFields,
 } from './resumeTemplateUtils';
 
 export const FinanceProfessionalResumeTemplate: React.FC<{ data: DocumentData }> = ({ data }) => {
-  const { personal, contact, summary, experience, education, skills, projects, certifications, achievements, customSections, customization } = data;
+  const { personal, contact, summary, experience, education, skills, projects, certifications, achievements, customSections, customization } = sanitizeDocumentTextFields(data);
   const primary = customization.primaryColor || '#064e3b'; // Deep Emerald / Green
 
   return (
@@ -22,8 +27,8 @@ export const FinanceProfessionalResumeTemplate: React.FC<{ data: DocumentData }>
         fontSize: customization.fontSize === 'sm' ? '12px' : customization.fontSize === 'lg' ? '15px' : '13px',
       }}
     >
-      <div className="border-b-2 border-emerald-900 pb-3 mb-4 flex justify-between items-baseline" style={METADATA_ROW_STYLE}>
-        <div style={METADATA_LEFT_STYLE}>
+      <div className="border-b-2 border-emerald-900 pb-3 mb-4" style={HEADER_ROW_STYLE}>
+        <div style={HEADER_LEFT_STYLE}>
           <h1 className="text-2xl font-black tracking-tight text-emerald-950 uppercase">
             {personal.fullName || 'FULL NAME'}
           </h1>
@@ -31,8 +36,8 @@ export const FinanceProfessionalResumeTemplate: React.FC<{ data: DocumentData }>
             {personal.professionalTitle || 'Finance & Investment Analyst / Quant'}
           </p>
         </div>
-        <div className="text-right text-xs text-slate-600 font-mono no-justify" style={{ flexShrink: 0 }}>
-          <div>{contact.phone} | {contact.email}</div>
+        <div className="text-right text-xs text-slate-600 font-mono no-justify" style={HEADER_RIGHT_STYLE}>
+          <div>{[contact.phone, contact.email].filter(Boolean).join(' | ')}</div>
           <div>{[contact.city, contact.state, contact.country].filter(Boolean).join(', ')} {contact.linkedin ? `| ${contact.linkedin}` : ''} {(contact.portfolio || contact.website) ? `| ${contact.portfolio || contact.website}` : ''}</div>
         </div>
       </div>
@@ -51,7 +56,7 @@ export const FinanceProfessionalResumeTemplate: React.FC<{ data: DocumentData }>
           <div className="space-y-3">
             {experience.map((exp) => (
               <div key={exp.id} data-entry>
-                <div className="flex justify-between items-baseline text-xs font-bold" style={METADATA_ROW_STYLE}>
+                <div className="text-xs font-bold" style={METADATA_ROW_STYLE}>
                   <span style={METADATA_LEFT_STYLE}>{exp.jobTitle}, <span className="font-semibold text-emerald-900">{exp.company}</span></span>
                   <span className="font-mono text-[11px] text-slate-600" style={METADATA_RIGHT_STYLE}>{exp.startDate} - {(exp.currentlyWorking && (!exp.endDate || exp.endDate.trim().toLowerCase() === 'present')) ? 'Present' : (exp.endDate || 'Present')}</span>
                 </div>
@@ -80,9 +85,9 @@ export const FinanceProfessionalResumeTemplate: React.FC<{ data: DocumentData }>
           <div className="space-y-2 text-xs">
             {projects.map((p) => (
               <div key={p.id} data-entry>
-                <div className="flex justify-between items-baseline font-bold text-slate-900" style={METADATA_ROW_STYLE}>
+                <div className="font-bold text-slate-900" style={METADATA_ROW_STYLE}>
                   <span style={METADATA_LEFT_STYLE}>{p.name}</span>
-                  {p.technologies && <span className="font-normal text-slate-500 font-mono text-[11px]" style={METADATA_RIGHT_STYLE}>{p.technologies}</span>}
+                  {p.technologies && <span className="font-normal text-slate-500 font-mono text-[11px]" style={METADATA_WIDE_RIGHT_STYLE}>{p.technologies}</span>}
                 </div>
                 {p.description && <p className="text-slate-700 mt-0.5 leading-relaxed">{p.description}</p>}
               </div>

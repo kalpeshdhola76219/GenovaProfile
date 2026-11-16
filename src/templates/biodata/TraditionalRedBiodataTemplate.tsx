@@ -1,8 +1,15 @@
 import React from 'react';
 import { DocumentData } from '../../types/document';
-import { getBiodataSections } from './biodataFields';
+import {
+  BIODATA_HEADER_LEFT_STYLE,
+  BIODATA_HEADER_RIGHT_STYLE,
+  BIODATA_HEADER_ROW_STYLE,
+  getBiodataSections,
+  sanitizeDocumentTextFields,
+} from './biodataFields';
 
-export const TraditionalRedBiodataTemplate: React.FC<{ data: DocumentData }> = ({ data }) => {
+export const TraditionalRedBiodataTemplate: React.FC<{ data: DocumentData }> = ({ data: rawData }) => {
+  const data = sanitizeDocumentTextFields(rawData);
   const { personal, customSections, customization } = data;
   const red = customization.primaryColor || '#b91c1c';
   const gold = customization.accentColor || '#d97706';
@@ -57,11 +64,11 @@ export const TraditionalRedBiodataTemplate: React.FC<{ data: DocumentData }> = (
         {personalItems.length > 0 && (
           <div className="flex-1">
             <div
-              className="border-b pb-1 mb-2 font-bold uppercase tracking-wider text-xs flex justify-between"
-              style={{ color: red, borderColor: gold }}
+              className="border-b pb-1 mb-2 font-bold uppercase tracking-wider text-xs"
+              style={{ ...BIODATA_HEADER_ROW_STYLE, color: red, borderColor: gold }}
             >
-              <span>Personal Data</span>
-              <span className="text-[11px] font-normal text-stone-500">व्यक्तिगत विवरण</span>
+              <span style={BIODATA_HEADER_LEFT_STYLE}>Personal Data</span>
+              <span className="text-[11px] font-normal text-stone-500" style={BIODATA_HEADER_RIGHT_STYLE}>व्यक्तिगत विवरण</span>
             </div>
             <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-xs">
               {personalItems.map((item) => (
@@ -77,11 +84,11 @@ export const TraditionalRedBiodataTemplate: React.FC<{ data: DocumentData }> = (
       {sections.astrology.length > 0 && (
         <div className="mb-5 avoid-break">
           <div
-            className="border-b pb-1 mb-2 font-bold uppercase tracking-wider text-xs flex justify-between"
-            style={{ color: red, borderColor: gold }}
+            className="border-b pb-1 mb-2 font-bold uppercase tracking-wider text-xs"
+            style={{ ...BIODATA_HEADER_ROW_STYLE, color: red, borderColor: gold }}
           >
-            <span>Astrological Data</span>
-            <span className="text-[11px] font-normal text-stone-500">ज्योतिष विवरण</span>
+            <span style={BIODATA_HEADER_LEFT_STYLE}>Astrological Data</span>
+            <span className="text-[11px] font-normal text-stone-500" style={BIODATA_HEADER_RIGHT_STYLE}>ज्योतिष विवरण</span>
           </div>
           <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-xs bg-amber-50/50 p-3.5 rounded border border-amber-200/60">
             {sections.astrology.map((item) => (
@@ -96,11 +103,11 @@ export const TraditionalRedBiodataTemplate: React.FC<{ data: DocumentData }> = (
       {sections.careerEducation.length > 0 && (
         <div className="mb-5 avoid-break">
           <div
-            className="border-b pb-1 mb-2 font-bold uppercase tracking-wider text-xs flex justify-between"
-            style={{ color: red, borderColor: gold }}
+            className="border-b pb-1 mb-2 font-bold uppercase tracking-wider text-xs"
+            style={{ ...BIODATA_HEADER_ROW_STYLE, color: red, borderColor: gold }}
           >
-            <span>Education & Professional Standing</span>
-            <span className="text-[11px] font-normal text-stone-500">शिक्षा एवं व्यवसाय</span>
+            <span style={BIODATA_HEADER_LEFT_STYLE}>Education & Professional Standing</span>
+            <span className="text-[11px] font-normal text-stone-500" style={BIODATA_HEADER_RIGHT_STYLE}>शिक्षा एवं व्यवसाय</span>
           </div>
           <div className="grid grid-cols-2 gap-3 text-xs">
             {sections.careerEducation.map((item) => (
@@ -116,11 +123,11 @@ export const TraditionalRedBiodataTemplate: React.FC<{ data: DocumentData }> = (
       {sections.family.length > 0 && (
         <div className="mb-5 avoid-break">
           <div
-            className="border-b pb-1 mb-2 font-bold uppercase tracking-wider text-xs flex justify-between"
-            style={{ color: red, borderColor: gold }}
+            className="border-b pb-1 mb-2 font-bold uppercase tracking-wider text-xs"
+            style={{ ...BIODATA_HEADER_ROW_STYLE, color: red, borderColor: gold }}
           >
-            <span>Family Heritage</span>
-            <span className="text-[11px] font-normal text-stone-500">पारिवारिक विवरण</span>
+            <span style={BIODATA_HEADER_LEFT_STYLE}>Family Heritage</span>
+            <span className="text-[11px] font-normal text-stone-500" style={BIODATA_HEADER_RIGHT_STYLE}>पारिवारिक विवरण</span>
           </div>
           <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-xs bg-amber-50/50 p-3.5 rounded border border-amber-200/60">
             {sections.family.map((item) => (

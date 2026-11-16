@@ -3,8 +3,15 @@ import { DocumentData } from '../../types/document';
 import { getStaticFontClass } from '../../utils/fontClassMap';
 import { GaneshaVector, ToranArchPattern } from './decorativeAssets';
 import { User, Phone, Mail, MapPin, Heart } from 'lucide-react';
+import {
+  BIODATA_HEADER_LEFT_STYLE,
+  BIODATA_HEADER_RIGHT_STYLE,
+  BIODATA_HEADER_ROW_STYLE,
+  sanitizeDocumentTextFields,
+} from './biodataFields';
 
-export const RoyalVedicQRTemplate: React.FC<{ data: DocumentData }> = ({ data }) => {
+export const RoyalVedicQRTemplate: React.FC<{ data: DocumentData }> = ({ data: rawData }) => {
+  const data = sanitizeDocumentTextFields(rawData);
   const { personal, contact, education, experience, family, marriage, customization } = data;
   const bgCream = '#fffcf7';
   const deepMaroon = customization.primaryColor || '#6b1111';
@@ -88,8 +95,8 @@ export const RoyalVedicQRTemplate: React.FC<{ data: DocumentData }> = ({ data })
           </div>
         </div>
 
-        <div className="mt-3.5 mb-3 flex items-center justify-between gap-6 px-2">
-          <div className="flex-1">
+        <div className="mt-3.5 mb-3 px-2" style={BIODATA_HEADER_ROW_STYLE}>
+          <div style={{ ...BIODATA_HEADER_LEFT_STYLE, verticalAlign: 'middle' }}>
             <div
               className="inline-block px-2.5 py-0.5 rounded-sm text-[10px] uppercase font-bold tracking-wider mb-1"
               style={{ backgroundColor: `${deepMaroon}12`, color: deepMaroon }}
@@ -112,10 +119,10 @@ export const RoyalVedicQRTemplate: React.FC<{ data: DocumentData }> = ({ data })
             </p>
           </div>
           {customization.showPhoto !== false && (
-            <div className="shrink-0">
+            <div style={{ ...BIODATA_HEADER_RIGHT_STYLE, verticalAlign: 'middle', width: '120px' }}>
               {personal.profilePhoto ? (
                 <div
-                  className="w-28 h-36 rounded-md p-1 shadow-md relative overflow-hidden"
+                  className="w-28 h-36 rounded-md p-1 shadow-md relative overflow-hidden inline-block"
                   style={{
                     backgroundColor: '#fff',
                     border: `2px solid ${gold}`,
@@ -132,7 +139,7 @@ export const RoyalVedicQRTemplate: React.FC<{ data: DocumentData }> = ({ data })
                 </div>
               ) : (
                 <div
-                  className="w-28 h-36 rounded-md flex flex-col items-center justify-center text-slate-400 bg-amber-50/60"
+                  className="w-28 h-36 rounded-md inline-flex flex-col items-center justify-center text-slate-400 bg-amber-50/60"
                   style={{ border: `1.5px dashed ${gold}` }}
                 >
                   <User size={36} className="opacity-60 mb-1" style={{ color: deepMaroon }} />
@@ -308,10 +315,10 @@ export const RoyalVedicQRTemplate: React.FC<{ data: DocumentData }> = ({ data })
         </div>
 
         <div
-          className="avoid-break mt-auto pt-3 border-t-2 bg-gradient-to-r from-amber-50/70 via-white to-amber-50/70 p-3 rounded-lg flex items-center justify-between gap-4"
-          style={{ borderColor: gold }}
+          className="avoid-break mt-auto pt-3 border-t-2 bg-gradient-to-r from-amber-50/70 via-white to-amber-50/70 p-3 rounded-lg"
+          style={{ ...BIODATA_HEADER_ROW_STYLE, borderColor: gold }}
         >
-          <div className="flex-1 space-y-1.5 text-xs">
+          <div className="space-y-1.5 text-xs" style={{ ...BIODATA_HEADER_LEFT_STYLE, verticalAlign: 'middle' }}>
             <div className="flex items-center gap-1.5 font-bold uppercase tracking-wider font-serif text-[11px]" style={{ color: deepMaroon }}>
               <Heart className="w-3.5 h-3.5 fill-current" />
               <span>Contact & Residence (संपर्क पत्ता)</span>
@@ -342,7 +349,8 @@ export const RoyalVedicQRTemplate: React.FC<{ data: DocumentData }> = ({ data })
             </div>
           </div>
 
-          <div className="shrink-0 flex flex-col items-center text-center p-2 rounded-lg bg-white border shadow-xs" style={{ borderColor: `${gold}99` }}>
+          <div style={{ ...BIODATA_HEADER_RIGHT_STYLE, verticalAlign: 'middle', width: '124px' }}>
+            <div className="inline-flex flex-col items-center text-center p-2 rounded-lg bg-white border shadow-xs" style={{ borderColor: `${gold}99` }}>
             <div className="w-18 h-18 p-1 relative flex items-center justify-center bg-white">
               <svg viewBox="0 0 100 100" fill="none" className="w-full h-full">
                 <rect x="5" y="5" width="26" height="26" rx="2" stroke={deepMaroon} strokeWidth="3" />
@@ -390,6 +398,7 @@ export const RoyalVedicQRTemplate: React.FC<{ data: DocumentData }> = ({ data })
             <div className="mt-1 text-[9px] font-bold text-slate-700 leading-tight max-w-[100px]">
               Scan to connect on WhatsApp / View Full Kundali
             </div>
+          </div>
           </div>
         </div>
 

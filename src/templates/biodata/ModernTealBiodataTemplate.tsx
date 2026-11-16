@@ -8,9 +8,16 @@ import {
   Phone,
   User,
 } from 'lucide-react';
-import { getBiodataSections } from './biodataFields';
+import {
+  BIODATA_HEADER_LEFT_STYLE,
+  BIODATA_HEADER_RIGHT_STYLE,
+  BIODATA_HEADER_ROW_STYLE,
+  getBiodataSections,
+  sanitizeDocumentTextFields,
+} from './biodataFields';
 
-export const ModernTealBiodataTemplate: React.FC<{ data: DocumentData }> = ({ data }) => {
+export const ModernTealBiodataTemplate: React.FC<{ data: DocumentData }> = ({ data: rawData }) => {
+  const data = sanitizeDocumentTextFields(rawData);
   const sections = getBiodataSections(data);
   const { personal, marriage, contact, customization } = data;
 
@@ -44,8 +51,8 @@ export const ModernTealBiodataTemplate: React.FC<{ data: DocumentData }> = ({ da
       }}
     >
       {/* Top Header Banner: Cursive Name, Bio & Profile Photo */}
-      <div className="pt-7 px-8 pb-5 flex items-center justify-between gap-6 bg-white relative">
-        <div className="flex-1 max-w-[65%]">
+      <div className="pt-7 px-8 pb-5 bg-white relative" style={BIODATA_HEADER_ROW_STYLE}>
+        <div style={{ ...BIODATA_HEADER_LEFT_STYLE, verticalAlign: 'middle' }}>
           {/* Script / Stylized Name */}
           <h1
             className="text-3xl md:text-4xl font-bold tracking-tight text-zinc-900 mb-1 font-serif italic"
@@ -73,41 +80,43 @@ export const ModernTealBiodataTemplate: React.FC<{ data: DocumentData }> = ({ da
 
         {/* Top-Right Circular Photo with Concentric Gold Rings */}
         {customization.showPhoto !== false && (
-          <div className="relative shrink-0 w-32 h-32">
-            {/* Dark teal flourish in top-right corner */}
-            <div
-              className="absolute -top-7 -right-8 w-20 h-20 rounded-bl-full pointer-events-none"
-              style={{ backgroundColor: tealBg }}
-            />
-            {personal.profilePhoto ? (
-              <div className="relative w-full h-full flex items-center justify-center">
-                {/* Gold concentric decorative rings */}
-                <div
-                  className="absolute inset-0 rounded-full border-2"
-                  style={{ borderColor: goldAccent }}
-                />
-                <div
-                  className="absolute inset-1.5 rounded-full border"
-                  style={{ borderColor: `${goldAccent}88` }}
-                />
-                <div className="w-28 h-28 rounded-full overflow-hidden shadow-lg bg-zinc-100">
-                  <img
-                    src={personal.profilePhoto}
-                    alt={personal.fullName || 'Profile'}
-                    crossOrigin="anonymous"
-                    referrerPolicy="no-referrer"
-                    className="w-full h-full object-cover object-top"
-                  />
-                </div>
-              </div>
-            ) : (
+          <div style={{ ...BIODATA_HEADER_RIGHT_STYLE, verticalAlign: 'middle', width: '136px' }}>
+            <div className="relative w-32 h-32 inline-block text-left">
+              {/* Dark teal flourish in top-right corner */}
               <div
-                className="w-28 h-28 rounded-full border-2 border-dashed flex items-center justify-center text-teal-800 bg-teal-50"
-                style={{ borderColor: goldAccent }}
-              >
-                <User size={32} />
-              </div>
-            )}
+                className="absolute -top-7 -right-8 w-20 h-20 rounded-bl-full pointer-events-none"
+                style={{ backgroundColor: tealBg }}
+              />
+              {personal.profilePhoto ? (
+                <div className="relative w-full h-full flex items-center justify-center">
+                  {/* Gold concentric decorative rings */}
+                  <div
+                    className="absolute inset-0 rounded-full border-2"
+                    style={{ borderColor: goldAccent }}
+                  />
+                  <div
+                    className="absolute inset-1.5 rounded-full border"
+                    style={{ borderColor: `${goldAccent}88` }}
+                  />
+                  <div className="w-28 h-28 rounded-full overflow-hidden shadow-lg bg-zinc-100">
+                    <img
+                      src={personal.profilePhoto}
+                      alt={personal.fullName || 'Profile'}
+                      crossOrigin="anonymous"
+                      referrerPolicy="no-referrer"
+                      className="w-full h-full object-cover object-top"
+                    />
+                  </div>
+                </div>
+              ) : (
+                <div
+                  className="w-28 h-28 rounded-full border-2 border-dashed flex items-center justify-center text-teal-800 bg-teal-50"
+                  style={{ borderColor: goldAccent }}
+                >
+                  <User size={32} />
+                </div>
+              )}
+            </div>
           </div>
         )}
       </div>

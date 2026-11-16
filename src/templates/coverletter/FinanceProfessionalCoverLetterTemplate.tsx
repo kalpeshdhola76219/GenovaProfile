@@ -2,12 +2,16 @@ import React from 'react';
 import { DocumentData } from '../../types/document';
 import { mapCoverLetterData, MappedCoverLetterData } from '../../utils/mapCoverLetterData';
 import {
+  CL_METADATA_LEFT_STYLE,
+  CL_METADATA_RIGHT_STYLE,
+  CL_METADATA_ROW_STYLE,
   CoverLetterBodyBlocks,
   CoverLetterClosingBlock,
   CoverLetterContactBar,
   CoverLetterDetailsBlock,
   CoverLetterSampleText,
   getCoverLetterSheetTypography,
+  sanitizeDocumentTextFields,
   shouldShowCoverLetterSlot,
   useCoverLetterPreviewMode,
 } from './CoverLetterTemplateHelpers';
@@ -15,7 +19,8 @@ import {
 export const FinanceProfessionalCoverLetterTemplate: React.FC<{
   data: DocumentData;
   mapped?: MappedCoverLetterData;
-}> = ({ data, mapped: propMapped }) => {
+}> = ({ data: rawData, mapped: propMapped }) => {
+  const data = sanitizeDocumentTextFields(rawData);
   const mapped = propMapped || mapCoverLetterData(data);
   const { isExportMode, previewMode } = useCoverLetterPreviewMode();
   const primaryColor = data.customization?.primaryColor || '#064e3b';
@@ -80,19 +85,24 @@ export const FinanceProfessionalCoverLetterTemplate: React.FC<{
           className="cl-header-block pb-4 mb-5"
           style={{ borderBottom: `2px solid ${primaryColor}` }}
         >
-          <div className="flex items-baseline justify-between gap-4">
-            {showName && (
-              <h1
-                className="cl-name font-bold tracking-tight break-words"
-                style={{ color: primaryColor }}
-              >
-                <CoverLetterSampleText value={mapped.sender.fullName} sample="Your Name" required />
-              </h1>
-            )}
+          <div style={CL_METADATA_ROW_STYLE}>
+            <div style={{ ...CL_METADATA_LEFT_STYLE, verticalAlign: 'baseline' }}>
+              {showName && (
+                <h1
+                  className="cl-name font-bold tracking-tight break-words"
+                  style={{ color: primaryColor }}
+                >
+                  <CoverLetterSampleText value={mapped.sender.fullName} sample="Your Name" required />
+                </h1>
+              )}
+            </div>
             {mapped.date && (
-              <span className="cl-meta font-medium text-slate-600 shrink-0 tabular-nums ml-auto">
+              <div
+                className="cl-meta font-medium text-slate-600 tabular-nums"
+                style={{ ...CL_METADATA_RIGHT_STYLE, verticalAlign: 'baseline' }}
+              >
                 {mapped.date}
-              </span>
+              </div>
             )}
           </div>
           {showTitle && (

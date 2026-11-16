@@ -1,9 +1,19 @@
 import React from 'react';
 import { DocumentData } from '../../types/document';
 import { getStaticFontClass } from '../../utils/fontClassMap';
-import { getBiodataSections } from './biodataFields';
+import {
+  BIODATA_HEADER_LEFT_STYLE,
+  BIODATA_HEADER_RIGHT_STYLE,
+  BIODATA_HEADER_ROW_STYLE,
+  BIODATA_LEFT_STYLE,
+  BIODATA_RIGHT_STYLE,
+  BIODATA_ROW_STYLE,
+  getBiodataSections,
+  sanitizeDocumentTextFields,
+} from './biodataFields';
 
-export const PremiumMinimalEditorialTemplate: React.FC<{ data: DocumentData }> = ({ data }) => {
+export const PremiumMinimalEditorialTemplate: React.FC<{ data: DocumentData }> = ({ data: rawData }) => {
+  const data = sanitizeDocumentTextFields(rawData);
   const { personal, customSections, customization } = data;
   const fontClass = getStaticFontClass(customization.fontFamily, 'cormorant');
   const baseFontSize =
@@ -14,16 +24,16 @@ export const PremiumMinimalEditorialTemplate: React.FC<{ data: DocumentData }> =
   return (
     <div className={`document-page-sheet p-12 bg-[#faf9f6] text-stone-900 shadow-sm ${baseFontSize}`}>
       <div className="pb-6 mb-8 border-b border-stone-200">
-        <div className="flex justify-between items-baseline mb-3">
-          <span className="text-[11px] font-mono uppercase tracking-[0.25em] text-stone-400">
+        <div className="mb-3" style={BIODATA_HEADER_ROW_STYLE}>
+          <span className="text-[11px] font-mono uppercase tracking-[0.25em] text-stone-400" style={{ ...BIODATA_HEADER_LEFT_STYLE, verticalAlign: 'baseline' }}>
             Matrimonial Profile
           </span>
-          <span className="text-xs text-stone-500 italic font-cormorant">
+          <span className="text-xs text-stone-500 italic font-cormorant" style={{ ...BIODATA_HEADER_RIGHT_STYLE, verticalAlign: 'baseline' }}>
             Private & Confidential
           </span>
         </div>
-        <div className="flex justify-between items-end">
-          <div>
+        <div style={BIODATA_HEADER_ROW_STYLE}>
+          <div style={{ ...BIODATA_HEADER_LEFT_STYLE, verticalAlign: 'bottom' }}>
             <h1 className={`text-5xl font-light tracking-tight text-stone-900 leading-none ${fontClass}`}>
               {personal.fullName || 'Devina Kapoor'}
             </h1>
@@ -39,14 +49,16 @@ export const PremiumMinimalEditorialTemplate: React.FC<{ data: DocumentData }> =
             )}
           </div>
           {customization.showPhoto !== false && personal.profilePhoto && (
-            <div className="w-28 h-36 overflow-hidden rounded-xs border border-stone-300 shrink-0">
-              <img
-                src={personal.profilePhoto}
-                alt={personal.fullName}
-                crossOrigin="anonymous"
-                referrerPolicy="no-referrer"
-                className="w-full h-full object-cover object-top contrast-110"
-              />
+            <div style={{ ...BIODATA_HEADER_RIGHT_STYLE, verticalAlign: 'bottom', width: '120px' }}>
+              <div className="w-28 h-36 overflow-hidden rounded-xs border border-stone-300 inline-block">
+                <img
+                  src={personal.profilePhoto}
+                  alt={personal.fullName}
+                  crossOrigin="anonymous"
+                  referrerPolicy="no-referrer"
+                  className="w-full h-full object-cover object-top contrast-110"
+                />
+              </div>
             </div>
           )}
         </div>
@@ -61,9 +73,9 @@ export const PremiumMinimalEditorialTemplate: React.FC<{ data: DocumentData }> =
               </h2>
               <div className="space-y-2 text-xs font-sans">
                 {sections.personal.map((item) => (
-                  <div key={item.key} className="flex justify-between gap-2">
-                    <span className="text-stone-400">{item.label}</span>
-                    <span className="font-medium text-stone-800 text-right">{item.value}</span>
+                  <div key={item.key} style={BIODATA_ROW_STYLE}>
+                    <span className="text-stone-400" style={{ ...BIODATA_LEFT_STYLE, width: '44%' }}>{item.label}</span>
+                    <span className="font-medium text-stone-800" style={{ ...BIODATA_RIGHT_STYLE, width: '56%' }}>{item.value}</span>
                   </div>
                 ))}
               </div>
@@ -77,9 +89,9 @@ export const PremiumMinimalEditorialTemplate: React.FC<{ data: DocumentData }> =
               </h2>
               <div className="space-y-2 text-xs font-sans">
                 {sections.astrology.map((item) => (
-                  <div key={item.key} className="flex justify-between gap-2">
-                    <span className="text-stone-400">{item.label}</span>
-                    <span className="font-medium text-stone-800 text-right">{item.value}</span>
+                  <div key={item.key} style={BIODATA_ROW_STYLE}>
+                    <span className="text-stone-400" style={{ ...BIODATA_LEFT_STYLE, width: '44%' }}>{item.label}</span>
+                    <span className="font-medium text-stone-800" style={{ ...BIODATA_RIGHT_STYLE, width: '56%' }}>{item.value}</span>
                   </div>
                 ))}
               </div>
@@ -202,9 +214,9 @@ export const PremiumMinimalEditorialTemplate: React.FC<{ data: DocumentData }> =
         </div>
       </div>
 
-      <div className="pt-4 border-t border-stone-200 flex justify-between items-center text-[11px] text-stone-400 font-mono">
-        <span>EDITORIAL ALLIANCE DOSSIER</span>
-        <span>STRICTLY CONFIDENTIAL</span>
+      <div className="pt-4 border-t border-stone-200 text-[11px] text-stone-400 font-mono" style={BIODATA_HEADER_ROW_STYLE}>
+        <span style={{ ...BIODATA_HEADER_LEFT_STYLE, verticalAlign: 'middle' }}>EDITORIAL ALLIANCE DOSSIER</span>
+        <span style={{ ...BIODATA_HEADER_RIGHT_STYLE, verticalAlign: 'middle' }}>STRICTLY CONFIDENTIAL</span>
       </div>
     </div>
   );

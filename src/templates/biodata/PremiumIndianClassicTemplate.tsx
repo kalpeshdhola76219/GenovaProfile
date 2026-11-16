@@ -1,9 +1,10 @@
 import React from 'react';
 import { DocumentData } from '../../types/document';
 import { getStaticFontClass } from '../../utils/fontClassMap';
-import { getBiodataSections } from './biodataFields';
+import { getBiodataSections, sanitizeDocumentTextFields } from './biodataFields';
 
-export const PremiumIndianClassicTemplate: React.FC<{ data: DocumentData }> = ({ data }) => {
+export const PremiumIndianClassicTemplate: React.FC<{ data: DocumentData }> = ({ data: rawData }) => {
+  const data = sanitizeDocumentTextFields(rawData);
   const { personal, customSections, customization } = data;
   const primary = customization.primaryColor || '#991b1b';
   const gold = customization.secondaryColor || '#d97706';

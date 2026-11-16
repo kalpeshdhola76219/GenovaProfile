@@ -2,10 +2,15 @@ import React from 'react';
 import { DocumentData } from '../../types/document';
 import { getStaticFontClass, getFontFamilyCss, FONT_FAMILY_CSS_MAP } from '../../utils/fontClassMap';
 import {
+  HEADER_LEFT_STYLE,
+  HEADER_RIGHT_STYLE,
+  HEADER_ROW_STYLE,
   METADATA_ROW_STYLE,
   METADATA_LEFT_STYLE,
   METADATA_RIGHT_STYLE,
+  METADATA_WIDE_RIGHT_STYLE,
   ResumeDescriptionBlock,
+  sanitizeDocumentTextFields,
 } from './resumeTemplateUtils';
 
 export const PremiumInternationalResumeTemplate: React.FC<{ data: DocumentData }> = ({ data }) => {
@@ -21,7 +26,7 @@ export const PremiumInternationalResumeTemplate: React.FC<{ data: DocumentData }
     achievements = [],
     customSections = [],
     customization,
-  } = data;
+  } = sanitizeDocumentTextFields(data);
 
   const primary = customization.primaryColor || '#1e3a8a';
   const fontClass = getStaticFontClass(customization.fontFamily, 'jakarta');
@@ -44,22 +49,20 @@ export const PremiumInternationalResumeTemplate: React.FC<{ data: DocumentData }
     >
       {/* Header Banner */}
       <div
-        className="p-8 text-white flex justify-between items-center"
-        style={{ backgroundColor: primary, display: 'flex', justifyContent: 'space-between', alignItems: 'center', columnGap: '16px' }}
+        className="p-8 text-white"
+        style={{ ...HEADER_ROW_STYLE, backgroundColor: primary }}
       >
-        <div className="flex items-center gap-5" style={METADATA_LEFT_STYLE}>
-          <div>
-            <h1 className={`text-2xl font-extrabold uppercase tracking-wide text-white ${fontClass}`} style={{ fontFamily: fontFamilyCss }}>
-              {displayFullName || 'FULL NAME'}
-            </h1>
-            {displayTitle && (
-              <p className="text-xs font-semibold text-blue-100 uppercase tracking-widest mt-0.5 no-justify">
-                {displayTitle}
-              </p>
-            )}
-          </div>
+        <div style={{ ...HEADER_LEFT_STYLE, verticalAlign: 'middle' }}>
+          <h1 className={`text-2xl font-extrabold uppercase tracking-wide text-white ${fontClass}`} style={{ fontFamily: fontFamilyCss }}>
+            {displayFullName || 'FULL NAME'}
+          </h1>
+          {displayTitle && (
+            <p className="text-xs font-semibold text-blue-100 uppercase tracking-widest mt-0.5 no-justify">
+              {displayTitle}
+            </p>
+          )}
         </div>
-        <div className="text-right text-xs text-blue-100 space-y-1 no-justify">
+        <div className="text-right text-xs text-blue-100 space-y-1 no-justify" style={{ ...HEADER_RIGHT_STYLE, verticalAlign: 'middle' }}>
           {displayEmail && <div>✉ {displayEmail}</div>}
           {displayPhone && <div>✆ {displayPhone}</div>}
           {displayLocation && (
@@ -81,9 +84,9 @@ export const PremiumInternationalResumeTemplate: React.FC<{ data: DocumentData }
               </h2>
               <div className="space-y-1.5 text-xs">
                 {skills.map((s) => (
-                  <div key={s.id} className="flex justify-between items-center" style={METADATA_ROW_STYLE}>
+                  <div key={s.id} style={METADATA_ROW_STYLE}>
                     <span className="font-medium text-slate-700" style={METADATA_LEFT_STYLE}>{s.name}</span>
-                    <span className="text-[10px] text-slate-400 capitalize" style={METADATA_RIGHT_STYLE}>{s.level || 'Expert'}</span>
+                    <span className="text-[10px] text-slate-400 capitalize" style={METADATA_WIDE_RIGHT_STYLE}>{s.level || 'Expert'}</span>
                   </div>
                 ))}
               </div>
@@ -162,7 +165,7 @@ export const PremiumInternationalResumeTemplate: React.FC<{ data: DocumentData }
               <div className="space-y-4">
                 {experience.map((exp) => (
                   <div key={exp.id} data-entry="true" className="relative pl-4 border-l-2" style={{ borderColor: primary }}>
-                    <div className="flex justify-between items-baseline" style={METADATA_ROW_STYLE}>
+                    <div style={METADATA_ROW_STYLE}>
                       <div className="font-bold text-sm text-slate-900" style={METADATA_LEFT_STYLE}>{exp.jobTitle}</div>
                       <div className="text-xs text-slate-500 font-medium" style={METADATA_RIGHT_STYLE}>
                         {exp.startDate} – {(exp.currentlyWorking && (!exp.endDate || exp.endDate.trim().toLowerCase() === 'present')) ? 'Present' : (exp.endDate || 'Present')}
@@ -199,9 +202,9 @@ export const PremiumInternationalResumeTemplate: React.FC<{ data: DocumentData }
               <div className="space-y-2.5">
                 {projects.map((p) => (
                   <div key={p.id} data-entry="true" className="text-xs">
-                    <div className="flex justify-between items-baseline" style={METADATA_ROW_STYLE}>
+                    <div style={METADATA_ROW_STYLE}>
                       <span className="font-bold text-slate-900" style={METADATA_LEFT_STYLE}>{p.name}</span>
-                      {p.role && <span className="text-slate-500 text-[11px]" style={METADATA_RIGHT_STYLE}>{p.role}</span>}
+                      {p.role && <span className="text-slate-500 text-[11px]" style={METADATA_WIDE_RIGHT_STYLE}>{p.role}</span>}
                     </div>
                     {p.technologies && <div className="text-[11px] text-slate-500">Tech: {p.technologies}</div>}
                     {p.description && <p className="text-slate-600 mt-0.5">{p.description}</p>}

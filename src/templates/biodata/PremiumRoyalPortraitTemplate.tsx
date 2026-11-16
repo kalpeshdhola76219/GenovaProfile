@@ -1,9 +1,16 @@
 import React from 'react';
 import { DocumentData } from '../../types/document';
 import { getStaticFontClass } from '../../utils/fontClassMap';
-import { getBiodataSections } from './biodataFields';
+import {
+  BIODATA_HEADER_LEFT_STYLE,
+  BIODATA_HEADER_RIGHT_STYLE,
+  BIODATA_HEADER_ROW_STYLE,
+  getBiodataSections,
+  sanitizeDocumentTextFields,
+} from './biodataFields';
 
-export const PremiumRoyalPortraitTemplate: React.FC<{ data: DocumentData }> = ({ data }) => {
+export const PremiumRoyalPortraitTemplate: React.FC<{ data: DocumentData }> = ({ data: rawData }) => {
+  const data = sanitizeDocumentTextFields(rawData);
   const { personal, customSections, customization } = data;
   const primary = customization.primaryColor || '#064e3b';
   const gold = customization.secondaryColor || '#b45309';
@@ -196,11 +203,11 @@ export const PremiumRoyalPortraitTemplate: React.FC<{ data: DocumentData }> = ({
       </div>
 
       {sections.contact.length > 0 && (
-        <div className="pt-3 border-t border-stone-200 flex items-center justify-between flex-wrap gap-4 text-xs text-stone-500">
-          <span className="font-cinzel uppercase text-[11px] tracking-wider" style={{ color: gold }}>
+        <div className="pt-3 border-t border-stone-200 text-xs text-stone-500" style={BIODATA_HEADER_ROW_STYLE}>
+          <span className="font-cinzel uppercase text-[11px] tracking-wider" style={{ ...BIODATA_HEADER_LEFT_STYLE, verticalAlign: 'middle', color: gold }}>
             Royal Portrait Dignity Edition
           </span>
-          <div className="flex gap-4">
+          <div className="flex justify-end flex-wrap gap-4" style={{ ...BIODATA_HEADER_RIGHT_STYLE, verticalAlign: 'middle' }}>
             {sections.contact.map((item) => (
               <span key={item.key}>
                 <strong>{item.label}:</strong> {item.value}

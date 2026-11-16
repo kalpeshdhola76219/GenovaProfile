@@ -1,9 +1,16 @@
 import React from 'react';
 import { DocumentData } from '../../types/document';
 import { getStaticFontClass } from '../../utils/fontClassMap';
-import { getBiodataSections } from './biodataFields';
+import {
+  BIODATA_LEFT_STYLE,
+  BIODATA_RIGHT_STYLE,
+  BIODATA_ROW_STYLE,
+  getBiodataSections,
+  sanitizeDocumentTextFields,
+} from './biodataFields';
 
-export const CircularPhotoBiodataTemplate: React.FC<{ data: DocumentData }> = ({ data }) => {
+export const CircularPhotoBiodataTemplate: React.FC<{ data: DocumentData }> = ({ data: rawData }) => {
+  const data = sanitizeDocumentTextFields(rawData);
   const sections = getBiodataSections(data);
   const { personal, marriage, customization } = data;
 
@@ -64,9 +71,9 @@ export const CircularPhotoBiodataTemplate: React.FC<{ data: DocumentData }> = ({
             </h2>
             <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
               {personalItems.map((item) => (
-                <div key={item.key} className="flex items-start justify-between gap-2 border-b border-stone-100 pb-0.5">
-                  <span className="text-stone-500 font-medium shrink-0">{item.label}:</span>
-                  <span className="font-semibold text-stone-900 text-right break-words flex-1 pl-2">{item.value}</span>
+                <div key={item.key} className="border-b border-stone-100 pb-0.5" style={BIODATA_ROW_STYLE}>
+                  <span className="text-stone-500 font-medium" style={{ ...BIODATA_LEFT_STYLE, width: '44%' }}>{item.label}:</span>
+                  <span className="font-semibold text-stone-900 break-words" style={{ ...BIODATA_RIGHT_STYLE, width: '56%' }}>{item.value}</span>
                 </div>
               ))}
             </div>
@@ -81,9 +88,9 @@ export const CircularPhotoBiodataTemplate: React.FC<{ data: DocumentData }> = ({
             </h2>
             <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
               {astrologyItems.map((item) => (
-                <div key={item.key} className="flex items-start justify-between gap-2 border-b border-stone-100 pb-0.5">
-                  <span className="text-stone-500 font-medium shrink-0">{item.label}:</span>
-                  <span className="font-semibold text-stone-900 text-right break-words flex-1 pl-2">{item.value}</span>
+                <div key={item.key} className="border-b border-stone-100 pb-0.5" style={BIODATA_ROW_STYLE}>
+                  <span className="text-stone-500 font-medium" style={{ ...BIODATA_LEFT_STYLE, width: '44%' }}>{item.label}:</span>
+                  <span className="font-semibold text-stone-900 break-words" style={{ ...BIODATA_RIGHT_STYLE, width: '56%' }}>{item.value}</span>
                 </div>
               ))}
             </div>
@@ -98,9 +105,9 @@ export const CircularPhotoBiodataTemplate: React.FC<{ data: DocumentData }> = ({
             </h2>
             <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
               {careerItems.map((item) => (
-                <div key={item.key} className="flex items-start justify-between gap-2 border-b border-stone-100 pb-0.5">
-                  <span className="text-stone-500 font-medium shrink-0">{item.label}:</span>
-                  <span className="font-semibold text-stone-900 text-right break-words flex-1 pl-2">{item.value}</span>
+                <div key={item.key} className="border-b border-stone-100 pb-0.5" style={BIODATA_ROW_STYLE}>
+                  <span className="text-stone-500 font-medium" style={{ ...BIODATA_LEFT_STYLE, width: '44%' }}>{item.label}:</span>
+                  <span className="font-semibold text-stone-900 break-words" style={{ ...BIODATA_RIGHT_STYLE, width: '56%' }}>{item.value}</span>
                 </div>
               ))}
             </div>
@@ -115,9 +122,9 @@ export const CircularPhotoBiodataTemplate: React.FC<{ data: DocumentData }> = ({
             </h2>
             <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
               {familyItems.map((item) => (
-                <div key={item.key} className="flex items-start justify-between gap-2 border-b border-stone-100 pb-0.5">
-                  <span className="text-stone-500 font-medium shrink-0">{item.label}:</span>
-                  <span className="font-semibold text-stone-900 text-right break-words flex-1 pl-2">{item.value}</span>
+                <div key={item.key} className="border-b border-stone-100 pb-0.5" style={BIODATA_ROW_STYLE}>
+                  <span className="text-stone-500 font-medium" style={{ ...BIODATA_LEFT_STYLE, width: '44%' }}>{item.label}:</span>
+                  <span className="font-semibold text-stone-900 break-words" style={{ ...BIODATA_RIGHT_STYLE, width: '56%' }}>{item.value}</span>
                 </div>
               ))}
             </div>
@@ -170,12 +177,13 @@ export const CircularPhotoBiodataTemplate: React.FC<{ data: DocumentData }> = ({
                 return (
                   <div
                     key={item.key}
-                    className={`flex items-start justify-between gap-2 border-b border-stone-100 pb-0.5 ${
+                    className={`border-b border-stone-100 pb-0.5 ${
                       isFullWidth ? 'col-span-2' : ''
                     }`}
+                    style={BIODATA_ROW_STYLE}
                   >
-                    <span className="text-stone-500 font-medium shrink-0">{item.label}:</span>
-                    <span className="font-semibold text-stone-900 text-right break-words flex-1 pl-2">
+                    <span className="text-stone-500 font-medium" style={{ ...BIODATA_LEFT_STYLE, width: '44%' }}>{item.label}:</span>
+                    <span className="font-semibold text-stone-900 break-words" style={{ ...BIODATA_RIGHT_STYLE, width: '56%' }}>
                       {item.value}
                     </span>
                   </div>

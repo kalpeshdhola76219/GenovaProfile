@@ -9,6 +9,7 @@ import {
   sampleCoverLetterDocument,
 } from '../../data/sampleData';
 import { getPreviewDataForTemplate } from '../../data/previewSampleData';
+import { sanitizeDocumentTextFields } from '../../utils/textSanitizer';
 import {
   X,
   ArrowRight,
@@ -290,7 +291,7 @@ export const TemplatePreviewModal: React.FC<TemplatePreviewModalProps> = ({
               minHeight: '1130px',
             }}
           >
-            <TemplateComponent data={previewData} />
+            <TemplateComponent data={sanitizeDocumentTextFields(previewData)} />
           </div>
         </div>
       </div>

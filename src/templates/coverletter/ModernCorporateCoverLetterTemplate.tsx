@@ -2,12 +2,16 @@ import React from 'react';
 import { DocumentData } from '../../types/document';
 import { mapCoverLetterData, MappedCoverLetterData } from '../../utils/mapCoverLetterData';
 import {
+  CL_METADATA_LEFT_STYLE,
+  CL_METADATA_RIGHT_STYLE,
+  CL_METADATA_ROW_STYLE,
   CoverLetterBodyBlocks,
   CoverLetterClosingBlock,
   CoverLetterContactBar,
   CoverLetterDetailsBlock,
   CoverLetterSampleText,
   getCoverLetterSheetTypography,
+  sanitizeDocumentTextFields,
   shouldShowCoverLetterSlot,
   useCoverLetterPreviewMode,
 } from './CoverLetterTemplateHelpers';
@@ -15,7 +19,8 @@ import {
 export const ModernCorporateCoverLetterTemplate: React.FC<{
   data: DocumentData;
   mapped?: MappedCoverLetterData;
-}> = ({ data, mapped: propMapped }) => {
+}> = ({ data: rawData, mapped: propMapped }) => {
+  const data = sanitizeDocumentTextFields(rawData);
   const mapped = propMapped || mapCoverLetterData(data);
   const { isExportMode, previewMode } = useCoverLetterPreviewMode();
   const primaryColor = data.customization?.primaryColor || '#1e3a8a';
@@ -102,8 +107,8 @@ export const ModernCorporateCoverLetterTemplate: React.FC<{
       {/* Letter Content Body */}
       <div className={`cl-sheet-root ${paddingClass} pt-7`}>
         {(showRecipient || mapped.date) && (
-          <div className="cl-recipient-block flex items-start justify-between gap-6 pb-4 mb-5 border-b border-slate-200">
-            <div className="cl-meta text-slate-700 space-y-0.5 break-words flex-1">
+          <div className="cl-recipient-block pb-4 mb-5 border-b border-slate-200" style={CL_METADATA_ROW_STYLE}>
+            <div className="cl-meta text-slate-700 space-y-0.5 break-words" style={CL_METADATA_LEFT_STYLE}>
               {showRecipient && (
                 <>
                   <div
@@ -150,7 +155,7 @@ export const ModernCorporateCoverLetterTemplate: React.FC<{
             </div>
 
             {mapped.date && (
-              <div className="text-right shrink-0">
+              <div className="text-right" style={CL_METADATA_RIGHT_STYLE}>
                 <div className="cl-label font-bold uppercase tracking-widest text-slate-400">
                   Date
                 </div>
