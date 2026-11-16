@@ -74,6 +74,7 @@ export const OnePageFit: React.FC<OnePageFitProps> = ({
   const [isOverflowing, setIsOverflowing] = useState<boolean>(false);
   const [fillPercent, setFillPercent] = useState<number>(100);
   const [pageBgColor, setPageBgColor] = useState<string>('#ffffff');
+  const [isFitSettled, setIsFitSettled] = useState<boolean>(false);
 
   // Binary search measurement function to find largest s in [0.72, 1.0]
   const measure = () => {
@@ -158,6 +159,7 @@ export const OnePageFit: React.FC<OnePageFitProps> = ({
 
   // Immediate layout measurement on data changes
   useLayoutEffect(() => {
+    setIsFitSettled(false);
     measure();
   }, [
     data.templateId,
@@ -179,36 +181,105 @@ export const OnePageFit: React.FC<OnePageFitProps> = ({
 
   // Observer & event-based re-measurement (ResizeObserver, fonts, images)
   useEffect(() => {
-    const timer = setTimeout(measure, 100);
-    const timer2 = setTimeout(measure, 350);
+    let active = true;
+    const cleanups: Array<() => void> = [];
+    let rafId1 = 0;
+    let rafId2 = 0;
 
-    let ro: ResizeObserver | null = null;
+    const safeMeasure = () => {
+      if (active) measure();
+    };
+
+    const timer = setTimeout(safeMeasure, 100);
+    const timer2 = setTimeout(safeMeasure, 350);
+    cleanups.push(() => {
+      clearTimeout(timer);
+      clearTimeout(timer2);
+    });
+
     if (typeof ResizeObserver !== 'undefined' && measureContainerRef.current) {
-      ro = new ResizeObserver(() => {
-        measure();
-      });
+      const ro = new ResizeObserver(safeMeasure);
       ro.observe(measureContainerRef.current);
-    }
-
-    if (typeof document !== 'undefined' && document.fonts) {
-      document.fonts.ready.then(() => measure()).catch(() => {});
+      cleanups.push(() => ro.disconnect());
     }
 
     const el = measureContainerRef.current;
-    if (el) {
-      const imgs = Array.from(el.querySelectorAll('img'));
-      imgs.forEach((img) => {
-        if (!img.complete) {
-          img.addEventListener('load', measure);
-          img.addEventListener('error', measure);
-        }
-      });
+
+    const onFontLoadingDone = () => {
+      safeMeasure();
+    };
+    if (typeof document !== 'undefined' && document.fonts) {
+      document.fonts.addEventListener('loadingdone', onFontLoadingDone);
+      cleanups.push(() => document.fonts.removeEventListener('loadingdone', onFontLoadingDone));
     }
 
+    const waitAndSettle = async () => {
+      try {
+        if (typeof document !== 'undefined' && document.fonts) {
+          const text = el?.textContent || '';
+          if (/[\u0A80-\u0AFF]/.test(text)) {
+            await Promise.allSettled([
+              document.fonts.load('400 14px "Noto Sans Gujarati"'),
+              document.fonts.load('600 14px "Noto Sans Gujarati"'),
+            ]);
+          }
+          await document.fonts.ready;
+        }
+      } catch {}
+
+      if (el) {
+        const imgs = Array.from(el.querySelectorAll('img'));
+        await Promise.all(
+          imgs.map(
+            (img) =>
+              new Promise<void>((resolve) => {
+                const finish = async () => {
+                  try {
+                    if (img.complete && img.naturalWidth > 0 && typeof img.decode === 'function') {
+                      await img.decode();
+                    }
+                  } catch {}
+                  resolve();
+                };
+                if (img.complete) {
+                  void finish();
+                  return;
+                }
+                const onLoadOrError = () => {
+                  img.removeEventListener('load', onLoadOrError);
+                  img.removeEventListener('error', onLoadOrError);
+                  safeMeasure();
+                  void finish();
+                };
+                img.addEventListener('load', onLoadOrError);
+                img.addEventListener('error', onLoadOrError);
+                cleanups.push(() => {
+                  img.removeEventListener('load', onLoadOrError);
+                  img.removeEventListener('error', onLoadOrError);
+                });
+              })
+          )
+        );
+      }
+
+      if (!active) return;
+      measure();
+      rafId1 = requestAnimationFrame(() => {
+        if (!active) return;
+        measure();
+        rafId2 = requestAnimationFrame(() => {
+          if (active) setIsFitSettled(true);
+        });
+      });
+    };
+
+    void waitAndSettle();
+
     return () => {
-      clearTimeout(timer);
-      clearTimeout(timer2);
-      if (ro) ro.disconnect();
+      active = false;
+      if (rafId1) cancelAnimationFrame(rafId1);
+      if (rafId2) cancelAnimationFrame(rafId2);
+      cleanups.forEach((fn) => fn());
     };
   }, [data]);
 
@@ -365,6 +436,7 @@ export const OnePageFit: React.FC<OnePageFitProps> = ({
         data-document-type="biodata"
         data-fill-percent={fillPercent}
         data-is-overflowing={isOverflowing ? 'true' : 'false'}
+        data-fit-settled={isFitSettled ? 'true' : 'false'}
         data-scale={scale}
         style={{
           width: '800px',

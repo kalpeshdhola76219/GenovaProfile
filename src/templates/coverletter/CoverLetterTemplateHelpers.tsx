@@ -350,6 +350,16 @@ export const CoverLetterClosingBlock: React.FC<{
           <img
             src={closing.signatureImage}
             alt="Signature"
+            crossOrigin={
+              closing.signatureImage.startsWith('data:') || closing.signatureImage.startsWith('blob:')
+                ? undefined
+                : 'anonymous'
+            }
+            referrerPolicy={
+              closing.signatureImage.startsWith('data:') || closing.signatureImage.startsWith('blob:')
+                ? undefined
+                : 'no-referrer'
+            }
             className="max-h-[44px] w-auto object-contain"
           />
         </div>

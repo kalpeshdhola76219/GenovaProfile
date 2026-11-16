@@ -48,6 +48,7 @@ export const CoverLetterOnePagePreview: React.FC<CoverLetterOnePagePreviewProps>
   const [isVerticallyBalanced, setIsVerticallyBalanced] = useState<boolean>(false);
   const [pageBgColor, setPageBgColor] = useState<string>('#ffffff');
   const [isPrinting, setIsPrinting] = useState<boolean>(false);
+  const [isFitSettled, setIsFitSettled] = useState<boolean>(false);
 
   const outerPreviewCtx = useContext(CoverLetterPreviewContext);
   const effectiveExportMode = outerPreviewCtx.isExportMode || isPrinting;
@@ -125,6 +126,7 @@ export const CoverLetterOnePagePreview: React.FC<CoverLetterOnePagePreviewProps>
   // Measure immediately on initial mount or template/export/customization switches; debounce typing by ~120ms
   const immediateKey = `${data.templateId}|${effectiveExportMode}|${JSON.stringify(data.customization)}`;
   useLayoutEffect(() => {
+    setIsFitSettled(false);
     if (lastImmediateKeyRef.current !== immediateKey) {
       lastImmediateKeyRef.current = immediateKey;
       measureFit();
@@ -144,47 +146,112 @@ export const CoverLetterOnePagePreview: React.FC<CoverLetterOnePagePreviewProps>
     };
   }, [mapped, immediateKey, measureFit]);
 
-  // Single font-ready pass on mount + ResizeObserver on single visible stage (debounced 120ms)
+  // Font-ready pass + loadingdone + image decode + ResizeObserver on single visible stage
   useEffect(() => {
     let active = true;
-    if (typeof document !== 'undefined' && document.fonts) {
-      document.fonts.ready
-        .then(() => {
-          if (active) measureFit();
-        })
-        .catch(() => {});
-    }
-
+    const cleanups: Array<() => void> = [];
+    let rafId1 = 0;
+    let rafId2 = 0;
     const stageEl = stageRef.current;
-    if (!stageEl || typeof ResizeObserver === 'undefined') {
-      return () => {
-        active = false;
-      };
+
+    const onFontLoadingDone = () => {
+      if (active) measureFit();
+    };
+    if (typeof document !== 'undefined' && document.fonts) {
+      document.fonts.addEventListener('loadingdone', onFontLoadingDone);
+      cleanups.push(() => document.fonts.removeEventListener('loadingdone', onFontLoadingDone));
     }
 
-    const observer = new ResizeObserver(() => {
-      if (resizeTimerRef.current) {
-        clearTimeout(resizeTimerRef.current);
-      }
-      resizeTimerRef.current = setTimeout(() => {
-        if (active) measureFit();
-      }, 120);
-    });
+    const settleMeasurement = async () => {
+      try {
+        if (typeof document !== 'undefined' && document.fonts) {
+          const text = stageEl?.textContent || '';
+          if (/[\u0A80-\u0AFF]/.test(text)) {
+            await Promise.allSettled([
+              document.fonts.load('400 14px "Noto Sans Gujarati"'),
+              document.fonts.load('600 14px "Noto Sans Gujarati"'),
+            ]);
+          }
+          await document.fonts.ready;
+        }
+      } catch {}
 
-    if (stageEl.firstElementChild) {
-      observer.observe(stageEl.firstElementChild);
-    } else {
-      observer.observe(stageEl);
+      if (stageEl) {
+        const imgs = Array.from(stageEl.querySelectorAll('img'));
+        await Promise.all(
+          imgs.map(
+            (img) =>
+              new Promise<void>((resolve) => {
+                const finish = async () => {
+                  try {
+                    if (img.complete && img.naturalWidth > 0 && typeof img.decode === 'function') {
+                      await img.decode();
+                    }
+                  } catch {}
+                  resolve();
+                };
+                if (img.complete) {
+                  void finish();
+                  return;
+                }
+                const onLoadOrError = () => {
+                  img.removeEventListener('load', onLoadOrError);
+                  img.removeEventListener('error', onLoadOrError);
+                  if (active) measureFit();
+                  void finish();
+                };
+                img.addEventListener('load', onLoadOrError);
+                img.addEventListener('error', onLoadOrError);
+                cleanups.push(() => {
+                  img.removeEventListener('load', onLoadOrError);
+                  img.removeEventListener('error', onLoadOrError);
+                });
+              })
+          )
+        );
+      }
+
+      if (!active) return;
+      measureFit();
+      rafId1 = requestAnimationFrame(() => {
+        if (!active) return;
+        measureFit();
+        rafId2 = requestAnimationFrame(() => {
+          if (active) setIsFitSettled(true);
+        });
+      });
+    };
+
+    void settleMeasurement();
+
+    if (stageEl && typeof ResizeObserver !== 'undefined') {
+      const observer = new ResizeObserver(() => {
+        if (resizeTimerRef.current) {
+          clearTimeout(resizeTimerRef.current);
+        }
+        resizeTimerRef.current = setTimeout(() => {
+          if (active) measureFit();
+        }, 120);
+      });
+
+      if (stageEl.firstElementChild) {
+        observer.observe(stageEl.firstElementChild);
+      } else {
+        observer.observe(stageEl);
+      }
+      cleanups.push(() => observer.disconnect());
     }
 
     return () => {
       active = false;
-      observer.disconnect();
+      if (rafId1) cancelAnimationFrame(rafId1);
+      if (rafId2) cancelAnimationFrame(rafId2);
       if (resizeTimerRef.current) {
         clearTimeout(resizeTimerRef.current);
       }
+      cleanups.forEach((fn) => fn());
     };
-  }, [measureFit, data.templateId]);
+  }, [measureFit, data.templateId, mapped, effectiveExportMode]);
 
   useEffect(() => {
     onPageCountChange?.(1);
@@ -281,7 +348,6 @@ export const CoverLetterOnePagePreview: React.FC<CoverLetterOnePagePreviewProps>
             -webkit-hyphens: none !important;
             overflow-wrap: break-word !important;
             word-break: normal !important;
-            text-wrap: pretty;
           }
           .cl-one-page-stage .cl-body-content .cl-unbreakable-token {
             overflow-wrap: anywhere !important;
@@ -463,6 +529,7 @@ export const CoverLetterOnePagePreview: React.FC<CoverLetterOnePagePreviewProps>
           lang="en"
           data-cl-justify="true"
           data-is-overflowing={isHeightOverflowing ? 'true' : 'false'}
+          data-fit-settled={isFitSettled ? 'true' : 'false'}
           data-overflow-paragraph={String(longestParagraphIndex || 2)}
           style={{
             width: '800px',

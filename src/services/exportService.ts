@@ -94,25 +94,153 @@ export function generateExportFilename(
   return `${base}.${extension}`;
 }
 
+const KNOWN_TEMPLATE_FONTS = [
+  'Plus Jakarta Sans',
+  'Inter',
+  'Poppins',
+  'Playfair Display',
+  'Cormorant Garamond',
+  'Cinzel',
+  'JetBrains Mono',
+  'Caveat',
+  'Rozha One',
+  'Yatra One',
+  'Noto Sans Gujarati',
+];
+
+const GUJARATI_CHAR_REGEX = /[\u0A80-\u0AFF]/;
+const MODERN_COLOR_FUNC_REGEX = /(oklch|oklab|lab|lch|color-mix|color)\(/gi;
+
+let colorProbeEl: HTMLSpanElement | null = null;
+
+function resolveColorMixInDom(expr: string): string | null {
+  if (typeof document === 'undefined' || !document.body) return null;
+  try {
+    if (!colorProbeEl || !document.body.contains(colorProbeEl)) {
+      colorProbeEl = document.createElement('span');
+      colorProbeEl.style.position = 'fixed';
+      colorProbeEl.style.left = '-9999px';
+      colorProbeEl.style.top = '-9999px';
+      colorProbeEl.style.visibility = 'hidden';
+      colorProbeEl.style.pointerEvents = 'none';
+      document.body.appendChild(colorProbeEl);
+    }
+    colorProbeEl.style.color = '';
+    colorProbeEl.style.color = expr;
+    const resolved = window.getComputedStyle(colorProbeEl).color;
+    if (!resolved || resolved.includes('color-mix')) return null;
+    if (resolved.includes('oklch') || resolved.includes('oklab') || resolved.includes('lab(') || resolved.includes('lch(') || resolved.includes('color(')) {
+      return formatRgb(resolved) || resolved;
+    }
+    return resolved;
+  } catch {
+    return null;
+  }
+}
+
+function replaceBalancedColorFunctions(
+  input: string,
+  transform: (fnName: string, fullExpr: string) => string
+): string {
+  const lower = input.toLowerCase();
+  const targets = ['color-mix(', 'oklch(', 'oklab(', 'color(', 'lab(', 'lch('];
+  let result = '';
+  let idx = 0;
+
+  while (idx < input.length) {
+    let nextPos = -1;
+    let matchedTarget = '';
+    for (const t of targets) {
+      const found = lower.indexOf(t, idx);
+      if (found !== -1 && (nextPos === -1 || found < nextPos)) {
+        // Ensure word boundary before function name (not part of e.g. background-color() or var(--color-))
+        const prevChar = found > 0 ? lower[found - 1] : '';
+        if (!prevChar || !/[a-z0-9_-]/i.test(prevChar)) {
+          nextPos = found;
+          matchedTarget = t;
+        }
+      }
+    }
+
+    if (nextPos === -1) {
+      result += input.slice(idx);
+      break;
+    }
+
+    result += input.slice(idx, nextPos);
+    const openParenIdx = nextPos + matchedTarget.length - 1;
+    let depth = 0;
+    let endIdx = openParenIdx;
+
+    while (endIdx < input.length) {
+      const ch = input[endIdx];
+      if (ch === '(') depth++;
+      else if (ch === ')') {
+        depth--;
+        if (depth === 0) {
+          endIdx++;
+          break;
+        }
+      }
+      endIdx++;
+    }
+
+    if (depth !== 0) {
+      result += input.slice(nextPos);
+      break;
+    }
+
+    const fullExpr = input.slice(nextPos, endIdx);
+    const fnName = matchedTarget.slice(0, -1);
+    result += transform(fnName, fullExpr);
+    idx = endIdx;
+  }
+
+  return result;
+}
+
 export function sanitizeModernColorString(cssString: string): string {
   if (!cssString || typeof cssString !== 'string') return cssString;
-  if (
-    !cssString.includes('oklch') &&
-    !cssString.includes('oklab') &&
-    !cssString.includes('lab(') &&
-    !cssString.includes('lch(') &&
-    !cssString.includes('color(')
-  ) {
+  MODERN_COLOR_FUNC_REGEX.lastIndex = 0;
+  if (!MODERN_COLOR_FUNC_REGEX.test(cssString)) {
     return cssString;
   }
-  return cssString.replace(/(oklch|oklab|lab|lch|color)\([^)]+\)/gi, (match) => {
+
+  return replaceBalancedColorFunctions(cssString, (fnName, fullExpr) => {
     try {
-      const converted = formatRgb(match);
-      return converted || match;
+      if (fnName === 'color-mix') {
+        const innerSanitized = sanitizeModernColorString(fullExpr.slice('color-mix('.length, -1));
+        const normalizedExpr = `color-mix(${innerSanitized})`;
+        const resolved = resolveColorMixInDom(normalizedExpr);
+        return resolved || fullExpr;
+      }
+      const converted = formatRgb(fullExpr);
+      return converted || fullExpr;
     } catch {
-      return match;
+      return fullExpr;
     }
   });
+}
+
+function sanitizeCssRuleList(rules: CSSRuleList, styleRuleCtor: typeof CSSStyleRule): void {
+  for (let r = 0; r < rules.length; r++) {
+    const rule = rules[r] as CSSRule & { cssRules?: CSSRuleList; style?: CSSStyleDeclaration };
+    if (rule instanceof styleRuleCtor && rule.style?.cssText) {
+      const cssText = rule.style.cssText;
+      if (
+        cssText.includes('oklch') ||
+        cssText.includes('oklab') ||
+        cssText.includes('color(') ||
+        cssText.includes('color-mix(') ||
+        cssText.includes('lab(') ||
+        cssText.includes('lch(')
+      ) {
+        rule.style.cssText = sanitizeModernColorString(cssText);
+      }
+    } else if (rule.cssRules) {
+      sanitizeCssRuleList(rule.cssRules, styleRuleCtor);
+    }
+  }
 }
 
 export function sanitizeClonedDocumentForExport(
@@ -127,7 +255,8 @@ export function sanitizeClonedDocumentForExport(
         styleTag.textContent &&
         (styleTag.textContent.includes('oklch') ||
           styleTag.textContent.includes('oklab') ||
-          styleTag.textContent.includes('color('))
+          styleTag.textContent.includes('color(') ||
+          styleTag.textContent.includes('color-mix('))
       ) {
         styleTag.textContent = sanitizeModernColorString(styleTag.textContent);
       }
@@ -138,19 +267,13 @@ export function sanitizeClonedDocumentForExport(
 
   try {
     const sheets = clonedDoc.styleSheets;
+    const styleRuleCtor = clonedDoc.defaultView?.CSSStyleRule || CSSStyleRule;
     for (let s = 0; s < sheets.length; s++) {
       try {
         const sheet = sheets[s];
         const rules = sheet.cssRules || sheet.rules;
         if (rules) {
-          for (let r = 0; r < rules.length; r++) {
-            const rule = rules[r];
-            if (rule instanceof (clonedDoc.defaultView?.CSSStyleRule || CSSStyleRule)) {
-              if (rule.style?.cssText && rule.style.cssText.includes('oklch')) {
-                rule.style.cssText = sanitizeModernColorString(rule.style.cssText);
-              }
-            }
-          }
+          sanitizeCssRuleList(rules, styleRuleCtor);
         }
       } catch {}
     }
@@ -206,7 +329,8 @@ export function sanitizeClonedDocumentForExport(
               val.includes('oklab') ||
               val.includes('lab(') ||
               val.includes('lch(') ||
-              val.includes('color('))
+              val.includes('color(') ||
+              val.includes('color-mix('))
           ) {
             const sanitized = sanitizeModernColorString(val);
             clonedEl.style[prop as any] = sanitized;
@@ -219,7 +343,13 @@ export function sanitizeClonedDocumentForExport(
           (clonedEl.style as any).hyphens = 'none';
           (clonedEl.style as any).webkitHyphens = 'none';
         }
-        if (clonedEl.style.cssText && clonedEl.style.cssText.includes('oklch')) {
+        if (
+          clonedEl.style.cssText &&
+          (clonedEl.style.cssText.includes('oklch') ||
+            clonedEl.style.cssText.includes('oklab') ||
+            clonedEl.style.cssText.includes('color(') ||
+            clonedEl.style.cssText.includes('color-mix('))
+        ) {
           clonedEl.style.cssText = sanitizeModernColorString(clonedEl.style.cssText);
         }
       } catch {}
@@ -236,26 +366,162 @@ export function sanitizeClonedDocumentForExport(
       parent.style.zoom = '1';
       parent = parent.parentElement;
     }
+    const liveComputedTarget = window.getComputedStyle(liveTarget);
     clonedTarget.style.transform = 'none';
     clonedTarget.style.transition = 'none';
     clonedTarget.style.zoom = '1';
-    clonedTarget.style.width = liveTarget.style.width || '800px';
-    clonedTarget.style.height = liveTarget.style.height || '1131px';
+    clonedTarget.style.width = liveTarget.style.width || `${liveTarget.offsetWidth || 800}px`;
+    clonedTarget.style.height = liveTarget.style.height || `${liveTarget.offsetHeight || 1131}px`;
     clonedTarget.style.boxSizing = 'border-box';
     clonedTarget.style.wordBreak = 'normal';
     clonedTarget.style.overflowWrap = 'break-word';
     (clonedTarget.style as any).hyphens = 'none';
     (clonedTarget.style as any).webkitHyphens = 'none';
-    clonedTarget.style.textRendering = 'geometricPrecision';
-    (clonedTarget.style as any).webkitFontSmoothing = 'antialiased';
+    clonedTarget.style.textRendering = liveComputedTarget.textRendering || 'auto';
   } catch {}
+}
+
+async function ensureFontsLoadedForElement(element: HTMLElement): Promise<void> {
+  if (typeof document === 'undefined' || !document.fonts) return;
+
+  const fontRequests = new Set<string>();
+  const textContent = element.textContent || '';
+  if (GUJARATI_CHAR_REGEX.test(textContent)) {
+    fontRequests.add('400 16px "Noto Sans Gujarati"');
+    fontRequests.add('500 16px "Noto Sans Gujarati"');
+    fontRequests.add('600 16px "Noto Sans Gujarati"');
+    fontRequests.add('700 16px "Noto Sans Gujarati"');
+  }
+
+  const nodes = [element, ...Array.from(element.querySelectorAll('*'))].slice(0, 250) as HTMLElement[];
+  for (const node of nodes) {
+    try {
+      const style = window.getComputedStyle(node);
+      const familyAttr = style.fontFamily || '';
+      const weight = style.fontWeight || '400';
+      const fontStyle = style.fontStyle === 'italic' ? 'italic' : 'normal';
+      for (const knownFont of KNOWN_TEMPLATE_FONTS) {
+        if (familyAttr.includes(knownFont)) {
+          fontRequests.add(`${fontStyle} ${weight} 16px "${knownFont}"`);
+          fontRequests.add(`normal 400 16px "${knownFont}"`);
+          fontRequests.add(`normal 600 16px "${knownFont}"`);
+          fontRequests.add(`normal 700 16px "${knownFont}"`);
+        }
+      }
+    } catch {}
+  }
+
+  if (fontRequests.size > 0) {
+    const loadPromises = Array.from(fontRequests).map((desc) =>
+      document.fonts.load(desc).catch(() => [])
+    );
+    await Promise.race([
+      Promise.allSettled(loadPromises),
+      new Promise<void>((resolve) => setTimeout(resolve, 6000)),
+    ]);
+  }
+
+  await Promise.race([
+    document.fonts.ready,
+    new Promise<void>((resolve) => setTimeout(resolve, 6000)),
+  ]);
+}
+
+async function waitForLayoutSettlement(rootElement: HTMLElement): Promise<void> {
+  const start = Date.now();
+  const maxWaitMs = 2500;
+
+  while (Date.now() - start < maxWaitMs) {
+    const unsettled =
+      rootElement.querySelector('[data-pagination-settled="false"], [data-fit-settled="false"]') ||
+      (rootElement.matches('[data-pagination-settled="false"], [data-fit-settled="false"]')
+        ? rootElement
+        : null);
+    if (!unsettled) {
+      break;
+    }
+    await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+  }
+
+  await new Promise<void>((resolve) => {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => resolve());
+    });
+  });
+}
+
+async function decodeAndVerifyImages(element: HTMLElement): Promise<void> {
+  const images = Array.from(element.querySelectorAll('img'));
+  if (images.length === 0) return;
+
+  await Promise.all(
+    images.map(async (img) => {
+      const src = img.getAttribute('src') || img.src || '';
+      if (!src) {
+        throw new Error('A required image in the document has no source URL.');
+      }
+
+      if (!img.complete) {
+        await new Promise<void>((resolve, reject) => {
+          let finished = false;
+          const cleanup = () => {
+            img.removeEventListener('load', onLoad);
+            img.removeEventListener('error', onError);
+          };
+          const onLoad = () => {
+            if (!finished) {
+              finished = true;
+              cleanup();
+              resolve();
+            }
+          };
+          const onError = () => {
+            if (!finished) {
+              finished = true;
+              cleanup();
+              reject(new Error('A required image or signature in the document failed to load.'));
+            }
+          };
+          img.addEventListener('load', onLoad);
+          img.addEventListener('error', onError);
+          setTimeout(() => {
+            if (!finished) {
+              finished = true;
+              cleanup();
+              if (img.complete && img.naturalWidth > 0) {
+                resolve();
+              } else {
+                reject(new Error('Timed out waiting for a required document image to load.'));
+              }
+            }
+          }, 12000);
+        });
+      }
+
+      if (img.naturalWidth <= 0) {
+        throw new Error('A required image or signature in the document failed to load.');
+      }
+
+      if (typeof img.decode === 'function') {
+        const isInlineSvg = src.startsWith('data:image/svg+xml');
+        try {
+          await img.decode();
+        } catch (decodeErr) {
+          if (!isInlineSvg || img.naturalWidth <= 0) {
+            throw new Error('A required image in the document could not be decoded for export.');
+          }
+          console.warn('Inline SVG decode fallback notice:', decodeErr);
+        }
+      }
+    })
+  );
 }
 
 export async function waitForDocumentReadyForExport(element: HTMLElement): Promise<void> {
   const timeoutPromise = new Promise<never>((_, reject) => {
     setTimeout(() => {
       reject(new Error('Export timed out waiting for document resources to be ready.'));
-    }, 10000);
+    }, 15000);
   });
 
   const readyPromise = (async () => {
@@ -269,41 +535,16 @@ export async function waitForDocumentReadyForExport(element: HTMLElement): Promi
     if (element.offsetWidth <= 0 || element.offsetHeight <= 0) {
       throw new Error('Document preview element has zero dimensions.');
     }
-    if (typeof document !== 'undefined' && document.fonts) {
-      try {
-        await document.fonts.ready;
-      } catch (fontErr) {
-        console.warn('Font loading check notice:', fontErr);
-      }
-    }
-    const images = Array.from(element.querySelectorAll('img'));
-    if (images.length > 0) {
-      await Promise.all(
-        images.map((img) => {
-          if (img.complete && img.naturalWidth > 0) {
-            return Promise.resolve();
-          }
-          return new Promise<void>((resolve) => {
-            let finished = false;
-            const onDone = () => {
-              if (!finished) {
-                finished = true;
-                img.removeEventListener('load', onDone);
-                img.removeEventListener('error', onDone);
-                resolve();
-              }
-            };
-            img.addEventListener('load', onDone);
-            img.addEventListener('error', onDone);
-            setTimeout(onDone, 1500);
-          });
-        })
-      );
-    }
+
+    await ensureFontsLoadedForElement(element);
+    await waitForLayoutSettlement(element);
+    await decodeAndVerifyImages(element);
+
+    // Confirm stable two animation frames + brief paint settle after all fonts & decoded images are committed
     await new Promise<void>((resolve) => {
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
-          resolve();
+          setTimeout(resolve, 150);
         });
       });
     });
@@ -312,16 +553,7 @@ export async function waitForDocumentReadyForExport(element: HTMLElement): Promi
   await Promise.race([readyPromise, timeoutPromise]);
 }
 
-function getTargetSheetsAndAncestorTransform(elementOrId: string | HTMLElement = 'document-preview-root'): {
-  rootElement: HTMLElement;
-  pageSheets: HTMLElement[];
-  transformedAncestor: HTMLElement | null;
-  originalTransform: string;
-  originalTransition: string;
-  transformedTarget?: HTMLElement | null;
-  originalTargetTransform?: string;
-  originalTargetTransition?: string;
-} {
+function resolveRootElement(elementOrId: string | HTMLElement = 'document-preview-root'): HTMLElement {
   let rootElement: HTMLElement | null = null;
   if (typeof elementOrId === 'string') {
     rootElement = document.getElementById(elementOrId);
@@ -343,6 +575,21 @@ function getTargetSheetsAndAncestorTransform(elementOrId: string | HTMLElement =
   if (!rootElement) {
     throw new Error('Document preview element not found in DOM.');
   }
+
+  return rootElement;
+}
+
+function getTargetSheetsAndAncestorTransform(elementOrId: string | HTMLElement = 'document-preview-root'): {
+  rootElement: HTMLElement;
+  pageSheets: HTMLElement[];
+  transformedAncestor: HTMLElement | null;
+  originalTransform: string;
+  originalTransition: string;
+  transformedTarget?: HTMLElement | null;
+  originalTargetTransform?: string;
+  originalTargetTransition?: string;
+} {
+  const rootElement = resolveRootElement(elementOrId);
 
   // Page selection: for biodata / OnePageFit, strictly select exactly 1 page sheet
   const onePageSheet = (rootElement.matches('[data-one-page-fit="true"], [data-document-type="biodata"]')
@@ -395,7 +642,7 @@ function getTargetSheetsAndAncestorTransform(elementOrId: string | HTMLElement =
     parent = parent.parentElement;
   }
 
-  // Also check if rootElement itself has an active inline transform (e.g. Invitation preview scale)
+  // Also check if rootElement itself has an active inline transform (e.g. zoom scale wrapper)
   let transformedTarget: HTMLElement | null = null;
   let originalTargetTransform = '';
   let originalTargetTransition = '';
@@ -419,7 +666,7 @@ function getTargetSheetsAndAncestorTransform(elementOrId: string | HTMLElement =
 
 /**
  * Saves a Blob to disk by creating an object URL, clicking a hidden anchor tag,
- * and revoking the object URL to prevent memory leaks.
+ * and revoking the object URL safely after download starts.
  */
 export function saveBlob(blob: Blob, filename: string): void {
   const url = URL.createObjectURL(blob);
@@ -429,27 +676,31 @@ export function saveBlob(blob: Blob, filename: string): void {
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
-  // Free the Blob URL safely after the browser has started the download
   setTimeout(() => {
     URL.revokeObjectURL(url);
-  }, 1000);
+  }, 15000);
 }
 
 /**
- * Builds a multi-page high-definition PDF Blob from the preview element in memory.
+ * Unified PDF generation pipeline used identically for both automatic background builds
+ * and manual PDF downloads across resumes, biodatas, and cover letters.
  */
 export async function generatePdfBlob(
   elementOrId: string | HTMLElement = 'document-preview-root',
-  options?: { targetDpi?: number }
+  _options?: { targetDpi?: number }
 ): Promise<Blob> {
-  const prep = getTargetSheetsAndAncestorTransform(elementOrId);
+  // Ensure fonts, layout pagination/auto-fit, and images settle BEFORE collecting page sheets
+  const initialRoot = resolveRootElement(elementOrId);
+  await waitForDocumentReadyForExport(initialRoot);
+
+  const prep = getTargetSheetsAndAncestorTransform(initialRoot);
   const pageSheets = prep.pageSheets;
   const transformedAncestor = prep.transformedAncestor;
   const originalTransform = prep.originalTransform;
   const originalTransition = prep.originalTransition;
-  const transformedTarget = (prep as any).transformedTarget as HTMLElement | null;
-  const originalTargetTransform = (prep as any).originalTargetTransform || '';
-  const originalTargetTransition = (prep as any).originalTargetTransition || '';
+  const transformedTarget = prep.transformedTarget || null;
+  const originalTargetTransform = prep.originalTargetTransform || '';
+  const originalTargetTransition = prep.originalTargetTransition || '';
 
   try {
     if (transformedAncestor) {
@@ -479,23 +730,28 @@ export async function generatePdfBlob(
       }
 
       await waitForDocumentReadyForExport(sheet);
-      await new Promise((resolve) => setTimeout(resolve, 60));
 
       const isBiodata =
         sheet.getAttribute('data-document-type') === 'biodata' ||
         sheet.hasAttribute('data-one-page-fit');
 
+      const computedSheetBg = sanitizeModernColorString(
+        sheet.style.backgroundColor || window.getComputedStyle(sheet).backgroundColor || '#ffffff'
+      );
+      const safeBgColor =
+        computedSheetBg && computedSheetBg !== 'rgba(0, 0, 0, 0)' && computedSheetBg !== 'transparent'
+          ? computedSheetBg
+          : '#ffffff';
+
       const canvas = await html2canvas(sheet, {
-        scale: 2,
+        scale: EXPORT_CONFIG.desktopScale,
         useCORS: true,
         logging: false,
-        backgroundColor: sheet.style.backgroundColor || '#ffffff',
+        backgroundColor: safeBgColor,
         imageTimeout: 15000,
         windowWidth: Math.max(1280, typeof window !== 'undefined' ? window.innerWidth : 1280),
         onclone: (clonedDoc: Document, clonedElement: HTMLElement) => {
           sanitizeClonedDocumentForExport(clonedDoc, clonedElement, sheet);
-          clonedElement.style.textRendering = 'geometricPrecision';
-          (clonedElement.style as any).webkitFontSmoothing = 'antialiased';
 
           if (isBiodata) {
             clonedElement.style.width = '800px';
@@ -505,7 +761,7 @@ export async function generatePdfBlob(
             clonedElement.style.minHeight = '1131px';
             clonedElement.style.maxHeight = '1131px';
             clonedElement.style.overflow = 'hidden';
-            clonedElement.style.backgroundColor = sheet.style.backgroundColor || '#ffffff';
+            clonedElement.style.backgroundColor = safeBgColor;
             clonedElement.style.boxSizing = 'border-box';
 
             const stage = clonedElement.querySelector('.one-page-stage') as HTMLElement | null;
@@ -526,7 +782,6 @@ export async function generatePdfBlob(
 
       const pageImgData = canvas.toDataURL('image/png');
       if (isBiodata) {
-        // Exactly one A4 page at 210mm x 297mm with no margin
         pdf.addImage(pageImgData, 'PNG', 0, 0, 210, 297, undefined, 'FAST');
       } else {
         pdf.addImage(pageImgData, 'PNG', 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
@@ -551,16 +806,19 @@ export async function generatePdfBlob(
  */
 export async function generatePngBlob(
   elementOrId: string | HTMLElement = 'document-preview-root',
-  options?: { targetDpi?: number }
+  _options?: { targetDpi?: number }
 ): Promise<Blob> {
-  const prep = getTargetSheetsAndAncestorTransform(elementOrId);
+  const initialRoot = resolveRootElement(elementOrId);
+  await waitForDocumentReadyForExport(initialRoot);
+
+  const prep = getTargetSheetsAndAncestorTransform(initialRoot);
   const targetElement = prep.pageSheets[0] || prep.rootElement;
   const transformedAncestor = prep.transformedAncestor;
   const originalTransform = prep.originalTransform;
   const originalTransition = prep.originalTransition;
-  const transformedTarget = (prep as any).transformedTarget as HTMLElement | null;
-  const originalTargetTransform = (prep as any).originalTargetTransform || '';
-  const originalTargetTransition = (prep as any).originalTargetTransition || '';
+  const transformedTarget = prep.transformedTarget || null;
+  const originalTargetTransform = prep.originalTargetTransform || '';
+  const originalTargetTransition = prep.originalTargetTransition || '';
 
   try {
     if (transformedAncestor) {
@@ -577,17 +835,23 @@ export async function generatePngBlob(
       targetElement.getAttribute('data-document-type') === 'biodata' ||
       targetElement.hasAttribute('data-one-page-fit');
 
+    const computedSheetBg = sanitizeModernColorString(
+      targetElement.style.backgroundColor || window.getComputedStyle(targetElement).backgroundColor || '#ffffff'
+    );
+    const safeBgColor =
+      computedSheetBg && computedSheetBg !== 'rgba(0, 0, 0, 0)' && computedSheetBg !== 'transparent'
+        ? computedSheetBg
+        : '#ffffff';
+
     const canvas = await html2canvas(targetElement, {
-      scale: 2,
+      scale: EXPORT_CONFIG.desktopScale,
       useCORS: true,
       logging: false,
-      backgroundColor: targetElement.style.backgroundColor || '#ffffff',
+      backgroundColor: safeBgColor,
       imageTimeout: 15000,
       windowWidth: Math.max(1280, typeof window !== 'undefined' ? window.innerWidth : 1280),
       onclone: (clonedDoc: Document, clonedElement: HTMLElement) => {
         sanitizeClonedDocumentForExport(clonedDoc, clonedElement, targetElement);
-        clonedElement.style.textRendering = 'geometricPrecision';
-        (clonedElement.style as any).webkitFontSmoothing = 'antialiased';
 
         if (isBiodata) {
           clonedElement.style.width = '800px';
@@ -597,7 +861,7 @@ export async function generatePngBlob(
           clonedElement.style.minHeight = '1131px';
           clonedElement.style.maxHeight = '1131px';
           clonedElement.style.overflow = 'hidden';
-          clonedElement.style.backgroundColor = targetElement.style.backgroundColor || '#ffffff';
+          clonedElement.style.backgroundColor = safeBgColor;
           clonedElement.style.boxSizing = 'border-box';
 
           const stage = clonedElement.querySelector('.one-page-stage') as HTMLElement | null;
@@ -664,13 +928,6 @@ export const exportService = {
     isExportInProgress = true;
 
     try {
-      if (typeof document !== 'undefined' && document.fonts) {
-        try {
-          await document.fonts.ready;
-        } catch {}
-      }
-      // Safe 1000ms render delay so all Tailwind styles and webfonts finish painting before html2canvas captures
-      await new Promise((resolve) => setTimeout(resolve, 1000));
       const blob = await generatePdfBlob(elementId);
       const cleanFilename = filename.endsWith('.pdf') ? filename : `${filename}.pdf`;
       saveBlob(blob, cleanFilename);
@@ -682,7 +939,7 @@ export const exportService = {
       console.error('Failed to generate high-quality PDF:', err);
       return {
         success: false,
-        error: 'PDF generation failed. Please try again or use the Print option.',
+        error: err?.message || 'PDF generation failed. Please try again or use the Print option.',
       };
     } finally {
       isExportInProgress = false;
@@ -710,7 +967,7 @@ export const exportService = {
       console.error('Failed to export high-quality PNG:', err);
       return {
         success: false,
-        error: 'Image export failed. Please try again.',
+        error: err?.message || 'Image export failed. Please try again.',
       };
     } finally {
       isExportInProgress = false;

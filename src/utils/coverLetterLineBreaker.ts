@@ -314,6 +314,11 @@ export function rebuildCoverLetterBodyLinesForExport(
     if (lines.length === 0) continue;
 
     const liveComputed = window.getComputedStyle(liveP);
+    clonedP.style.fontFamily = liveComputed.fontFamily;
+    clonedP.style.fontSize = liveComputed.fontSize;
+    clonedP.style.fontWeight = liveComputed.fontWeight;
+    clonedP.style.letterSpacing = liveComputed.letterSpacing;
+    clonedP.style.wordSpacing = liveComputed.wordSpacing;
     clonedP.style.lineHeight = `${lineHeightPx}px`;
     clonedP.style.textAlign = 'left';
     clonedP.style.hyphens = 'none';

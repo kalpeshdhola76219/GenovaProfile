@@ -1,4 +1,4 @@
-import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { DocumentData } from '../../types/document';
 import { calculateDocumentPagination, DocumentPaginationResult, A4_DIMENSIONS } from '../../services/paginationEngine';
 import { OnePageFit } from './OnePageFit';
@@ -25,6 +25,8 @@ export const PaginatedDocumentPreview: React.FC<PaginatedDocumentPreviewProps> =
   return <MultiPagePaginatedDocumentPreview {...props} />;
 };
 
+const GUJARATI_CHAR_REGEX = /[\u0A80-\u0AFF]/;
+
 const MultiPagePaginatedDocumentPreview: React.FC<PaginatedDocumentPreviewProps> = ({
   data,
   TemplateComponent,
@@ -32,6 +34,7 @@ const MultiPagePaginatedDocumentPreview: React.FC<PaginatedDocumentPreviewProps>
   onPageCountChange,
 }) => {
   const measureRef = useRef<HTMLDivElement>(null);
+  const [isPaginationSettled, setIsPaginationSettled] = useState<boolean>(false);
   const [pagination, setPagination] = useState<DocumentPaginationResult>({
     pageCount: 1,
     pageBreaks: [
@@ -47,20 +50,23 @@ const MultiPagePaginatedDocumentPreview: React.FC<PaginatedDocumentPreviewProps>
     isMultiPage: false,
   });
 
-  // Re-calculate pages whenever data or template changes
-  const runPaginationCalculation = () => {
+  // Re-calculate pages whenever data, fonts, or images finish loading
+  const runPaginationCalculation = useCallback(() => {
     if (!measureRef.current) return;
     const result = calculateDocumentPagination(measureRef.current);
     setPagination(result);
     onPageCountChange?.(result.pageCount);
-  };
+  }, [onPageCountChange]);
 
   useLayoutEffect(() => {
+    setIsPaginationSettled(false);
     runPaginationCalculation();
   }, [
     data.templateId,
     data.type,
+    data.customization.fontFamily,
     data.customization.fontSize,
+    data.customization.headingSize,
     data.customization.lineHeight,
     data.customization.margins,
     data.customization.sectionSpacing,
@@ -74,31 +80,130 @@ const MultiPagePaginatedDocumentPreview: React.FC<PaginatedDocumentPreviewProps>
     data.summary,
     data.personal,
     data.contact,
+    runPaginationCalculation,
   ]);
 
-  // Recalculate after images load or window resizes
+  // Recalculate reliably after fonts, images, and resize settle
   useEffect(() => {
-    const timer = setTimeout(runPaginationCalculation, 150);
+    let active = true;
+    const cleanups: Array<() => void> = [];
+    let rafId1 = 0;
+    let rafId2 = 0;
 
-    // Watch for image loads inside measurement container
+    const scheduleCalculation = () => {
+      if (!active) return;
+      runPaginationCalculation();
+    };
+
+    const timer = setTimeout(scheduleCalculation, 150);
+    cleanups.push(() => clearTimeout(timer));
+
     const measureEl = measureRef.current;
-    if (measureEl) {
-      const imgs = Array.from(measureEl.querySelectorAll('img'));
-      imgs.forEach((img) => {
-        if (!img.complete) {
-          img.addEventListener('load', runPaginationCalculation);
-          img.addEventListener('error', runPaginationCalculation);
-        }
+
+    // Watch ResizeObserver on offscreen measurement container
+    if (typeof ResizeObserver !== 'undefined' && measureEl) {
+      let roTimer: ReturnType<typeof setTimeout> | null = null;
+      const ro = new ResizeObserver(() => {
+        if (!active) return;
+        if (roTimer) clearTimeout(roTimer);
+        roTimer = setTimeout(() => {
+          if (active) runPaginationCalculation();
+        }, 40);
+      });
+      ro.observe(measureEl);
+      cleanups.push(() => {
+        ro.disconnect();
+        if (roTimer) clearTimeout(roTimer);
       });
     }
 
-    return () => clearTimeout(timer);
-  }, [data]);
+    // Wait for fonts (plus Noto Sans Gujarati if Gujarati characters are present) and images
+    const waitForResourcesAndSettle = async () => {
+      try {
+        if (typeof document !== 'undefined' && document.fonts) {
+          const textContent = measureEl?.textContent || '';
+          if (GUJARATI_CHAR_REGEX.test(textContent)) {
+            await Promise.allSettled([
+              document.fonts.load('400 14px "Noto Sans Gujarati"'),
+              document.fonts.load('600 14px "Noto Sans Gujarati"'),
+            ]);
+          }
+          await document.fonts.ready;
+        }
+      } catch {}
+
+      if (measureEl) {
+        const imgs = Array.from(measureEl.querySelectorAll('img'));
+        await Promise.all(
+          imgs.map(
+            (img) =>
+              new Promise<void>((resolve) => {
+                const finish = async () => {
+                  try {
+                    if (img.complete && img.naturalWidth > 0 && typeof img.decode === 'function') {
+                      await img.decode();
+                    }
+                  } catch {}
+                  resolve();
+                };
+                if (img.complete) {
+                  void finish();
+                  return;
+                }
+                const onLoadOrError = () => {
+                  img.removeEventListener('load', onLoadOrError);
+                  img.removeEventListener('error', onLoadOrError);
+                  void finish();
+                };
+                img.addEventListener('load', onLoadOrError);
+                img.addEventListener('error', onLoadOrError);
+                cleanups.push(() => {
+                  img.removeEventListener('load', onLoadOrError);
+                  img.removeEventListener('error', onLoadOrError);
+                });
+              })
+          )
+        );
+      }
+
+      if (!active) return;
+      runPaginationCalculation();
+      rafId1 = requestAnimationFrame(() => {
+        if (!active) return;
+        runPaginationCalculation();
+        rafId2 = requestAnimationFrame(() => {
+          if (active) setIsPaginationSettled(true);
+        });
+      });
+    };
+
+    if (typeof document !== 'undefined' && document.fonts) {
+      const onFontLoadingDone = () => {
+        if (active) runPaginationCalculation();
+      };
+      document.fonts.addEventListener('loadingdone', onFontLoadingDone);
+      cleanups.push(() => {
+        document.fonts.removeEventListener('loadingdone', onFontLoadingDone);
+      });
+    }
+
+    void waitForResourcesAndSettle();
+
+    return () => {
+      active = false;
+      if (rafId1) cancelAnimationFrame(rafId1);
+      if (rafId2) cancelAnimationFrame(rafId2);
+      cleanups.forEach((fn) => fn());
+    };
+  }, [data, runPaginationCalculation]);
 
   const { pageBreaks, pageCount, isMultiPage } = pagination;
 
   return (
-    <div className="w-full flex flex-col items-center">
+    <div
+      className="w-full flex flex-col items-center"
+      data-pagination-settled={isPaginationSettled ? 'true' : 'false'}
+    >
       {/* Hidden measurement container rendered offscreen at exact 800px A4 width */}
       <div
         ref={measureRef}

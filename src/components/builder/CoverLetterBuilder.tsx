@@ -119,10 +119,23 @@ export const CoverLetterBuilder: React.FC<CoverLetterBuilderProps> = ({
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  const invalidatePreparedBlob = (markEdited = true) => {
+    docVersionRef.current += 1;
+    if (preparedBlob || isPreparingBlob) {
+      setPreparedBlob(null);
+      if (markEdited) {
+        setIsDocumentEditedSinceBuild(true);
+      }
+    }
+  };
+
   useEffect(() => {
     const sanitized = sanitizeDocument(initialDocument);
     setDoc(sanitized);
     setTempTitle(sanitized.title);
+    invalidatePreparedBlob(false);
+    setIsDocumentEditedSinceBuild(false);
+    hasAutoBuiltRef.current = false;
   }, [initialDocument.id, initialDocument.templateId]);
 
   useEffect(() => {
@@ -133,11 +146,7 @@ export const CoverLetterBuilder: React.FC<CoverLetterBuilderProps> = ({
   }, [doc]);
 
   const handleDocumentChange = (updated: DocumentData) => {
-    docVersionRef.current += 1;
-    if (preparedBlob) {
-      setPreparedBlob(null);
-      setIsDocumentEditedSinceBuild(true);
-    }
+    invalidatePreparedBlob(true);
     setDoc(updated);
     onDocumentChange?.(updated);
   };
@@ -287,12 +296,14 @@ export const CoverLetterBuilder: React.FC<CoverLetterBuilderProps> = ({
   }, [autoOpenCheckout]);
 
   const runBackgroundBuild = async () => {
-    if (isPreparingBlob || exportService.isBusy()) return;
+    if (isPreparingBlob || isExportingPDF || exportService.isBusy()) return;
+    if (typeof window !== 'undefined' && window.innerWidth < 1024 && mobileView !== 'preview') {
+      handleSwitchToPreview();
+      await new Promise((resolve) => setTimeout(resolve, 120));
+    }
     setIsPreparingBlob(true);
     setIsCoverLetterExporting(true);
     setIsDocumentEditedSinceBuild(false);
-
-    await new Promise((resolve) => setTimeout(resolve, 450));
 
     const captureVersion = docVersionRef.current;
     const filename = generateExportFilename(doc.personal?.fullName, doc.title, doc.type, 'pdf');
@@ -350,6 +361,7 @@ export const CoverLetterBuilder: React.FC<CoverLetterBuilderProps> = ({
   const saveTitle = () => {
     const trimmed = tempTitle.trim() || doc.title;
     const updated = { ...doc, title: trimmed };
+    invalidatePreparedBlob(true);
     setDoc(updated);
     storageService.saveDocument(updated);
     onDocumentChange?.(updated);

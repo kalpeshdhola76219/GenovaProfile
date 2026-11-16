@@ -115,10 +115,23 @@ export const DocumentBuilder: React.FC<DocumentBuilderProps> = ({
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  const invalidatePreparedBlob = (markEdited = true) => {
+    docVersionRef.current += 1;
+    if (preparedBlob || isPreparingBlob) {
+      setPreparedBlob(null);
+      if (markEdited) {
+        setIsDocumentEditedSinceBuild(true);
+      }
+    }
+  };
+
   // Sync state if initialDocument id or templateId changes
   useEffect(() => {
     setDoc(initialDocument);
     setTempTitle(initialDocument.title);
+    invalidatePreparedBlob(false);
+    setIsDocumentEditedSinceBuild(false);
+    hasAutoBuiltRef.current = false;
   }, [initialDocument.id, initialDocument.templateId, initialDocument.updatedAt]);
 
   // Autosave to localStorage on changes (debounced)
@@ -132,11 +145,7 @@ export const DocumentBuilder: React.FC<DocumentBuilderProps> = ({
 
   // Requirement 4: The rule that edited documents rebuild the file
   const handleDocumentChange = (updated: DocumentData) => {
-    docVersionRef.current += 1;
-    if (preparedBlob) {
-      setPreparedBlob(null);
-      setIsDocumentEditedSinceBuild(true);
-    }
+    invalidatePreparedBlob(true);
     setDoc(updated);
     onDocumentChange?.(updated);
   };
@@ -287,14 +296,15 @@ export const DocumentBuilder: React.FC<DocumentBuilderProps> = ({
     }
   }, [autoOpenCheckout]);
 
-  // Requirement 3 & 5: Background build triggered once when paid=true, guarded by useRef
+  // Background build triggered once when paid=true, using the exact same readiness pipeline as manual download
   const runBackgroundBuild = async (type: 'pdf' | 'png') => {
-    if (isPreparingBlob || exportService.isBusy()) return;
+    if (isPreparingBlob || isExportingPDF || isExportingPNG || exportService.isBusy()) return;
+    if (typeof window !== 'undefined' && window.innerWidth < 1024 && mobileView !== 'preview') {
+      handleSwitchToPreview();
+      await new Promise((resolve) => setTimeout(resolve, 120));
+    }
     setIsPreparingBlob(true);
     setIsDocumentEditedSinceBuild(false);
-
-    // Safe 1000ms render delay to ensure Tailwind styles and webfonts have painted before capture
-    await new Promise((resolve) => setTimeout(resolve, 1000));
 
     const captureVersion = docVersionRef.current;
     const filename = generateExportFilename(doc.personal?.fullName, doc.title, doc.type, type);
@@ -386,6 +396,7 @@ export const DocumentBuilder: React.FC<DocumentBuilderProps> = ({
   const saveTitle = () => {
     const trimmed = tempTitle.trim() || doc.title;
     const updated = { ...doc, title: trimmed };
+    invalidatePreparedBlob(true);
     setDoc(updated);
     storageService.saveDocument(updated);
     onDocumentChange?.(updated);
