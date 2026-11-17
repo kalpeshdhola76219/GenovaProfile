@@ -156,15 +156,15 @@ export default function App() {
   // When a template is clicked from gallery
   const handleSelectTemplate = (template: TemplateMetadata) => {
     if (activeDocument && activeDocument.type === template.type) {
-      const updated = {
+      const updated = sanitizeDocument({
         ...activeDocument,
         templateId: template.id,
         updatedAt: new Date().toISOString(),
-      };
+      });
       setActiveDocument(updated);
       storageService.saveDocument(updated);
     } else {
-      const newDoc = storageService.createNewDocument(template.type, template.id);
+      const newDoc = sanitizeDocument(storageService.createNewDocument(template.type, template.id));
       setActiveDocument(newDoc);
     }
     navigateTo('builder');
@@ -178,12 +178,13 @@ export default function App() {
 
   // Try Demo immediately
   const handleTryDemo = (type: DocumentType) => {
-    const demoDoc =
+    const rawDemo =
       type === 'biodata'
         ? sampleBiodataDocument
         : type === 'cover-letter'
         ? sampleCoverLetterDocument
         : sampleResumeDocument;
+    const demoDoc = sanitizeDocument(rawDemo);
     storageService.saveDocument(demoDoc);
     setActiveDocument(demoDoc);
     navigateTo('builder');

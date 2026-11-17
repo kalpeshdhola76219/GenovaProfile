@@ -2,14 +2,9 @@ import React from 'react';
 import { DocumentData } from '../../types/document';
 import { getStaticFontClass, getFontFamilyCss, FONT_FAMILY_CSS_MAP } from '../../utils/fontClassMap';
 import {
-  HEADER_LEFT_STYLE,
-  HEADER_RIGHT_STYLE,
-  HEADER_ROW_STYLE,
-  METADATA_ROW_STYLE,
-  METADATA_LEFT_STYLE,
-  METADATA_RIGHT_STYLE,
-  METADATA_WIDE_RIGHT_STYLE,
   ResumeDescriptionBlock,
+  ResumeHeaderTable,
+  ResumeSplitRow,
   sanitizeDocumentTextFields,
 } from './resumeTemplateUtils';
 
@@ -50,27 +45,35 @@ export const PremiumInternationalResumeTemplate: React.FC<{ data: DocumentData }
       {/* Header Banner */}
       <div
         className="p-8 text-white"
-        style={{ ...HEADER_ROW_STYLE, backgroundColor: primary }}
+        style={{ backgroundColor: primary }}
       >
-        <div style={{ ...HEADER_LEFT_STYLE, verticalAlign: 'middle' }}>
-          <h1 className={`text-2xl font-extrabold uppercase tracking-wide text-white ${fontClass}`} style={{ fontFamily: fontFamilyCss }}>
-            {displayFullName || 'FULL NAME'}
-          </h1>
-          {displayTitle && (
-            <p className="text-xs font-semibold text-blue-100 uppercase tracking-widest mt-0.5 no-justify">
-              {displayTitle}
-            </p>
-          )}
-        </div>
-        <div className="text-right text-xs text-blue-100 space-y-1 no-justify" style={{ ...HEADER_RIGHT_STYLE, verticalAlign: 'middle' }}>
-          {displayEmail && <div>✉ {displayEmail}</div>}
-          {displayPhone && <div>✆ {displayPhone}</div>}
-          {displayLocation && (
-            <div>📍 {displayLocation}</div>
-          )}
-          {displayLinkedin && <div>🔗 {displayLinkedin}</div>}
-          {(contact.portfolio || contact.website) && <div>🌐 {contact.portfolio || contact.website}</div>}
-        </div>
+        <ResumeHeaderTable
+          verticalAlign="middle"
+          left={
+            <>
+              <h1 className={`text-2xl font-extrabold uppercase tracking-wide text-white ${fontClass}`} style={{ fontFamily: fontFamilyCss }}>
+                {displayFullName || 'FULL NAME'}
+              </h1>
+              {displayTitle && (
+                <p className="text-xs font-semibold text-blue-100 uppercase tracking-widest mt-0.5 no-justify">
+                  {displayTitle}
+                </p>
+              )}
+            </>
+          }
+          rightClassName="text-right text-xs text-blue-100 space-y-1 no-justify"
+          right={
+            <>
+              {displayEmail && <div>✉ {displayEmail}</div>}
+              {displayPhone && <div>✆ {displayPhone}</div>}
+              {displayLocation && (
+                <div>📍 {displayLocation}</div>
+              )}
+              {displayLinkedin && <div>🔗 {displayLinkedin}</div>}
+              {(contact.portfolio || contact.website) && <div>🌐 {contact.portfolio || contact.website}</div>}
+            </>
+          }
+        />
       </div>
 
       {/* Main Body */}
@@ -84,10 +87,15 @@ export const PremiumInternationalResumeTemplate: React.FC<{ data: DocumentData }
               </h2>
               <div className="space-y-1.5 text-xs">
                 {skills.map((s) => (
-                  <div key={s.id} style={METADATA_ROW_STYLE}>
-                    <span className="font-medium text-slate-700" style={METADATA_LEFT_STYLE}>{s.name}</span>
-                    <span className="text-[10px] text-slate-400 capitalize" style={METADATA_WIDE_RIGHT_STYLE}>{s.level || 'Expert'}</span>
-                  </div>
+                  <ResumeSplitRow
+                    key={s.id}
+                    wrapRight
+                    leftClassName="font-medium text-slate-700"
+                    left={s.name}
+                    rightClassName="text-[10px] text-slate-400 capitalize"
+                    right={s.level || 'Expert'}
+                    rightWidth="68px"
+                  />
                 ))}
               </div>
             </div>
@@ -165,12 +173,16 @@ export const PremiumInternationalResumeTemplate: React.FC<{ data: DocumentData }
               <div className="space-y-4">
                 {experience.map((exp) => (
                   <div key={exp.id} data-entry="true" className="relative pl-4 border-l-2" style={{ borderColor: primary }}>
-                    <div style={METADATA_ROW_STYLE}>
-                      <div className="font-bold text-sm text-slate-900" style={METADATA_LEFT_STYLE}>{exp.jobTitle}</div>
-                      <div className="text-xs text-slate-500 font-medium" style={METADATA_RIGHT_STYLE}>
-                        {exp.startDate} – {(exp.currentlyWorking && (!exp.endDate || exp.endDate.trim().toLowerCase() === 'present')) ? 'Present' : (exp.endDate || 'Present')}
-                      </div>
-                    </div>
+                    <ResumeSplitRow
+                      leftClassName="font-bold text-sm text-slate-900"
+                      left={exp.jobTitle}
+                      rightClassName="text-xs text-slate-500 font-medium"
+                      right={
+                        <>
+                          {exp.startDate} – {(exp.currentlyWorking && (!exp.endDate || exp.endDate.trim().toLowerCase() === 'present')) ? 'Present' : (exp.endDate || 'Present')}
+                        </>
+                      }
+                    />
                     <div className="text-xs font-semibold text-slate-600 mb-1">
                       {exp.company} {exp.location ? `• ${exp.location}` : ''}
                     </div>
@@ -202,10 +214,13 @@ export const PremiumInternationalResumeTemplate: React.FC<{ data: DocumentData }
               <div className="space-y-2.5">
                 {projects.map((p) => (
                   <div key={p.id} data-entry="true" className="text-xs">
-                    <div style={METADATA_ROW_STYLE}>
-                      <span className="font-bold text-slate-900" style={METADATA_LEFT_STYLE}>{p.name}</span>
-                      {p.role && <span className="text-slate-500 text-[11px]" style={METADATA_WIDE_RIGHT_STYLE}>{p.role}</span>}
-                    </div>
+                    <ResumeSplitRow
+                      wrapRight
+                      leftClassName="font-bold text-slate-900"
+                      left={p.name}
+                      rightClassName="text-slate-500 text-[11px]"
+                      right={p.role}
+                    />
                     {p.technologies && <div className="text-[11px] text-slate-500">Tech: {p.technologies}</div>}
                     {p.description && <p className="text-slate-600 mt-0.5">{p.description}</p>}
                   </div>

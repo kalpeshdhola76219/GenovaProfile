@@ -4,12 +4,9 @@ import { FONT_FAMILY_CSS_MAP } from '../../utils/fontClassMap';
 import {
   BULLET_LIST_STYLE,
   CONTACT_CENTER_ROW_STYLE,
-  METADATA_LEFT_STYLE,
-  METADATA_RIGHT_STYLE,
-  METADATA_ROW_STYLE,
-  METADATA_WIDE_RIGHT_STYLE,
   ResumeBulletItem,
   ResumeDescriptionBlock,
+  ResumeSplitRow,
   sanitizeDocumentTextFields,
 } from './resumeTemplateUtils';
 
@@ -59,10 +56,12 @@ export const FreshGraduateResumeTemplate: React.FC<{ data: DocumentData }> = ({ 
           <div className="space-y-2 text-xs">
             {education.map((e) => (
               <div key={e.id} data-entry>
-                <div className="font-bold text-slate-900" style={METADATA_ROW_STYLE}>
-                  <span style={METADATA_LEFT_STYLE}>{e.degree} &bull; {e.institute}{e.score ? ` • ${/^[0-9./\s]+$/.test(e.score.trim()) ? `GPA: ${e.score.trim()}` : e.score.trim()}` : ''}</span>
-                  <span className="text-slate-500 font-normal" style={METADATA_RIGHT_STYLE}>{e.endYear}</span>
-                </div>
+                <ResumeSplitRow
+                  className="font-bold text-slate-900"
+                  left={<>{e.degree} &bull; {e.institute}{e.score ? ` • ${/^[0-9./\s]+$/.test(e.score.trim()) ? `GPA: ${e.score.trim()}` : e.score.trim()}` : ''}</>}
+                  rightClassName="text-slate-500 font-normal"
+                  right={e.endYear}
+                />
                 {e.description && <p className="text-slate-600 mt-0.5">{e.description}</p>}
               </div>
             ))}
@@ -79,10 +78,13 @@ export const FreshGraduateResumeTemplate: React.FC<{ data: DocumentData }> = ({ 
           <div className="space-y-2 text-xs">
             {projects.map((p) => (
               <div key={p.id} data-entry>
-                <div className="font-bold" style={METADATA_ROW_STYLE}>
-                  <span style={METADATA_LEFT_STYLE}>{p.name}</span>
-                  {p.link && <span className="text-blue-700 font-normal" style={METADATA_WIDE_RIGHT_STYLE}>{p.link}</span>}
-                </div>
+                <ResumeSplitRow
+                  className="font-bold"
+                  wrapRight
+                  left={p.name}
+                  rightClassName="text-blue-700 font-normal"
+                  right={p.link}
+                />
                 {p.technologies && <div className="text-[11px] text-slate-500 italic">Tools: {p.technologies}</div>}
                 <p className="text-slate-700 mt-0.5">{p.description}</p>
               </div>
@@ -116,10 +118,12 @@ export const FreshGraduateResumeTemplate: React.FC<{ data: DocumentData }> = ({ 
           <div className="space-y-2 text-xs">
             {experience.map((exp) => (
               <div key={exp.id} data-entry>
-                <div className="font-bold" style={METADATA_ROW_STYLE}>
-                  <span style={METADATA_LEFT_STYLE}>{exp.jobTitle} at {exp.company}</span>
-                  <span className="text-slate-500 font-normal" style={METADATA_RIGHT_STYLE}>{exp.startDate} - {(exp.currentlyWorking && (!exp.endDate || exp.endDate.trim().toLowerCase() === 'present')) ? 'Present' : (exp.endDate || 'Present')}</span>
-                </div>
+                <ResumeSplitRow
+                  className="font-bold"
+                  left={<>{exp.jobTitle} at {exp.company}</>}
+                  rightClassName="text-slate-500 font-normal"
+                  right={<>{exp.startDate} - {(exp.currentlyWorking && (!exp.endDate || exp.endDate.trim().toLowerCase() === 'present')) ? 'Present' : (exp.endDate || 'Present')}</>}
+                />
                 <ResumeDescriptionBlock
                   text={exp.description}
                   wrapperClassName="mt-1 space-y-1 text-xs text-slate-700"

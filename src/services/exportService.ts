@@ -359,8 +359,14 @@ export function sanitizeClonedDocumentForExport(
   }
 
   try {
+    clonedDoc.documentElement.style.zoom = '1';
+    clonedDoc.documentElement.style.transform = 'none';
+    clonedDoc.body.style.zoom = '1';
+    clonedDoc.body.style.transform = 'none';
+    clonedDoc.body.style.margin = '0';
+
     let parent = clonedTarget.parentElement;
-    while (parent && parent !== clonedDoc.body) {
+    while (parent && parent !== clonedDoc.documentElement) {
       parent.style.transform = 'none';
       parent.style.transition = 'none';
       parent.style.zoom = '1';
@@ -383,6 +389,42 @@ export function sanitizeClonedDocumentForExport(
     (clonedTarget.style as any).webkitHyphens = 'none';
     clonedTarget.style.textRendering = liveComputedTarget.textRendering || 'auto';
   } catch {}
+}
+
+/**
+ * Temporarily normalizes window.devicePixelRatio to 1 during html2canvas capture so
+ * Windows 125%/150% OS scaling and high-DPR mobile browsers compute identical CSS line
+ * heights and cell offsets without subpixel wrapping or date dropping.
+ */
+async function withNormalizedDevicePixelRatio<T>(task: () => Promise<T>): Promise<T> {
+  if (typeof window === 'undefined') {
+    return await task();
+  }
+  const ownDesc = Object.getOwnPropertyDescriptor(window, 'devicePixelRatio');
+  let patched = false;
+  try {
+    Object.defineProperty(window, 'devicePixelRatio', {
+      configurable: true,
+      get: () => 1,
+    });
+    patched = true;
+  } catch {
+    patched = false;
+  }
+
+  try {
+    return await task();
+  } finally {
+    if (patched) {
+      try {
+        if (ownDesc) {
+          Object.defineProperty(window, 'devicePixelRatio', ownDesc);
+        } else {
+          delete (window as unknown as Record<string, unknown>).devicePixelRatio;
+        }
+      } catch {}
+    }
+  }
 }
 
 async function ensureFontsLoadedForElement(element: HTMLElement): Promise<void> {
@@ -729,6 +771,11 @@ function layoutClonedMultiPageSheet(
     walker = walker.parentElement;
   }
 
+  clonedDoc.documentElement.style.zoom = '1';
+  clonedDoc.documentElement.style.transform = 'none';
+  clonedDoc.body.style.zoom = '1';
+  clonedDoc.body.style.transform = 'none';
+
   clonedRoot.style.width = `${EXPORT_A4_WIDTH_PX}px`;
   clonedRoot.style.minWidth = `${EXPORT_A4_WIDTH_PX}px`;
   clonedRoot.style.maxWidth = `${EXPORT_A4_WIDTH_PX}px`;
@@ -737,6 +784,7 @@ function layoutClonedMultiPageSheet(
   clonedRoot.style.maxHeight = 'none';
   clonedRoot.style.overflow = 'visible';
   clonedRoot.style.transform = 'none';
+  clonedRoot.style.zoom = '1';
   clonedRoot.style.margin = '0';
   clonedRoot.style.boxShadow = 'none';
   clonedRoot.style.backgroundColor = safeBgColor;
@@ -751,6 +799,7 @@ function layoutClonedMultiPageSheet(
     flowRoot.style.maxHeight = 'none';
     flowRoot.style.overflow = 'visible';
     flowRoot.style.transform = 'none';
+    flowRoot.style.zoom = '1';
     flowRoot.style.margin = '0';
     flowRoot.style.boxShadow = 'none';
     flowRoot.style.boxSizing = 'border-box';
@@ -906,7 +955,7 @@ function layoutClonedMultiPageSheet(
   void flowRoot.offsetHeight;
   const rootTop = flowRoot.getBoundingClientRect().top;
   let maxBottom = flowRoot.scrollHeight;
-  const allEls = Array.from(flowRoot.querySelectorAll('h1, h2, h3, p, div, li, span, img')) as HTMLElement[];
+  const allEls = Array.from(flowRoot.querySelectorAll('h1, h2, h3, p, div, li, span, td, th, img')) as HTMLElement[];
   for (const el of allEls) {
     if ((el.children.length === 0 && (el.textContent || '').trim().length > 0) || el.tagName === 'IMG') {
       const b = el.getBoundingClientRect().bottom - rootTop;
@@ -1008,54 +1057,60 @@ export async function generatePdfBlob(
           ? computedSheetBg
           : '#ffffff';
 
-      const canvas = await html2canvas(sheet, {
-        scale: EXPORT_CONFIG.desktopScale,
-        useCORS: true,
-        allowTaint: false,
-        logging: false,
-        backgroundColor: '#ffffff',
-        imageTimeout: 15000,
-        windowWidth: 1200,
-        onclone: (clonedDoc: Document, clonedElement: HTMLElement) => {
-          if (isCoverLetter) {
-            rebuildCoverLetterBodyLinesForExport(clonedDoc, clonedElement, sheet);
-          }
-
-          sanitizeClonedDocumentForExport(clonedDoc, clonedElement, sheet);
-
-          clonedElement.style.width = `${EXPORT_A4_WIDTH_PX}px`;
-          clonedElement.style.maxWidth = `${EXPORT_A4_WIDTH_PX}px`;
-          clonedElement.style.minWidth = `${EXPORT_A4_WIDTH_PX}px`;
-          clonedElement.style.height = `${EXPORT_A4_HEIGHT_PX}px`;
-          clonedElement.style.minHeight = `${EXPORT_A4_HEIGHT_PX}px`;
-          clonedElement.style.maxHeight = `${EXPORT_A4_HEIGHT_PX}px`;
-          clonedElement.style.overflow = 'hidden';
-          clonedElement.style.transform = 'none';
-          clonedElement.style.margin = '0';
-          clonedElement.style.boxShadow = 'none';
-          clonedElement.style.backgroundColor = safeBgColor;
-          clonedElement.style.boxSizing = 'border-box';
-
-          if (isCoverLetter) {
-            const clStage = clonedElement.querySelector('.cl-one-page-stage') as HTMLElement | null;
-            if (clStage) {
-              clStage.style.transform = `scale(${EXPORT_A4_WIDTH_PX / 800})`;
-              clStage.style.transformOrigin = 'top left';
+      const canvas = await withNormalizedDevicePixelRatio(() =>
+        html2canvas(sheet, {
+          scale: EXPORT_CONFIG.desktopScale,
+          useCORS: true,
+          allowTaint: false,
+          logging: false,
+          backgroundColor: '#ffffff',
+          imageTimeout: 15000,
+          width: EXPORT_A4_WIDTH_PX,
+          windowWidth: EXPORT_A4_WIDTH_PX,
+          scrollX: 0,
+          scrollY: 0,
+          onclone: (clonedDoc: Document, clonedElement: HTMLElement) => {
+            if (isCoverLetter) {
+              rebuildCoverLetterBodyLinesForExport(clonedDoc, clonedElement, sheet);
             }
-          } else {
-            const stage = clonedElement.querySelector('.one-page-stage') as HTMLElement | null;
-            const liveStage = sheet.querySelector('.one-page-stage') as HTMLElement | null;
-            if (stage && liveStage) {
-              const liveScaleAttr = Number(sheet.getAttribute('data-scale') || '1');
-              const liveScale = Number.isFinite(liveScaleAttr) && liveScaleAttr > 0 ? liveScaleAttr : 1;
-              stage.style.width = liveStage.style.width;
-              stage.style.height = liveStage.style.height;
-              stage.style.transform = `scale(${liveScale * (EXPORT_A4_WIDTH_PX / 800)})`;
-              stage.style.transformOrigin = 'top left';
+
+            sanitizeClonedDocumentForExport(clonedDoc, clonedElement, sheet);
+
+            clonedElement.style.width = `${EXPORT_A4_WIDTH_PX}px`;
+            clonedElement.style.maxWidth = `${EXPORT_A4_WIDTH_PX}px`;
+            clonedElement.style.minWidth = `${EXPORT_A4_WIDTH_PX}px`;
+            clonedElement.style.height = `${EXPORT_A4_HEIGHT_PX}px`;
+            clonedElement.style.minHeight = `${EXPORT_A4_HEIGHT_PX}px`;
+            clonedElement.style.maxHeight = `${EXPORT_A4_HEIGHT_PX}px`;
+            clonedElement.style.overflow = 'hidden';
+            clonedElement.style.transform = 'none';
+            clonedElement.style.zoom = '1';
+            clonedElement.style.margin = '0';
+            clonedElement.style.boxShadow = 'none';
+            clonedElement.style.backgroundColor = safeBgColor;
+            clonedElement.style.boxSizing = 'border-box';
+
+            if (isCoverLetter) {
+              const clStage = clonedElement.querySelector('.cl-one-page-stage') as HTMLElement | null;
+              if (clStage) {
+                clStage.style.transform = `scale(${EXPORT_A4_WIDTH_PX / 800})`;
+                clStage.style.transformOrigin = 'top left';
+              }
+            } else {
+              const stage = clonedElement.querySelector('.one-page-stage') as HTMLElement | null;
+              const liveStage = sheet.querySelector('.one-page-stage') as HTMLElement | null;
+              if (stage && liveStage) {
+                const liveScaleAttr = Number(sheet.getAttribute('data-scale') || '1');
+                const liveScale = Number.isFinite(liveScaleAttr) && liveScaleAttr > 0 ? liveScaleAttr : 1;
+                stage.style.width = liveStage.style.width;
+                stage.style.height = liveStage.style.height;
+                stage.style.transform = `scale(${liveScale * (EXPORT_A4_WIDTH_PX / 800)})`;
+                stage.style.transformOrigin = 'top left';
+              }
             }
-          }
-        },
-      });
+          },
+        })
+      );
 
       const pageImgData = canvas.toDataURL('image/png');
       pdf.addImage(pageImgData, 'PNG', 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
@@ -1098,21 +1153,25 @@ export async function generatePdfBlob(
 
     let resolvedTotalPages = Math.max(1, pageSheets.length);
 
-    const fullCanvas = await html2canvas(firstSheet, {
-      scale: exportScale,
-      useCORS: true,
-      allowTaint: false,
-      logging: false,
-      backgroundColor: safeBgColor,
-      imageTimeout: 15000,
-      windowWidth: 1200,
-      width: EXPORT_A4_WIDTH_PX,
-      onclone: (clonedDoc: Document, clonedElement: HTMLElement) => {
-        sanitizeClonedDocumentForExport(clonedDoc, clonedElement, firstSheet);
-        const templateSheet = (clonedElement.querySelector('.document-page-sheet') as HTMLElement | null) || clonedElement;
-        resolvedTotalPages = layoutClonedMultiPageSheet(clonedElement, templateSheet, clonedDoc, safeBgColor);
-      },
-    });
+    const fullCanvas = await withNormalizedDevicePixelRatio(() =>
+      html2canvas(firstSheet, {
+        scale: exportScale,
+        useCORS: true,
+        allowTaint: false,
+        logging: false,
+        backgroundColor: safeBgColor,
+        imageTimeout: 15000,
+        width: EXPORT_A4_WIDTH_PX,
+        windowWidth: EXPORT_A4_WIDTH_PX,
+        scrollX: 0,
+        scrollY: 0,
+        onclone: (clonedDoc: Document, clonedElement: HTMLElement) => {
+          sanitizeClonedDocumentForExport(clonedDoc, clonedElement, firstSheet);
+          const templateSheet = (clonedElement.querySelector('.document-page-sheet') as HTMLElement | null) || clonedElement;
+          resolvedTotalPages = layoutClonedMultiPageSheet(clonedElement, templateSheet, clonedDoc, safeBgColor);
+        },
+      })
+    );
 
     const sliceCanvasHeight = Math.round(EXPORT_A4_HEIGHT_PX * exportScale);
     const actualPages = Math.max(1, resolvedTotalPages, Math.round(fullCanvas.height / sliceCanvasHeight));
@@ -1210,65 +1269,71 @@ export async function generatePngBlob(
         ? computedSheetBg
         : '#ffffff';
 
-    const canvas = await html2canvas(targetElement, {
-      scale: EXPORT_CONFIG.desktopScale,
-      useCORS: true,
-      allowTaint: false,
-      logging: false,
-      backgroundColor: '#ffffff',
-      imageTimeout: 15000,
-      windowWidth: 1200,
-      onclone: (clonedDoc: Document, clonedElement: HTMLElement) => {
-        if (isCoverLetter) {
-          rebuildCoverLetterBodyLinesForExport(clonedDoc, clonedElement, targetElement);
-        }
-
-        sanitizeClonedDocumentForExport(clonedDoc, clonedElement, targetElement);
-
-        clonedElement.style.width = '794px';
-        clonedElement.style.maxWidth = '794px';
-        clonedElement.style.minWidth = '794px';
-        clonedElement.style.transform = 'none';
-        clonedElement.style.margin = '0';
-        clonedElement.style.boxShadow = 'none';
-        clonedElement.style.backgroundColor = safeBgColor;
-        clonedElement.style.boxSizing = 'border-box';
-
-        if (isCoverLetter) {
-          clonedElement.style.height = '1123px';
-          clonedElement.style.minHeight = '1123px';
-          clonedElement.style.maxHeight = '1123px';
-          clonedElement.style.overflow = 'hidden';
-
-          const clStage = clonedElement.querySelector('.cl-one-page-stage') as HTMLElement | null;
-          if (clStage) {
-            clStage.style.transform = `scale(${794 / 800})`;
-            clStage.style.transformOrigin = 'top left';
+    const canvas = await withNormalizedDevicePixelRatio(() =>
+      html2canvas(targetElement, {
+        scale: EXPORT_CONFIG.desktopScale,
+        useCORS: true,
+        allowTaint: false,
+        logging: false,
+        backgroundColor: '#ffffff',
+        imageTimeout: 15000,
+        width: EXPORT_A4_WIDTH_PX,
+        windowWidth: EXPORT_A4_WIDTH_PX,
+        scrollX: 0,
+        scrollY: 0,
+        onclone: (clonedDoc: Document, clonedElement: HTMLElement) => {
+          if (isCoverLetter) {
+            rebuildCoverLetterBodyLinesForExport(clonedDoc, clonedElement, targetElement);
           }
-        } else if (isBiodata) {
-          clonedElement.style.height = '1123px';
-          clonedElement.style.minHeight = '1123px';
-          clonedElement.style.maxHeight = '1123px';
-          clonedElement.style.overflow = 'hidden';
 
-          const stage = clonedElement.querySelector('.one-page-stage') as HTMLElement | null;
-          const liveStage = targetElement.querySelector('.one-page-stage') as HTMLElement | null;
-          if (stage && liveStage) {
-            const liveScaleAttr = Number(targetElement.getAttribute('data-scale') || '1');
-            const liveScale = Number.isFinite(liveScaleAttr) && liveScaleAttr > 0 ? liveScaleAttr : 1;
-            stage.style.width = liveStage.style.width;
-            stage.style.height = liveStage.style.height;
-            stage.style.transform = `scale(${liveScale * (794 / 800)})`;
-            stage.style.transformOrigin = 'top left';
+          sanitizeClonedDocumentForExport(clonedDoc, clonedElement, targetElement);
+
+          clonedElement.style.width = '794px';
+          clonedElement.style.maxWidth = '794px';
+          clonedElement.style.minWidth = '794px';
+          clonedElement.style.transform = 'none';
+          clonedElement.style.zoom = '1';
+          clonedElement.style.margin = '0';
+          clonedElement.style.boxShadow = 'none';
+          clonedElement.style.backgroundColor = safeBgColor;
+          clonedElement.style.boxSizing = 'border-box';
+
+          if (isCoverLetter) {
+            clonedElement.style.height = '1123px';
+            clonedElement.style.minHeight = '1123px';
+            clonedElement.style.maxHeight = '1123px';
+            clonedElement.style.overflow = 'hidden';
+
+            const clStage = clonedElement.querySelector('.cl-one-page-stage') as HTMLElement | null;
+            if (clStage) {
+              clStage.style.transform = `scale(${794 / 800})`;
+              clStage.style.transformOrigin = 'top left';
+            }
+          } else if (isBiodata) {
+            clonedElement.style.height = '1123px';
+            clonedElement.style.minHeight = '1123px';
+            clonedElement.style.maxHeight = '1123px';
+            clonedElement.style.overflow = 'hidden';
+
+            const stage = clonedElement.querySelector('.one-page-stage') as HTMLElement | null;
+            const liveStage = targetElement.querySelector('.one-page-stage') as HTMLElement | null;
+            if (stage && liveStage) {
+              const liveScaleAttr = Number(targetElement.getAttribute('data-scale') || '1');
+              const liveScale = Number.isFinite(liveScaleAttr) && liveScaleAttr > 0 ? liveScaleAttr : 1;
+              stage.style.width = liveStage.style.width;
+              stage.style.height = liveStage.style.height;
+              stage.style.transform = `scale(${liveScale * (794 / 800)})`;
+              stage.style.transformOrigin = 'top left';
+            }
+          } else if (isPaginatedSheet) {
+            clonedElement.style.height = '1123px';
+            clonedElement.style.minHeight = '1123px';
+            clonedElement.style.maxHeight = '1123px';
+            clonedElement.style.overflow = 'hidden';
           }
-        } else if (isPaginatedSheet) {
-          clonedElement.style.height = '1123px';
-          clonedElement.style.minHeight = '1123px';
-          clonedElement.style.maxHeight = '1123px';
-          clonedElement.style.overflow = 'hidden';
-        }
-      },
-    });
+        },
+      })
+    );
 
     return await new Promise<Blob>((resolve, reject) => {
       canvas.toBlob((blob) => {

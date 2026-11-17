@@ -220,10 +220,10 @@ export const storageService = {
 
   update: (doc: DocumentData): DocumentData => {
     const docs = storageService.getAll();
-    const updatedDoc: DocumentData = {
+    const updatedDoc: DocumentData = sanitizeDocument({
       ...doc,
       updatedAt: new Date().toISOString(),
-    };
+    });
     const index = docs.findIndex((d) => d.id === doc.id);
     let newDocs: DocumentData[];
     if (index >= 0) {
@@ -284,7 +284,7 @@ export const storageService = {
   deleteDocument: (id: string): boolean => storageService.delete(id),
 
   resetToDemo: (): DocumentData[] => {
-    const initial = [sampleBiodataDocument, sampleResumeDocument, sampleCoverLetterDocument];
+    const initial = [sampleBiodataDocument, sampleResumeDocument, sampleCoverLetterDocument].map(sanitizeDocument);
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(initial));
     } catch (e) {
@@ -332,7 +332,7 @@ export const storageService = {
       const existing = storageService.getAll();
       const existingMap = new Map(existing.map((d) => [d.id, d]));
       for (const d of validDocs) {
-        existingMap.set(d.id, d);
+        existingMap.set(d.id, sanitizeDocument(d));
       }
       const merged = Array.from(existingMap.values());
       localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));

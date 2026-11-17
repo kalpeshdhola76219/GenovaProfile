@@ -4,7 +4,7 @@
  */
 export function sanitizeDisplayText(value: string): string {
   if (typeof value !== 'string' || !value) return value;
-  return value.replace(/\\{1,2}([$€£₹¥%#&_*])/g, '$1');
+  return value.replace(/\\+([€£₹¥$%#&_*])/g, '$1');
 }
 
 export const sanitizeText = sanitizeDisplayText;

@@ -392,7 +392,7 @@ function sanitizeServerDocumentData<T>(node: T, currentKey?: string): T {
     ) {
       return node;
     }
-    return node.replace(/\\{1,2}([$€£₹¥%#&_*])/g, '$1') as unknown as T;
+    return node.replace(/\\+([€£₹¥$%#&_*])/g, '$1') as unknown as T;
   }
   if (Array.isArray(node)) {
     return node.map((item) => sanitizeServerDocumentData(item)) as unknown as T;

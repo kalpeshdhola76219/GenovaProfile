@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { DocumentData } from '../../types/document';
-import { storageService } from '../../services/storageService';
+import { storageService, sanitizeDocument } from '../../services/storageService';
 import { exportService, generateExportFilename } from '../../services/exportService';
 import { sessionService } from '../../services/sessionService';
 import { BiodataForm } from '../forms/BiodataForm';
@@ -59,7 +59,7 @@ export const DocumentBuilder: React.FC<DocumentBuilderProps> = ({
     return Math.max(0.35, Math.min(1.0, Number((availableWidth / 800).toFixed(2))));
   };
 
-  const [doc, setDoc] = useState<DocumentData>(initialDocument);
+  const [doc, setDoc] = useState<DocumentData>(() => sanitizeDocument(initialDocument));
   const [zoom, setZoom] = useState<number>(() => calculateOptimalZoom());
   const [pageCount, setPageCount] = useState<number>(1);
   const [isSaving, setIsSaving] = useState(false);
@@ -127,8 +127,9 @@ export const DocumentBuilder: React.FC<DocumentBuilderProps> = ({
 
   // Sync state if initialDocument id or templateId changes
   useEffect(() => {
-    setDoc(initialDocument);
-    setTempTitle(initialDocument.title);
+    const sanitized = sanitizeDocument(initialDocument);
+    setDoc(sanitized);
+    setTempTitle(sanitized.title);
     invalidatePreparedBlob(false);
     setIsDocumentEditedSinceBuild(false);
     hasAutoBuiltRef.current = false;

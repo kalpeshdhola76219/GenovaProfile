@@ -141,6 +141,162 @@ export const ResumeBulletItem: React.FC<{
   </div>
 );
 
+export const ResumeSplitRow: React.FC<{
+  left: React.ReactNode;
+  right?: React.ReactNode;
+  className?: string;
+  style?: React.CSSProperties;
+  leftClassName?: string;
+  leftStyle?: React.CSSProperties;
+  rightClassName?: string;
+  rightStyle?: React.CSSProperties;
+  rightWidth?: string;
+  wrapRight?: boolean;
+  verticalAlign?: 'top' | 'middle' | 'bottom' | 'baseline';
+}> = ({
+  left,
+  right,
+  className,
+  style,
+  leftClassName,
+  leftStyle,
+  rightClassName,
+  rightStyle,
+  rightWidth,
+  wrapRight = false,
+  verticalAlign = 'top',
+}) => {
+  const hasRight = right !== undefined && right !== null && right !== false && right !== '';
+  return (
+    <table
+      className={className}
+      style={{
+        width: '100%',
+        borderCollapse: 'collapse',
+        tableLayout: 'fixed',
+        margin: 0,
+        padding: 0,
+        border: 'none',
+        ...style,
+      }}
+    >
+      <tbody>
+        <tr>
+          <td
+            className={leftClassName}
+            style={{
+              verticalAlign,
+              textAlign: 'left',
+              padding: 0,
+              paddingRight: hasRight ? '12px' : 0,
+              border: 'none',
+              background: 'transparent',
+              ...leftStyle,
+            }}
+          >
+            {left}
+          </td>
+          {hasRight && (
+            <td
+              className={rightClassName}
+              style={{
+                verticalAlign,
+                textAlign: 'right',
+                padding: 0,
+                border: 'none',
+                background: 'transparent',
+                width: rightWidth ?? (wrapRight ? '40%' : '152px'),
+                whiteSpace: wrapRight ? 'normal' : 'nowrap',
+                overflowWrap: wrapRight ? 'anywhere' : 'normal',
+                ...rightStyle,
+              }}
+            >
+              {right}
+            </td>
+          )}
+        </tr>
+      </tbody>
+    </table>
+  );
+};
+
+export const ResumeHeaderTable: React.FC<{
+  left: React.ReactNode;
+  right?: React.ReactNode;
+  className?: string;
+  style?: React.CSSProperties;
+  leftClassName?: string;
+  leftStyle?: React.CSSProperties;
+  rightClassName?: string;
+  rightStyle?: React.CSSProperties;
+  rightWidth?: string;
+  nowrapRight?: boolean;
+  verticalAlign?: 'top' | 'middle' | 'bottom';
+}> = ({
+  left,
+  right,
+  className,
+  style,
+  leftClassName,
+  leftStyle,
+  rightClassName,
+  rightStyle,
+  rightWidth,
+  nowrapRight = true,
+  verticalAlign = 'top',
+}) => {
+  const hasRight = right !== undefined && right !== null && right !== false && right !== '';
+  return (
+    <table
+      className={className}
+      style={{
+        width: '100%',
+        borderCollapse: 'collapse',
+        margin: 0,
+        padding: 0,
+        border: 'none',
+        ...style,
+      }}
+    >
+      <tbody>
+        <tr>
+          <td
+            className={leftClassName}
+            style={{
+              verticalAlign,
+              textAlign: 'left',
+              padding: 0,
+              paddingRight: hasRight ? '16px' : 0,
+              border: 'none',
+              background: 'transparent',
+              ...leftStyle,
+            }}
+          >
+            {left}
+          </td>
+          {hasRight && (
+            <td
+              className={rightClassName}
+              style={{
+                verticalAlign,
+                textAlign: 'right',
+                padding: 0,
+                border: 'none',
+                background: 'transparent',
+                width: rightWidth ?? (nowrapRight ? '1%' : '44%'),
+                whiteSpace: nowrapRight ? 'nowrap' : 'normal',
+                ...rightStyle,
+              }}
+            >
+              {right}
+            </td>
+          )}
+        </tr>
+      </tbody>
+    </table>
+  );
+};
+
 export const ResumeDescriptionBlock: React.FC<{
   text?: string;
   wrapperClassName?: string;

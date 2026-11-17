@@ -2,15 +2,10 @@ import React from 'react';
 import { DocumentData } from '../../types/document';
 import { FONT_FAMILY_CSS_MAP } from '../../utils/fontClassMap';
 import {
-  HEADER_LEFT_STYLE,
-  HEADER_RIGHT_STYLE,
-  HEADER_ROW_STYLE,
-  METADATA_ROW_STYLE,
-  METADATA_LEFT_STYLE,
-  METADATA_RIGHT_STYLE,
-  METADATA_WIDE_RIGHT_STYLE,
   ResumeBulletItem,
   ResumeDescriptionBlock,
+  ResumeHeaderTable,
+  ResumeSplitRow,
   sanitizeDocumentTextFields,
 } from './resumeTemplateUtils';
 
@@ -29,23 +24,29 @@ export const ProfessionalResumeTemplate: React.FC<{ data: DocumentData }> = ({ d
       {/* Header Accent Line */}
       <div className="h-1.5 w-full rounded mb-6" style={{ backgroundColor: primary }}></div>
 
-      <div className="border-b border-slate-200 pb-4 mb-5" style={HEADER_ROW_STYLE}>
-        <div style={HEADER_LEFT_STYLE}>
-          <h1 className="text-2xl font-black tracking-tight text-slate-900">
-            {personal.fullName || 'FULL NAME'}
-          </h1>
-          <p className="text-sm font-semibold text-slate-600 mt-0.5 no-justify">
-            {personal.professionalTitle || 'Software Engineer / Consultant'}
-          </p>
-        </div>
-        <div className="text-right text-xs text-slate-500 space-y-0.5 no-justify" style={HEADER_RIGHT_STYLE}>
-          {contact.email && <div>{contact.email}</div>}
-          {contact.phone && <div>{contact.phone}</div>}
-          {(contact.city || contact.state || contact.country) && <div>{[contact.city, contact.state, contact.country].filter(Boolean).join(', ')}</div>}
-          {contact.linkedin && <div>{contact.linkedin}</div>}
-          {(contact.portfolio || contact.website) && <div>{contact.portfolio || contact.website}</div>}
-        </div>
-      </div>
+      <ResumeHeaderTable
+        className="border-b border-slate-200 pb-4 mb-5"
+        left={
+          <>
+            <h1 className="text-2xl font-black tracking-tight text-slate-900">
+              {personal.fullName || 'FULL NAME'}
+            </h1>
+            <p className="text-sm font-semibold text-slate-600 mt-0.5 no-justify">
+              {personal.professionalTitle || 'Software Engineer / Consultant'}
+            </p>
+          </>
+        }
+        rightClassName="text-right text-xs text-slate-500 space-y-0.5 no-justify"
+        right={
+          <>
+            {contact.email && <div>{contact.email}</div>}
+            {contact.phone && <div>{contact.phone}</div>}
+            {(contact.city || contact.state || contact.country) && <div>{[contact.city, contact.state, contact.country].filter(Boolean).join(', ')}</div>}
+            {contact.linkedin && <div>{contact.linkedin}</div>}
+            {(contact.portfolio || contact.website) && <div>{contact.portfolio || contact.website}</div>}
+          </>
+        }
+      />
 
       {summary && (
         <div className="mb-5 avoid-break">
@@ -64,10 +65,21 @@ export const ProfessionalResumeTemplate: React.FC<{ data: DocumentData }> = ({ d
           <div className="space-y-3.5">
             {experience.map((exp) => (
               <div key={exp.id} data-entry="true">
-                <div className="text-xs font-bold" style={METADATA_ROW_STYLE}>
-                  <span className="text-slate-900" style={METADATA_LEFT_STYLE}>{exp.jobTitle} • <span className="font-medium text-slate-600">{exp.company}</span></span>
-                  <span className="text-slate-500 font-normal text-[11px]" style={METADATA_RIGHT_STYLE}>{exp.startDate} - {(exp.currentlyWorking && (!exp.endDate || exp.endDate.trim().toLowerCase() === 'present')) ? 'Present' : (exp.endDate || 'Present')}</span>
-                </div>
+                <ResumeSplitRow
+                  className="text-xs font-bold"
+                  leftClassName="text-slate-900"
+                  left={
+                    <>
+                      {exp.jobTitle} • <span className="font-medium text-slate-600">{exp.company}</span>
+                    </>
+                  }
+                  rightClassName="text-slate-500 font-normal text-[11px]"
+                  right={
+                    <>
+                      {exp.startDate} - {(exp.currentlyWorking && (!exp.endDate || exp.endDate.trim().toLowerCase() === 'present')) ? 'Present' : (exp.endDate || 'Present')}
+                    </>
+                  }
+                />
                 <ResumeDescriptionBlock
                   text={exp.description}
                   wrapperClassName="mt-1 space-y-1 text-xs text-slate-700"
@@ -132,10 +144,13 @@ export const ProfessionalResumeTemplate: React.FC<{ data: DocumentData }> = ({ d
           <div className="space-y-2 text-xs">
             {projects.map((p) => (
               <div key={p.id} data-entry="true">
-                <div className="font-bold" style={METADATA_ROW_STYLE}>
-                  <span style={METADATA_LEFT_STYLE}>{p.name}</span>
-                  {p.link && <span className="text-sky-700 font-normal" style={METADATA_WIDE_RIGHT_STYLE}>{p.link}</span>}
-                </div>
+                <ResumeSplitRow
+                  className="font-bold"
+                  wrapRight
+                  left={p.name}
+                  rightClassName="text-sky-700 font-normal"
+                  right={p.link}
+                />
                 <p className="text-slate-600 mt-0.5">{p.description}</p>
               </div>
             ))}

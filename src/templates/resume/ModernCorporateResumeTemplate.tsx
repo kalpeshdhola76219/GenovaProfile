@@ -3,11 +3,8 @@ import { DocumentData } from '../../types/document';
 import { FONT_FAMILY_CSS_MAP } from '../../utils/fontClassMap';
 import {
   CONTACT_ROW_STYLE,
-  METADATA_LEFT_STYLE,
-  METADATA_RIGHT_STYLE,
-  METADATA_ROW_STYLE,
-  METADATA_WIDE_RIGHT_STYLE,
   ResumeDescriptionBlock,
+  ResumeSplitRow,
   sanitizeDocumentTextFields,
 } from './resumeTemplateUtils';
 
@@ -71,10 +68,13 @@ export const ModernCorporateResumeTemplate: React.FC<{ data: DocumentData }> = (
             <div className="space-y-4">
               {displayExperience.map((exp) => (
                 <div key={exp.id} data-entry>
-                  <div className="text-xs" style={METADATA_ROW_STYLE}>
-                    <span className="font-bold text-slate-900" style={METADATA_LEFT_STYLE}>{exp.jobTitle}</span>
-                    <span className="text-slate-500 font-medium text-[11px]" style={METADATA_RIGHT_STYLE}>{exp.startDate} - {(exp.currentlyWorking && (!exp.endDate || exp.endDate.trim().toLowerCase() === 'present')) ? 'Present' : (exp.endDate || 'Present')}</span>
-                  </div>
+                  <ResumeSplitRow
+                    className="text-xs"
+                    leftClassName="font-bold text-slate-900"
+                    left={exp.jobTitle}
+                    rightClassName="text-slate-500 font-medium text-[11px]"
+                    right={<>{exp.startDate} - {(exp.currentlyWorking && (!exp.endDate || exp.endDate.trim().toLowerCase() === 'present')) ? 'Present' : (exp.endDate || 'Present')}</>}
+                  />
                   <div className="text-xs font-semibold text-blue-800">{exp.company} {exp.location ? `• ${exp.location}` : ''}</div>
                   <ResumeDescriptionBlock
                     text={exp.description}
@@ -99,10 +99,13 @@ export const ModernCorporateResumeTemplate: React.FC<{ data: DocumentData }> = (
               <div className="space-y-3">
                 {projects.map((proj) => (
                   <div key={proj.id} data-entry className="text-xs">
-                    <div className="font-bold" style={METADATA_ROW_STYLE}>
-                      <span style={METADATA_LEFT_STYLE}>{proj.name}</span>
-                      {proj.link && <span className="font-mono text-[11px] text-blue-700" style={METADATA_WIDE_RIGHT_STYLE}>{proj.link}</span>}
-                    </div>
+                    <ResumeSplitRow
+                      className="font-bold"
+                      wrapRight
+                      left={proj.name}
+                      rightClassName="font-mono text-[11px] text-blue-700"
+                      right={proj.link}
+                    />
                     {proj.technologies && <div className="text-[11px] text-slate-500">Tech: {proj.technologies}</div>}
                     <p className="text-slate-700 mt-0.5">{proj.description}</p>
                   </div>

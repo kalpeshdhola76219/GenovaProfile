@@ -3,15 +3,10 @@ import { DocumentData } from '../../types/document';
 import { FONT_FAMILY_CSS_MAP } from '../../utils/fontClassMap';
 import {
   BULLET_LIST_STYLE,
-  HEADER_LEFT_STYLE,
-  HEADER_RIGHT_STYLE,
-  HEADER_ROW_STYLE,
-  METADATA_LEFT_STYLE,
-  METADATA_RIGHT_STYLE,
-  METADATA_ROW_STYLE,
-  METADATA_WIDE_RIGHT_STYLE,
   ResumeBulletItem,
   ResumeDescriptionBlock,
+  ResumeHeaderTable,
+  ResumeSplitRow,
   sanitizeDocumentTextFields,
 } from './resumeTemplateUtils';
 
@@ -26,20 +21,28 @@ export const ITProfessionalResumeTemplate: React.FC<{ data: DocumentData }> = ({
         fontSize: customization.fontSize === 'sm' ? '11px' : customization.fontSize === 'lg' ? '14px' : '12px',
       }}
     >
-      <div className="border-b-2 border-slate-900 pb-3 mb-4" style={HEADER_ROW_STYLE}>
-        <div style={HEADER_LEFT_STYLE}>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900 font-sans" style={{ fontFamily: FONT_FAMILY_CSS_MAP.sans }}>
-            {personal.fullName || 'FULL NAME'}
-          </h1>
-          <p className="text-xs text-indigo-700 font-bold mt-0.5 font-sans no-justify" style={{ fontFamily: FONT_FAMILY_CSS_MAP.sans }}>
-            {personal.professionalTitle || 'Senior Software Engineer / DevOps Architect'}
-          </p>
-        </div>
-        <div className="text-right text-[11px] text-slate-600 no-justify" style={HEADER_RIGHT_STYLE}>
-          <div>{[contact.email, contact.phone].filter(Boolean).join(' | ')}</div>
-          <div>{[contact.city, contact.state, contact.country].filter(Boolean).join(', ')} {contact.linkedin ? `| ${contact.linkedin}` : ''} {(contact.portfolio || contact.website) ? `| ${contact.portfolio || contact.website}` : ''}</div>
-        </div>
-      </div>
+      <ResumeHeaderTable
+        className="border-b-2 border-slate-900 pb-3 mb-4"
+        nowrapRight={false}
+        rightWidth="48%"
+        left={
+          <>
+            <h1 className="text-2xl font-bold tracking-tight text-slate-900 font-sans" style={{ fontFamily: FONT_FAMILY_CSS_MAP.sans }}>
+              {personal.fullName || 'FULL NAME'}
+            </h1>
+            <p className="text-xs text-indigo-700 font-bold mt-0.5 font-sans no-justify" style={{ fontFamily: FONT_FAMILY_CSS_MAP.sans }}>
+              {personal.professionalTitle || 'Senior Software Engineer / DevOps Architect'}
+            </p>
+          </>
+        }
+        rightClassName="text-right text-[11px] text-slate-600 no-justify"
+        right={
+          <>
+            <div>{[contact.email, contact.phone].filter(Boolean).join(' | ')}</div>
+            <div>{[contact.city, contact.state, contact.country].filter(Boolean).join(', ')} {contact.linkedin ? `| ${contact.linkedin}` : ''} {(contact.portfolio || contact.website) ? `| ${contact.portfolio || contact.website}` : ''}</div>
+          </>
+        }
+      />
 
       {summary && (
         <div className="mb-4 avoid-break bg-slate-50 p-3 rounded border border-slate-200">
@@ -70,10 +73,12 @@ export const ITProfessionalResumeTemplate: React.FC<{ data: DocumentData }> = ({
           <div className="space-y-3">
             {experience.map((exp) => (
               <div key={exp.id} data-entry>
-                <div className="text-xs font-bold" style={METADATA_ROW_STYLE}>
-                  <span style={METADATA_LEFT_STYLE}>{exp.jobTitle} @ {exp.company}</span>
-                  <span className="text-slate-500 font-normal text-[11px]" style={METADATA_RIGHT_STYLE}>{exp.startDate} - {(exp.currentlyWorking && (!exp.endDate || exp.endDate.trim().toLowerCase() === 'present')) ? 'Present' : (exp.endDate || 'Present')}</span>
-                </div>
+                <ResumeSplitRow
+                  className="text-xs font-bold"
+                  left={<>{exp.jobTitle} @ {exp.company}</>}
+                  rightClassName="text-slate-500 font-normal text-[11px]"
+                  right={<>{exp.startDate} - {(exp.currentlyWorking && (!exp.endDate || exp.endDate.trim().toLowerCase() === 'present')) ? 'Present' : (exp.endDate || 'Present')}</>}
+                />
                 <ResumeDescriptionBlock
                   text={exp.description}
                   wrapperClassName="mt-1 space-y-1 text-xs text-slate-700"
@@ -98,10 +103,13 @@ export const ITProfessionalResumeTemplate: React.FC<{ data: DocumentData }> = ({
           <div className="space-y-2">
             {projects.map((proj) => (
               <div key={proj.id} data-entry className="text-xs">
-                <div className="font-bold" style={METADATA_ROW_STYLE}>
-                  <span style={METADATA_LEFT_STYLE}>{proj.name}</span>
-                  {proj.link && <span className="text-indigo-600 font-normal" style={METADATA_WIDE_RIGHT_STYLE}>{proj.link}</span>}
-                </div>
+                <ResumeSplitRow
+                  className="font-bold"
+                  wrapRight
+                  left={proj.name}
+                  rightClassName="text-indigo-600 font-normal"
+                  right={proj.link}
+                />
                 {proj.technologies && <div className="text-[11px] text-slate-500">[{proj.technologies}]</div>}
                 <p className="text-slate-700 mt-0.5">{proj.description}</p>
               </div>

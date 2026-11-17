@@ -3,10 +3,8 @@ import { DocumentData } from '../../types/document';
 import { FONT_FAMILY_CSS_MAP } from '../../utils/fontClassMap';
 import {
   CONTACT_ROW_STYLE,
-  METADATA_LEFT_STYLE,
-  METADATA_RIGHT_STYLE,
-  METADATA_ROW_STYLE,
   ResumeDescriptionBlock,
+  ResumeSplitRow,
   sanitizeDocumentTextFields,
 } from './resumeTemplateUtils';
 
@@ -56,10 +54,13 @@ export const CreativeResumeTemplate: React.FC<{ data: DocumentData }> = ({ data 
           <div className="space-y-3.5">
             {experience.map((exp) => (
               <div key={exp.id} data-entry className="pl-3 border-l-2 border-orange-200">
-                <div className="text-xs font-bold" style={METADATA_ROW_STYLE}>
-                  <span className="text-slate-900" style={METADATA_LEFT_STYLE}>{exp.jobTitle} &bull; <span className="text-orange-600">{exp.company}</span></span>
-                  <span className="text-slate-400 text-[11px]" style={METADATA_RIGHT_STYLE}>{exp.startDate} - {(exp.currentlyWorking && (!exp.endDate || exp.endDate.trim().toLowerCase() === 'present')) ? 'Present' : (exp.endDate || 'Present')}</span>
-                </div>
+                <ResumeSplitRow
+                  className="text-xs font-bold"
+                  leftClassName="text-slate-900"
+                  left={<>{exp.jobTitle} &bull; <span className="text-orange-600">{exp.company}</span></>}
+                  rightClassName="text-slate-400 text-[11px]"
+                  right={<>{exp.startDate} - {(exp.currentlyWorking && (!exp.endDate || exp.endDate.trim().toLowerCase() === 'present')) ? 'Present' : (exp.endDate || 'Present')}</>}
+                />
                 <ResumeDescriptionBlock
                   text={exp.description}
                   wrapperClassName="mt-1 space-y-1 text-xs text-slate-700"
@@ -131,10 +132,13 @@ export const CreativeResumeTemplate: React.FC<{ data: DocumentData }> = ({ data 
             {certifications.map((c) => (
               <div key={c.id} className="p-2 rounded-lg border border-slate-200 bg-slate-50/40">
                 <div className="font-bold text-slate-900">{c.name}</div>
-                <div className="text-slate-500 text-[11px] mt-0.5" style={METADATA_ROW_STYLE}>
-                  <span style={METADATA_LEFT_STYLE}>{c.issuer}</span>
-                  {c.issueDate && <span className="text-slate-400 font-mono text-[10px]" style={METADATA_RIGHT_STYLE}>{c.issueDate}</span>}
-                </div>
+                <ResumeSplitRow
+                  className="text-slate-500 text-[11px] mt-0.5"
+                  left={c.issuer}
+                  rightClassName="text-slate-400 font-mono text-[10px]"
+                  right={c.issueDate}
+                  rightWidth="88px"
+                />
               </div>
             ))}
           </div>

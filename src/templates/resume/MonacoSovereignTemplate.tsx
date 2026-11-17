@@ -2,14 +2,9 @@ import React from 'react';
 import { DocumentData } from '../../types/document';
 import { FONT_FAMILY_CSS_MAP } from '../../utils/fontClassMap';
 import {
-  HEADER_LEFT_STYLE,
-  HEADER_RIGHT_STYLE,
-  HEADER_ROW_STYLE,
-  METADATA_ROW_STYLE,
-  METADATA_LEFT_STYLE,
-  METADATA_RIGHT_STYLE,
-  METADATA_WIDE_RIGHT_STYLE,
   ResumeDescriptionBlock,
+  ResumeHeaderTable,
+  ResumeSplitRow,
   sanitizeDocumentTextFields,
 } from './resumeTemplateUtils';
 
@@ -54,30 +49,34 @@ export const MonacoSovereignTemplate: React.FC<{ data: DocumentData }> = ({ data
       <div className="h-1 w-full bg-gradient-to-r from-transparent via-[#c5a059] to-transparent mb-6"></div>
 
       {/* Hero Header */}
-      <div className="border-b border-slate-200/80 pb-6 mb-6" style={HEADER_ROW_STYLE}>
-        <div style={HEADER_LEFT_STYLE}>
-          <span className="text-[10px] uppercase tracking-[0.25em] font-extrabold text-[#c5a059] block mb-1">
-            Global Leadership Dossier
-          </span>
-          <h1 className="text-3xl font-black tracking-tight uppercase font-cinzel" style={{ color: primary, fontFamily: FONT_FAMILY_CSS_MAP.cinzel }}>
-            {personal.fullName || 'ALEXANDER STERLING'}
-          </h1>
-          <p className="text-xs font-semibold text-slate-600 mt-1 tracking-wide font-playfair italic text-sm no-justify" style={{ fontFamily: FONT_FAMILY_CSS_MAP.playfair }}>
-            {personal.professionalTitle || 'Chief Strategy Officer • Cross-Border Enterprise Architect'}
-          </p>
-        </div>
-
-        {/* Global Coordinates */}
-        <div className="text-right text-xs text-slate-500 space-y-1 font-sans no-justify" style={HEADER_RIGHT_STYLE}>
-          {contact.email && <div className="font-medium text-slate-800">{contact.email}</div>}
-          {contact.phone && <div>{contact.phone}</div>}
-          <div>
-            {[contact.city, contact.state, contact.country].filter(Boolean).join(' • ') || 'London • New York • Singapore'}
-          </div>
-          {contact.linkedin && <div className="text-[#c5a059] font-medium">{contact.linkedin}</div>}
-          {(contact.portfolio || contact.website) && <div className="text-[#c5a059]">{contact.portfolio || contact.website}</div>}
-        </div>
-      </div>
+      <ResumeHeaderTable
+        className="border-b border-slate-200/80 pb-6 mb-6"
+        left={
+          <>
+            <span className="text-[10px] uppercase tracking-[0.25em] font-extrabold text-[#c5a059] block mb-1">
+              Global Leadership Dossier
+            </span>
+            <h1 className="text-3xl font-black tracking-tight uppercase font-cinzel" style={{ color: primary, fontFamily: FONT_FAMILY_CSS_MAP.cinzel }}>
+              {personal.fullName || 'ALEXANDER STERLING'}
+            </h1>
+            <p className="text-xs font-semibold text-slate-600 mt-1 tracking-wide font-playfair italic text-sm no-justify" style={{ fontFamily: FONT_FAMILY_CSS_MAP.playfair }}>
+              {personal.professionalTitle || 'Chief Strategy Officer • Cross-Border Enterprise Architect'}
+            </p>
+          </>
+        }
+        rightClassName="text-right text-xs text-slate-500 space-y-1 font-sans no-justify"
+        right={
+          <>
+            {contact.email && <div className="font-medium text-slate-800">{contact.email}</div>}
+            {contact.phone && <div>{contact.phone}</div>}
+            <div>
+              {[contact.city, contact.state, contact.country].filter(Boolean).join(' • ') || 'London • New York • Singapore'}
+            </div>
+            {contact.linkedin && <div className="text-[#c5a059] font-medium">{contact.linkedin}</div>}
+            {(contact.portfolio || contact.website) && <div className="text-[#c5a059]">{contact.portfolio || contact.website}</div>}
+          </>
+        }
+      />
 
       {/* Executive Scorecard Metric Strip */}
       {showExecutiveMetrics !== false && metricsToDisplay.length > 0 && (
@@ -117,21 +116,27 @@ export const MonacoSovereignTemplate: React.FC<{ data: DocumentData }> = ({ data
         <div className="col-span-8 space-y-6">
           {experience.length > 0 && (
             <div>
-              <h2 className="text-xs font-black uppercase tracking-[0.18em] border-b border-slate-200 pb-1.5 mb-3" style={{ ...HEADER_ROW_STYLE, color: primary }}>
-                <span style={HEADER_LEFT_STYLE}>Executive Experience</span>
-                <span style={{ ...HEADER_RIGHT_STYLE, verticalAlign: 'middle' }}>
-                  <span className="inline-block w-1.5 h-1.5 rounded-full bg-[#c5a059]"></span>
-                </span>
+              <h2 className="text-xs font-black uppercase tracking-[0.18em] border-b border-slate-200 pb-1.5 mb-3" style={{ color: primary }}>
+                <ResumeSplitRow
+                  left="Executive Experience"
+                  right={<span className="inline-block w-1.5 h-1.5 rounded-full bg-[#c5a059]"></span>}
+                  rightWidth="16px"
+                  verticalAlign="middle"
+                />
               </h2>
               <div className="space-y-4">
                 {experience.map((exp) => (
                   <div key={exp.id} data-entry="true" className="relative pl-3 border-l border-slate-200 avoid-break">
-                    <div style={METADATA_ROW_STYLE}>
-                      <span className="font-extrabold text-slate-900 text-xs" style={METADATA_LEFT_STYLE}>{exp.jobTitle}</span>
-                      <span className="text-[10px] font-semibold text-slate-400 font-mono" style={METADATA_RIGHT_STYLE}>
-                        {exp.startDate} &ndash; {(exp.currentlyWorking && (!exp.endDate || exp.endDate.trim().toLowerCase() === 'present')) ? 'Present' : (exp.endDate || 'Present')}
-                      </span>
-                    </div>
+                    <ResumeSplitRow
+                      leftClassName="font-extrabold text-slate-900 text-xs"
+                      left={exp.jobTitle}
+                      rightClassName="text-[10px] font-semibold text-slate-400 font-mono"
+                      right={
+                        <>
+                          {exp.startDate} &ndash; {(exp.currentlyWorking && (!exp.endDate || exp.endDate.trim().toLowerCase() === 'present')) ? 'Present' : (exp.endDate || 'Present')}
+                        </>
+                      }
+                    />
                     <div className="text-xs font-semibold text-[#c5a059] mb-1">
                       {exp.company} {exp.location ? `• ${exp.location}` : ''}
                     </div>
@@ -160,19 +165,24 @@ export const MonacoSovereignTemplate: React.FC<{ data: DocumentData }> = ({ data
           {/* Strategic Projects / Engagements */}
           {projects.length > 0 && (
             <div className="avoid-break">
-              <h2 className="text-xs font-black uppercase tracking-[0.18em] border-b border-slate-200 pb-1.5 mb-3" style={{ ...HEADER_ROW_STYLE, color: primary }}>
-                <span style={HEADER_LEFT_STYLE}>Key Engagements & Board Advisory</span>
-                <span style={{ ...HEADER_RIGHT_STYLE, verticalAlign: 'middle' }}>
-                  <span className="inline-block w-1.5 h-1.5 rounded-full bg-[#c5a059]"></span>
-                </span>
+              <h2 className="text-xs font-black uppercase tracking-[0.18em] border-b border-slate-200 pb-1.5 mb-3" style={{ color: primary }}>
+                <ResumeSplitRow
+                  left="Key Engagements & Board Advisory"
+                  right={<span className="inline-block w-1.5 h-1.5 rounded-full bg-[#c5a059]"></span>}
+                  rightWidth="16px"
+                  verticalAlign="middle"
+                />
               </h2>
               <div className="space-y-3">
                 {projects.map((p) => (
                   <div key={p.id} data-entry="true" className="text-xs">
-                    <div className="font-bold text-slate-900" style={METADATA_ROW_STYLE}>
-                      <span style={METADATA_LEFT_STYLE}>{p.name}</span>
-                      {p.link && <span className="text-[#c5a059] font-normal text-[11px]" style={METADATA_WIDE_RIGHT_STYLE}>{p.link}</span>}
-                    </div>
+                    <ResumeSplitRow
+                      className="font-bold text-slate-900"
+                      wrapRight
+                      left={p.name}
+                      rightClassName="text-[#c5a059] font-normal text-[11px]"
+                      right={p.link}
+                    />
                     {p.technologies && <div className="text-[10px] text-slate-400 italic">Domain: {p.technologies}</div>}
                     <p className="text-slate-600 mt-0.5">{p.description}</p>
                   </div>
@@ -240,9 +250,15 @@ export const MonacoSovereignTemplate: React.FC<{ data: DocumentData }> = ({ data
               {sec.items ? (
                 <div className="space-y-1 text-xs">
                   {sec.items.map((i) => (
-                    <div key={i.id} className="text-[11px]" style={METADATA_ROW_STYLE}>
-                      <span className="text-slate-500 font-medium" style={METADATA_LEFT_STYLE}>{i.key}:</span>
-                      <span className="font-semibold text-slate-800" style={METADATA_WIDE_RIGHT_STYLE}>{i.value}</span>
+                    <div key={i.id} className="text-[11px]">
+                      <ResumeSplitRow
+                        wrapRight
+                        leftClassName="text-slate-500 font-medium"
+                        left={`${i.key}:`}
+                        rightClassName="font-semibold text-slate-800"
+                        right={i.value}
+                        rightWidth="52%"
+                      />
                     </div>
                   ))}
                 </div>

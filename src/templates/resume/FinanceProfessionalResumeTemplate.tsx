@@ -3,15 +3,10 @@ import { DocumentData } from '../../types/document';
 import { FONT_FAMILY_CSS_MAP } from '../../utils/fontClassMap';
 import {
   BULLET_LIST_STYLE,
-  HEADER_LEFT_STYLE,
-  HEADER_RIGHT_STYLE,
-  HEADER_ROW_STYLE,
-  METADATA_LEFT_STYLE,
-  METADATA_RIGHT_STYLE,
-  METADATA_ROW_STYLE,
-  METADATA_WIDE_RIGHT_STYLE,
   ResumeBulletItem,
   ResumeDescriptionBlock,
+  ResumeHeaderTable,
+  ResumeSplitRow,
   sanitizeDocumentTextFields,
 } from './resumeTemplateUtils';
 
@@ -27,20 +22,28 @@ export const FinanceProfessionalResumeTemplate: React.FC<{ data: DocumentData }>
         fontSize: customization.fontSize === 'sm' ? '12px' : customization.fontSize === 'lg' ? '15px' : '13px',
       }}
     >
-      <div className="border-b-2 border-emerald-900 pb-3 mb-4" style={HEADER_ROW_STYLE}>
-        <div style={HEADER_LEFT_STYLE}>
-          <h1 className="text-2xl font-black tracking-tight text-emerald-950 uppercase">
-            {personal.fullName || 'FULL NAME'}
-          </h1>
-          <p className="text-xs font-bold text-emerald-800 tracking-wider uppercase mt-0.5 no-justify">
-            {personal.professionalTitle || 'Finance & Investment Analyst / Quant'}
-          </p>
-        </div>
-        <div className="text-right text-xs text-slate-600 font-mono no-justify" style={HEADER_RIGHT_STYLE}>
-          <div>{[contact.phone, contact.email].filter(Boolean).join(' | ')}</div>
-          <div>{[contact.city, contact.state, contact.country].filter(Boolean).join(', ')} {contact.linkedin ? `| ${contact.linkedin}` : ''} {(contact.portfolio || contact.website) ? `| ${contact.portfolio || contact.website}` : ''}</div>
-        </div>
-      </div>
+      <ResumeHeaderTable
+        className="border-b-2 border-emerald-900 pb-3 mb-4"
+        nowrapRight={false}
+        rightWidth="48%"
+        left={
+          <>
+            <h1 className="text-2xl font-black tracking-tight text-emerald-950 uppercase">
+              {personal.fullName || 'FULL NAME'}
+            </h1>
+            <p className="text-xs font-bold text-emerald-800 tracking-wider uppercase mt-0.5 no-justify">
+              {personal.professionalTitle || 'Finance & Investment Analyst / Quant'}
+            </p>
+          </>
+        }
+        rightClassName="text-right text-xs text-slate-600 font-mono no-justify"
+        right={
+          <>
+            <div>{[contact.phone, contact.email].filter(Boolean).join(' | ')}</div>
+            <div>{[contact.city, contact.state, contact.country].filter(Boolean).join(', ')} {contact.linkedin ? `| ${contact.linkedin}` : ''} {(contact.portfolio || contact.website) ? `| ${contact.portfolio || contact.website}` : ''}</div>
+          </>
+        }
+      />
 
       {summary && (
         <div className="mb-4 avoid-break">
@@ -56,10 +59,12 @@ export const FinanceProfessionalResumeTemplate: React.FC<{ data: DocumentData }>
           <div className="space-y-3">
             {experience.map((exp) => (
               <div key={exp.id} data-entry>
-                <div className="text-xs font-bold" style={METADATA_ROW_STYLE}>
-                  <span style={METADATA_LEFT_STYLE}>{exp.jobTitle}, <span className="font-semibold text-emerald-900">{exp.company}</span></span>
-                  <span className="font-mono text-[11px] text-slate-600" style={METADATA_RIGHT_STYLE}>{exp.startDate} - {(exp.currentlyWorking && (!exp.endDate || exp.endDate.trim().toLowerCase() === 'present')) ? 'Present' : (exp.endDate || 'Present')}</span>
-                </div>
+                <ResumeSplitRow
+                  className="text-xs font-bold"
+                  left={<>{exp.jobTitle}, <span className="font-semibold text-emerald-900">{exp.company}</span></>}
+                  rightClassName="font-mono text-[11px] text-slate-600"
+                  right={<>{exp.startDate} - {(exp.currentlyWorking && (!exp.endDate || exp.endDate.trim().toLowerCase() === 'present')) ? 'Present' : (exp.endDate || 'Present')}</>}
+                />
                 {exp.location && <div className="text-[11px] text-slate-500 italic">{exp.location}</div>}
                 <ResumeDescriptionBlock
                   text={exp.description}
@@ -85,10 +90,13 @@ export const FinanceProfessionalResumeTemplate: React.FC<{ data: DocumentData }>
           <div className="space-y-2 text-xs">
             {projects.map((p) => (
               <div key={p.id} data-entry>
-                <div className="font-bold text-slate-900" style={METADATA_ROW_STYLE}>
-                  <span style={METADATA_LEFT_STYLE}>{p.name}</span>
-                  {p.technologies && <span className="font-normal text-slate-500 font-mono text-[11px]" style={METADATA_WIDE_RIGHT_STYLE}>{p.technologies}</span>}
-                </div>
+                <ResumeSplitRow
+                  className="font-bold text-slate-900"
+                  wrapRight
+                  left={p.name}
+                  rightClassName="font-normal text-slate-500 font-mono text-[11px]"
+                  right={p.technologies}
+                />
                 {p.description && <p className="text-slate-700 mt-0.5 leading-relaxed">{p.description}</p>}
               </div>
             ))}

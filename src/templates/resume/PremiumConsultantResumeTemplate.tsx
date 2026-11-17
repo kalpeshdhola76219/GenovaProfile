@@ -2,12 +2,9 @@ import React from 'react';
 import { DocumentData } from '../../types/document';
 import { getStaticFontClass, getFontFamilyCss, FONT_FAMILY_CSS_MAP } from '../../utils/fontClassMap';
 import {
-  METADATA_ROW_STYLE,
-  METADATA_LEFT_STYLE,
-  METADATA_RIGHT_STYLE,
-  METADATA_WIDE_RIGHT_STYLE,
   CONTACT_CENTER_ROW_STYLE,
   ResumeDescriptionBlock,
+  ResumeSplitRow,
   sanitizeDocumentTextFields,
 } from './resumeTemplateUtils';
 
@@ -73,18 +70,25 @@ export const PremiumConsultantResumeTemplate: React.FC<{ data: DocumentData }> =
           <div className="space-y-4">
             {experience.map((exp) => (
               <div key={exp.id} data-entry="true">
-                <div style={METADATA_ROW_STYLE}>
-                  <span className="font-bold text-sm text-slate-900" style={METADATA_LEFT_STYLE}>
-                    {exp.company} • <span className="font-semibold text-slate-700">{exp.jobTitle}</span>
-                  </span>
-                  <span className="text-xs text-slate-500 font-medium" style={METADATA_WIDE_RIGHT_STYLE}>
-                    {exp.location ? `${exp.location} | ` : ''}
-                    {exp.startDate} –{' '}
-                    {exp.currentlyWorking && (!exp.endDate || exp.endDate.trim().toLowerCase() === 'present')
-                      ? 'Present'
-                      : exp.endDate || 'Present'}
-                  </span>
-                </div>
+                <ResumeSplitRow
+                  wrapRight
+                  leftClassName="font-bold text-sm text-slate-900"
+                  left={
+                    <>
+                      {exp.company} • <span className="font-semibold text-slate-700">{exp.jobTitle}</span>
+                    </>
+                  }
+                  rightClassName="text-xs text-slate-500 font-medium"
+                  right={
+                    <>
+                      {exp.location ? `${exp.location} | ` : ''}
+                      {exp.startDate} –{' '}
+                      {exp.currentlyWorking && (!exp.endDate || exp.endDate.trim().toLowerCase() === 'present')
+                        ? 'Present'
+                        : exp.endDate || 'Present'}
+                    </>
+                  }
+                />
                 <ResumeDescriptionBlock
                   text={exp.description}
                   wrapperClassName="mt-1 space-y-1 text-xs text-slate-700"
@@ -114,15 +118,22 @@ export const PremiumConsultantResumeTemplate: React.FC<{ data: DocumentData }> =
           </h2>
           <div className="space-y-2 text-xs">
             {education.map((e) => (
-              <div key={e.id} style={METADATA_ROW_STYLE}>
-                <div style={METADATA_LEFT_STYLE}>
-                  <span className="font-bold text-slate-900">{e.institute}</span>
-                  <span className="text-slate-600"> — {e.degree}</span>
-                </div>
-                <div className="text-slate-500" style={METADATA_RIGHT_STYLE}>
-                  {e.endYear}
-                  {e.score ? ` • ${/^[0-9./\s]+$/.test(e.score.trim()) ? `GPA: ${e.score.trim()}` : e.score.trim()}` : ''}
-                </div>
+              <div key={e.id} data-entry="true">
+                <ResumeSplitRow
+                  left={
+                    <>
+                      <span className="font-bold text-slate-900">{e.institute}</span>
+                      <span className="text-slate-600"> — {e.degree}</span>
+                    </>
+                  }
+                  rightClassName="text-slate-500"
+                  right={
+                    <>
+                      {e.endYear}
+                      {e.score ? ` • ${/^[0-9./\s]+$/.test(e.score.trim()) ? `GPA: ${e.score.trim()}` : e.score.trim()}` : ''}
+                    </>
+                  }
+                />
               </div>
             ))}
           </div>
@@ -137,10 +148,13 @@ export const PremiumConsultantResumeTemplate: React.FC<{ data: DocumentData }> =
           <div className="space-y-3 text-xs">
             {projects.map((p) => (
               <div key={p.id} data-entry="true">
-                <div className="font-bold text-slate-900" style={METADATA_ROW_STYLE}>
-                  <span style={METADATA_LEFT_STYLE}>{p.name}</span>
-                  {p.technologies && <span className="font-normal text-slate-500 text-[11px]" style={METADATA_WIDE_RIGHT_STYLE}>{p.technologies}</span>}
-                </div>
+                <ResumeSplitRow
+                  className="font-bold text-slate-900"
+                  wrapRight
+                  left={p.name}
+                  rightClassName="font-normal text-slate-500 text-[11px]"
+                  right={p.technologies}
+                />
                 {p.description && <p className="text-slate-700 mt-0.5 leading-relaxed">{p.description}</p>}
               </div>
             ))}
@@ -194,9 +208,14 @@ export const PremiumConsultantResumeTemplate: React.FC<{ data: DocumentData }> =
               {sec.items && sec.items.length > 0 ? (
                 <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
                   {sec.items.map((i) => (
-                    <div key={i.id} className="py-0.5 border-b border-slate-100" style={METADATA_ROW_STYLE}>
-                      <span className="text-slate-500 font-medium" style={METADATA_LEFT_STYLE}>{i.key}:</span>
-                      <span className="font-semibold text-slate-900" style={METADATA_WIDE_RIGHT_STYLE}>{i.value}</span>
+                    <div key={i.id} className="py-0.5 border-b border-slate-100">
+                      <ResumeSplitRow
+                        wrapRight
+                        leftClassName="text-slate-500 font-medium"
+                        left={`${i.key}:`}
+                        rightClassName="font-semibold text-slate-900"
+                        right={i.value}
+                      />
                     </div>
                   ))}
                 </div>

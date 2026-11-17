@@ -3,12 +3,9 @@ import { DocumentData } from '../../types/document';
 import { Mail, Phone, MapPin, Globe, Linkedin, Github } from 'lucide-react';
 import { FONT_FAMILY_CSS_MAP } from '../../utils/fontClassMap';
 import {
-  METADATA_ROW_STYLE,
-  METADATA_LEFT_STYLE,
-  METADATA_RIGHT_STYLE,
-  METADATA_WIDE_RIGHT_STYLE,
   CONTACT_ROW_STYLE,
   ResumeDescriptionBlock,
+  ResumeSplitRow,
   sanitizeDocumentTextFields,
 } from './resumeTemplateUtils';
 
@@ -116,17 +113,22 @@ export const ResumeATSTemplate: React.FC<{ data: DocumentData }> = ({ data }) =>
           <div className="space-y-3">
             {experience.map((exp, idx) => (
               <div key={exp.id || idx} data-entry="true">
-                <div className="text-xs" style={METADATA_ROW_STYLE}>
-                  <span className="font-bold text-slate-900" style={METADATA_LEFT_STYLE}>{exp.jobTitle || 'Role'}</span>
-                  <span className="text-slate-500 font-medium" style={METADATA_RIGHT_STYLE}>
-                    {exp.startDate || ''} –{' '}
-                    {exp.currentlyWorking && (!exp.endDate || exp.endDate.trim().toLowerCase() === 'present')
-                      ? 'Present'
-                      : exp.endDate || 'Present'}
-                  </span>
-                </div>
-                <div className="text-xs text-slate-600 italic" style={METADATA_ROW_STYLE}>
-                  <span style={METADATA_LEFT_STYLE}>{exp.company}{exp.location ? ` • ${exp.location}` : ''}</span>
+                <ResumeSplitRow
+                  className="text-xs"
+                  leftClassName="font-bold text-slate-900"
+                  left={exp.jobTitle || 'Role'}
+                  rightClassName="text-slate-500 font-medium"
+                  right={
+                    <>
+                      {exp.startDate || ''} –{' '}
+                      {exp.currentlyWorking && (!exp.endDate || exp.endDate.trim().toLowerCase() === 'present')
+                        ? 'Present'
+                        : exp.endDate || 'Present'}
+                    </>
+                  }
+                />
+                <div className="text-xs text-slate-600 italic">
+                  {exp.company}{exp.location ? ` • ${exp.location}` : ''}
                 </div>
                 <ResumeDescriptionBlock
                   text={exp.description}
@@ -157,17 +159,19 @@ export const ResumeATSTemplate: React.FC<{ data: DocumentData }> = ({ data }) =>
           <div className="space-y-2">
             {education.map((edu, idx) => (
               <div key={edu.id || idx} data-entry="true" className="text-xs">
-                <div className="font-bold text-slate-900" style={METADATA_ROW_STYLE}>
-                  <span style={METADATA_LEFT_STYLE}>{edu.degree}</span>
-                  <span className="text-slate-500 font-normal" style={METADATA_RIGHT_STYLE}>
-                    {edu.startYear || ''}{edu.startYear && edu.endYear ? ' – ' : ''}{edu.endYear || ''}
-                  </span>
-                </div>
-                <div className="text-slate-600" style={METADATA_ROW_STYLE}>
-                  <span style={METADATA_LEFT_STYLE}>
-                    {[edu.institute, edu.location].filter(Boolean).join(', ')}
-                    {edu.score ? ` • ${/^[0-9./\s]+$/.test(edu.score.trim()) ? `GPA: ${edu.score.trim()}` : edu.score.trim()}` : ''}
-                  </span>
+                <ResumeSplitRow
+                  className="font-bold text-slate-900"
+                  left={edu.degree}
+                  rightClassName="text-slate-500 font-normal"
+                  right={
+                    <>
+                      {edu.startYear || ''}{edu.startYear && edu.endYear ? ' – ' : ''}{edu.endYear || ''}
+                    </>
+                  }
+                />
+                <div className="text-slate-600">
+                  {[edu.institute, edu.location].filter(Boolean).join(', ')}
+                  {edu.score ? ` • ${/^[0-9./\s]+$/.test(edu.score.trim()) ? `GPA: ${edu.score.trim()}` : edu.score.trim()}` : ''}
                 </div>
               </div>
             ))}
@@ -209,20 +213,23 @@ export const ResumeATSTemplate: React.FC<{ data: DocumentData }> = ({ data }) =>
           <div className="space-y-2">
             {projects.map((proj, idx) => (
               <div key={proj.id || idx} data-entry="true" className="text-xs">
-                <div className="font-bold text-slate-900" style={METADATA_ROW_STYLE}>
-                  <span style={METADATA_LEFT_STYLE}>{proj.name}</span>
-                  {proj.link && (
-                    <a
-                      href={proj.link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-blue-600 underline text-[11px]"
-                      style={METADATA_RIGHT_STYLE}
-                    >
-                      View Project
-                    </a>
-                  )}
-                </div>
+                <ResumeSplitRow
+                  className="font-bold text-slate-900"
+                  wrapRight
+                  left={proj.name}
+                  right={
+                    proj.link ? (
+                      <a
+                        href={proj.link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-600 underline text-[11px] font-normal"
+                      >
+                        View Project
+                      </a>
+                    ) : undefined
+                  }
+                />
                 {proj.technologies && (
                   <p className="text-[11px] text-slate-500 font-medium no-justify">Tech: {proj.technologies}</p>
                 )}
@@ -244,11 +251,13 @@ export const ResumeATSTemplate: React.FC<{ data: DocumentData }> = ({ data }) =>
           </h2>
           <div className="space-y-1 text-xs">
             {certifications.map((cert, idx) => (
-              <div key={cert.id || idx} style={METADATA_ROW_STYLE}>
-                <span className="font-semibold text-slate-800" style={METADATA_LEFT_STYLE}>
-                  {cert.name} {cert.issuer ? `— ${cert.issuer}` : ''}
-                </span>
-                {cert.issueDate && <span className="text-slate-500" style={METADATA_RIGHT_STYLE}>{cert.issueDate}</span>}
+              <div key={cert.id || idx}>
+                <ResumeSplitRow
+                  leftClassName="font-semibold text-slate-800"
+                  left={`${cert.name}${cert.issuer ? ` — ${cert.issuer}` : ''}`}
+                  rightClassName="text-slate-500"
+                  right={cert.issueDate}
+                />
               </div>
             ))}
           </div>
@@ -269,9 +278,14 @@ export const ResumeATSTemplate: React.FC<{ data: DocumentData }> = ({ data }) =>
               {sec.items && sec.items.length > 0 ? (
                 <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
                   {sec.items.map((i) => (
-                    <div key={i.id} className="py-0.5 border-b border-slate-100" style={METADATA_ROW_STYLE}>
-                      <span className="text-slate-500 font-medium" style={METADATA_LEFT_STYLE}>{i.key}:</span>
-                      <span className="font-semibold text-slate-900" style={METADATA_WIDE_RIGHT_STYLE}>{i.value}</span>
+                    <div key={i.id} className="py-0.5 border-b border-slate-100">
+                      <ResumeSplitRow
+                        wrapRight
+                        leftClassName="text-slate-500 font-medium"
+                        left={`${i.key}:`}
+                        rightClassName="font-semibold text-slate-900"
+                        right={i.value}
+                      />
                     </div>
                   ))}
                 </div>

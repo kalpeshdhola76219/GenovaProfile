@@ -2,12 +2,9 @@ import React from 'react';
 import { DocumentData } from '../../types/document';
 import { FONT_FAMILY_CSS_MAP } from '../../utils/fontClassMap';
 import {
-  METADATA_ROW_STYLE,
-  METADATA_LEFT_STYLE,
-  METADATA_RIGHT_STYLE,
-  METADATA_WIDE_RIGHT_STYLE,
   ResumeBulletItem,
   ResumeDescriptionBlock,
+  ResumeSplitRow,
   sanitizeDocumentTextFields,
 } from './resumeTemplateUtils';
 
@@ -91,10 +88,18 @@ export const TwoColumnResumeTemplate: React.FC<{ data: DocumentData }> = ({ data
             <div className="space-y-3.5">
               {experience.map((exp) => (
                 <div key={exp.id} data-entry="true">
-                  <div className="text-xs font-bold" style={METADATA_ROW_STYLE}>
-                    <span className="text-slate-900" style={METADATA_LEFT_STYLE}>{exp.jobTitle}</span>
-                    <span className="text-slate-500 font-normal text-[11px]" style={METADATA_RIGHT_STYLE}>{exp.startDate} - {(exp.currentlyWorking && (!exp.endDate || exp.endDate.trim().toLowerCase() === 'present')) ? 'Present' : (exp.endDate || 'Present')}</span>
-                  </div>
+                  <ResumeSplitRow
+                    className="text-xs font-bold"
+                    leftClassName="text-slate-900"
+                    left={exp.jobTitle}
+                    rightClassName="text-slate-500 font-normal text-[11px]"
+                    rightWidth="136px"
+                    right={
+                      <>
+                        {exp.startDate} - {(exp.currentlyWorking && (!exp.endDate || exp.endDate.trim().toLowerCase() === 'present')) ? 'Present' : (exp.endDate || 'Present')}
+                      </>
+                    }
+                  />
                   <div className="text-xs font-medium text-sky-800">{exp.company} {exp.location ? `• ${exp.location}` : ''}</div>
                   <ResumeDescriptionBlock
                     text={exp.description}
@@ -125,10 +130,13 @@ export const TwoColumnResumeTemplate: React.FC<{ data: DocumentData }> = ({ data
             <div className="space-y-2 text-xs">
               {projects.map((proj) => (
                 <div key={proj.id} data-entry="true">
-                  <div className="font-bold" style={METADATA_ROW_STYLE}>
-                    <span style={METADATA_LEFT_STYLE}>{proj.name}</span>
-                    {proj.link && <span className="text-sky-700 font-normal" style={METADATA_WIDE_RIGHT_STYLE}>{proj.link}</span>}
-                  </div>
+                  <ResumeSplitRow
+                    className="font-bold"
+                    wrapRight
+                    left={proj.name}
+                    rightClassName="text-sky-700 font-normal"
+                    right={proj.link}
+                  />
                   {proj.technologies && <div className="text-[11px] text-slate-500">{proj.technologies}</div>}
                   <p className="text-slate-700 mt-0.5">{proj.description}</p>
                 </div>
