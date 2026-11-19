@@ -4,8 +4,10 @@ import { Mail, Phone, MapPin, Globe, Linkedin, Github } from 'lucide-react';
 import { FONT_FAMILY_CSS_MAP } from '../../utils/fontClassMap';
 import {
   CONTACT_ROW_STYLE,
+  RESUME_SHEET_BASE_STYLE,
   ResumeDescriptionBlock,
   ResumeSplitRow,
+  ResumeTwoColGrid,
   sanitizeDocumentTextFields,
 } from './resumeTemplateUtils';
 
@@ -30,8 +32,10 @@ export const ResumeATSTemplate: React.FC<{ data: DocumentData }> = ({ data }) =>
     <div
       className="document-page-sheet p-8 font-sans text-slate-800 shadow-sm"
       style={{
-        fontFamily: FONT_FAMILY_CSS_MAP.sans,
+        ...RESUME_SHEET_BASE_STYLE,
         backgroundColor: paperColor,
+        padding: '32px',
+        fontFamily: FONT_FAMILY_CSS_MAP.sans,
         fontSize: customization?.fontSize === 'sm' ? '13px' : customization?.fontSize === 'lg' ? '15px' : '14px',
         lineHeight: '1.5',
       }}
@@ -52,13 +56,13 @@ export const ResumeATSTemplate: React.FC<{ data: DocumentData }> = ({ data }) =>
             </span>
           )}
           {contact?.phone && (
-            <span className="flex items-center gap-1">
+            <span className="flex items-center gap-1" style={{ display: 'inline-flex', alignItems: 'center', columnGap: '4px' }}>
               <Phone className="w-3.5 h-3.5 text-slate-500" />
               <span>{contact.phone}</span>
             </span>
           )}
           {contact?.city && (
-            <span className="flex items-center gap-1">
+            <span className="flex items-center gap-1" style={{ display: 'inline-flex', alignItems: 'center', columnGap: '4px' }}>
               <MapPin className="w-3.5 h-3.5 text-slate-500" />
               <span>
                 {contact.city}
@@ -68,19 +72,19 @@ export const ResumeATSTemplate: React.FC<{ data: DocumentData }> = ({ data }) =>
             </span>
           )}
           {contact?.linkedin && (
-            <span className="flex items-center gap-1">
+            <span className="flex items-center gap-1" style={{ display: 'inline-flex', alignItems: 'center', columnGap: '4px' }}>
               <Linkedin className="w-3.5 h-3.5 text-slate-500" />
               <span>{contact.linkedin.replace(/^https?:\/\/(www\.)?linkedin\.com\/in\//, '')}</span>
             </span>
           )}
           {contact?.github && (
-            <span className="flex items-center gap-1">
+            <span className="flex items-center gap-1" style={{ display: 'inline-flex', alignItems: 'center', columnGap: '4px' }}>
               <Github className="w-3.5 h-3.5 text-slate-500" />
               <span>{contact.github.replace(/^https?:\/\/(www\.)?github\.com\//, '')}</span>
             </span>
           )}
           {(contact?.portfolio || contact?.website) && (
-            <span className="flex items-center gap-1">
+            <span className="flex items-center gap-1" style={{ display: 'inline-flex', alignItems: 'center', columnGap: '4px' }}>
               <Globe className="w-3.5 h-3.5 text-slate-500" />
               <span>{(contact.portfolio || contact.website)!.replace(/^https?:\/\//, '')}</span>
             </span>
@@ -90,7 +94,7 @@ export const ResumeATSTemplate: React.FC<{ data: DocumentData }> = ({ data }) =>
 
       {/* Professional Summary */}
       {summary && (
-        <section className="mb-4">
+        <section className="mb-4 avoid-break">
           <h2
             className="text-xs font-bold uppercase tracking-wider border-b pb-1 mb-2"
             style={{ color: primary, borderColor: '#e2e8f0' }}
@@ -158,7 +162,7 @@ export const ResumeATSTemplate: React.FC<{ data: DocumentData }> = ({ data }) =>
           </h2>
           <div className="space-y-2">
             {education.map((edu, idx) => (
-              <div key={edu.id || idx} data-entry="true" className="text-xs">
+              <div key={edu.id || idx} data-entry="true" className="text-xs avoid-break">
                 <ResumeSplitRow
                   className="font-bold text-slate-900"
                   left={edu.degree}
@@ -181,14 +185,14 @@ export const ResumeATSTemplate: React.FC<{ data: DocumentData }> = ({ data }) =>
 
       {/* Skills */}
       {skills && skills.length > 0 && (
-        <section className="mb-4 no-justify">
+        <section className="mb-4 avoid-break no-justify">
           <h2
             className="text-xs font-bold uppercase tracking-wider border-b pb-1 mb-2"
             style={{ color: primary, borderColor: '#e2e8f0' }}
           >
             Key Skills
           </h2>
-          <div className="flex flex-wrap gap-1.5 text-xs no-justify">
+          <div className="flex flex-wrap gap-1.5 text-xs no-justify" style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
             {skills.map((skill, idx) => (
               <span
                 key={idx}
@@ -212,7 +216,7 @@ export const ResumeATSTemplate: React.FC<{ data: DocumentData }> = ({ data }) =>
           </h2>
           <div className="space-y-2">
             {projects.map((proj, idx) => (
-              <div key={proj.id || idx} data-entry="true" className="text-xs">
+              <div key={proj.id || idx} data-entry="true" className="text-xs avoid-break">
                 <ResumeSplitRow
                   className="font-bold text-slate-900"
                   wrapRight
@@ -242,7 +246,7 @@ export const ResumeATSTemplate: React.FC<{ data: DocumentData }> = ({ data }) =>
 
       {/* Certifications */}
       {certifications && certifications.length > 0 && (
-        <section className="mb-4">
+        <section className="mb-4 avoid-break">
           <h2
             className="text-xs font-bold uppercase tracking-wider border-b pb-1 mb-2"
             style={{ color: primary, borderColor: '#e2e8f0' }}
@@ -266,18 +270,25 @@ export const ResumeATSTemplate: React.FC<{ data: DocumentData }> = ({ data }) =>
 
       {/* Custom Sections */}
       {customSections && customSections.length > 0 && (
-        <div className="space-y-4">
-          {customSections.map((sec) => (
-            <section key={sec.id} className="avoid-break">
+        <div>
+          {customSections.map((sec, idx) => (
+            <section
+              key={sec.id}
+              className="avoid-break"
+              style={{ marginBottom: idx < customSections.length - 1 ? '16px' : '0px' }}
+            >
               <h2
                 className="text-xs font-bold uppercase tracking-wider border-b pb-1 mb-2"
                 style={{ color: primary, borderColor: '#e2e8f0' }}
               >
                 {sec.title}
               </h2>
-              {sec.items && sec.items.length > 0 ? (
-                <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
-                  {sec.items.map((i) => (
+              {sec.items && sec.items.length > 0 && (
+                <ResumeTwoColGrid
+                  className="text-xs"
+                  gapX={16}
+                  gapY={4}
+                  items={sec.items.map((i) => (
                     <div key={i.id} className="py-0.5 border-b border-slate-100">
                       <ResumeSplitRow
                         wrapRight
@@ -288,9 +299,10 @@ export const ResumeATSTemplate: React.FC<{ data: DocumentData }> = ({ data }) =>
                       />
                     </div>
                   ))}
-                </div>
-              ) : (
-                <p className="text-xs text-slate-700 leading-relaxed whitespace-pre-line">{sec.content}</p>
+                />
+              )}
+              {sec.content && sec.content.trim() && (
+                <p className="text-xs text-slate-700 leading-relaxed whitespace-pre-line mt-1">{sec.content}</p>
               )}
             </section>
           ))}

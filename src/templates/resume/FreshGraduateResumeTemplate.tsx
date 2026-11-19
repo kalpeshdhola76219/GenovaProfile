@@ -4,7 +4,9 @@ import { FONT_FAMILY_CSS_MAP } from '../../utils/fontClassMap';
 import {
   BULLET_LIST_STYLE,
   CONTACT_CENTER_ROW_STYLE,
+  RESUME_SHEET_BASE_STYLE,
   ResumeBulletItem,
+  ResumeCustomSectionBody,
   ResumeDescriptionBlock,
   ResumeSplitRow,
   sanitizeDocumentTextFields,
@@ -12,12 +14,14 @@ import {
 
 export const FreshGraduateResumeTemplate: React.FC<{ data: DocumentData }> = ({ data }) => {
   const { personal, contact, summary, experience, education, skills, projects, certifications, achievements, customSections, customization } = sanitizeDocumentTextFields(data);
-  const primary = customization.primaryColor || '#1d4ed8'; // Royal Blue
 
   return (
     <div
       className="document-page-sheet p-8 font-jakarta text-slate-800 bg-white"
       style={{
+        ...RESUME_SHEET_BASE_STYLE,
+        backgroundColor: '#ffffff',
+        padding: '32px',
         fontFamily: FONT_FAMILY_CSS_MAP.jakarta,
         fontSize: customization.fontSize === 'sm' ? '12px' : customization.fontSize === 'lg' ? '15px' : '13px',
       }}
@@ -49,13 +53,13 @@ export const FreshGraduateResumeTemplate: React.FC<{ data: DocumentData }> = ({ 
 
       {/* Education First for fresh graduates */}
       {education.length > 0 && (
-        <div className="mb-4 avoid-break">
+        <div className="mb-4">
           <h2 className="text-xs font-bold uppercase tracking-wider text-blue-900 border-b border-blue-900 pb-0.5 mb-2">
             Education & Academic Background
           </h2>
           <div className="space-y-2 text-xs">
             {education.map((e) => (
-              <div key={e.id} data-entry>
+              <div key={e.id} data-entry="true" className="avoid-break">
                 <ResumeSplitRow
                   className="font-bold text-slate-900"
                   left={<>{e.degree} &bull; {e.institute}{e.score ? ` • ${/^[0-9./\s]+$/.test(e.score.trim()) ? `GPA: ${e.score.trim()}` : e.score.trim()}` : ''}</>}
@@ -71,13 +75,13 @@ export const FreshGraduateResumeTemplate: React.FC<{ data: DocumentData }> = ({ 
 
       {/* Projects Spotlight */}
       {projects.length > 0 && (
-        <div className="mb-4 avoid-break">
+        <div className="mb-4">
           <h2 className="text-xs font-bold uppercase tracking-wider text-blue-900 border-b border-blue-900 pb-0.5 mb-2">
             Academic & Capstone Projects
           </h2>
           <div className="space-y-2 text-xs">
             {projects.map((p) => (
-              <div key={p.id} data-entry>
+              <div key={p.id} data-entry="true" className="avoid-break">
                 <ResumeSplitRow
                   className="font-bold"
                   wrapRight
@@ -111,13 +115,13 @@ export const FreshGraduateResumeTemplate: React.FC<{ data: DocumentData }> = ({ 
 
       {/* Internship & Experience if any */}
       {experience.length > 0 && (
-        <div className="mb-4 avoid-break">
+        <div className="mb-4">
           <h2 className="text-xs font-bold uppercase tracking-wider text-blue-900 border-b border-blue-900 pb-0.5 mb-2">
             Internships & Work Experience
           </h2>
           <div className="space-y-2 text-xs">
             {experience.map((exp) => (
-              <div key={exp.id} data-entry>
+              <div key={exp.id} data-entry="true">
                 <ResumeSplitRow
                   className="font-bold"
                   left={<>{exp.jobTitle} at {exp.company}</>}
@@ -159,11 +163,13 @@ export const FreshGraduateResumeTemplate: React.FC<{ data: DocumentData }> = ({ 
       {customSections.map((sec) => (
         <div key={sec.id} className="mb-2 avoid-break">
           <h2 className="text-xs font-bold uppercase tracking-wider text-blue-900 border-b border-blue-900 pb-0.5 mb-1">{sec.title}</h2>
-          {sec.items ? (
-            <div className="grid grid-cols-2 gap-2 text-xs">
-              {sec.items.map((i) => <div key={i.id}><strong>{i.key}:</strong> {i.value}</div>)}
-            </div>
-          ) : <p className="text-xs text-slate-700">{sec.content}</p>}
+          <ResumeCustomSectionBody
+            items={sec.items}
+            content={sec.content}
+            textClassName="text-xs text-slate-700"
+            keyClassName="font-semibold text-slate-900"
+            columns={2}
+          />
         </div>
       ))}
     </div>

@@ -3,21 +3,53 @@ import { DocumentData } from '../../types/document';
 import { FONT_FAMILY_CSS_MAP } from '../../utils/fontClassMap';
 import {
   BULLET_LIST_STYLE,
+  RESUME_SHEET_BASE_STYLE,
   ResumeBulletItem,
+  ResumeCustomSectionBody,
   ResumeDescriptionBlock,
   ResumeHeaderTable,
   ResumeSplitRow,
+  ResumeTwoColumnTable,
   sanitizeDocumentTextFields,
 } from './resumeTemplateUtils';
 
 export const FinanceProfessionalResumeTemplate: React.FC<{ data: DocumentData }> = ({ data }) => {
   const { personal, contact, summary, experience, education, skills, projects, certifications, achievements, customSections, customization } = sanitizeDocumentTextFields(data);
-  const primary = customization.primaryColor || '#064e3b'; // Deep Emerald / Green
+
+  const educationBlock = education.length > 0 ? (
+    <div className="avoid-break">
+      <h2 className="text-xs font-bold uppercase tracking-wider text-emerald-950 bg-emerald-50 px-2 py-0.5 mb-2 border-l-4 border-emerald-800">
+        Education & Honors
+      </h2>
+      <div className="space-y-1.5 text-xs">
+        {education.map((e) => (
+          <div key={e.id}>
+            <div className="font-bold">{e.degree} &bull; {e.institute}</div>
+            <div className="text-slate-500 font-mono text-[11px]">{e.endYear}{e.score ? ` • ${/^[0-9./\s]+$/.test(e.score.trim()) ? `GPA: ${e.score.trim()}` : e.score.trim()}` : ''}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  ) : null;
+
+  const skillsBlock = skills.length > 0 ? (
+    <div className="avoid-break no-justify">
+      <h2 className="text-xs font-bold uppercase tracking-wider text-emerald-950 bg-emerald-50 px-2 py-0.5 mb-2 border-l-4 border-emerald-800">
+        Financial Modeling & Skills
+      </h2>
+      <p className="text-xs text-slate-800 leading-relaxed no-justify">
+        {skills.map((s) => s.name).join(' • ')}
+      </p>
+    </div>
+  ) : null;
 
   return (
     <div
       className="document-page-sheet p-8 font-jakarta text-slate-900 bg-white"
       style={{
+        ...RESUME_SHEET_BASE_STYLE,
+        backgroundColor: '#ffffff',
+        padding: '32px',
         fontFamily: FONT_FAMILY_CSS_MAP.jakarta,
         fontSize: customization.fontSize === 'sm' ? '12px' : customization.fontSize === 'lg' ? '15px' : '13px',
       }}
@@ -52,13 +84,13 @@ export const FinanceProfessionalResumeTemplate: React.FC<{ data: DocumentData }>
       )}
 
       {experience.length > 0 && (
-        <div className="mb-4 avoid-break">
+        <div className="mb-4">
           <h2 className="text-xs font-bold uppercase tracking-wider text-emerald-950 bg-emerald-50 px-2 py-0.5 mb-2 border-l-4 border-emerald-800">
             Professional Experience & Quantitative Track Record
           </h2>
           <div className="space-y-3">
             {experience.map((exp) => (
-              <div key={exp.id} data-entry>
+              <div key={exp.id} data-entry="true">
                 <ResumeSplitRow
                   className="text-xs font-bold"
                   left={<>{exp.jobTitle}, <span className="font-semibold text-emerald-900">{exp.company}</span></>}
@@ -83,13 +115,13 @@ export const FinanceProfessionalResumeTemplate: React.FC<{ data: DocumentData }>
       )}
 
       {projects && projects.length > 0 && (
-        <div className="mb-4 avoid-break">
+        <div className="mb-4">
           <h2 className="text-xs font-bold uppercase tracking-wider text-emerald-950 bg-emerald-50 px-2 py-0.5 mb-2 border-l-4 border-emerald-800">
             Key Financial Projects & Transactions
           </h2>
           <div className="space-y-2 text-xs">
             {projects.map((p) => (
-              <div key={p.id} data-entry>
+              <div key={p.id} data-entry="true" className="avoid-break">
                 <ResumeSplitRow
                   className="font-bold text-slate-900"
                   wrapRight
@@ -104,34 +136,21 @@ export const FinanceProfessionalResumeTemplate: React.FC<{ data: DocumentData }>
         </div>
       )}
 
-      <div className="grid grid-cols-2 gap-6 mb-4 no-justify">
-        {education.length > 0 && (
-          <div className="avoid-break">
-            <h2 className="text-xs font-bold uppercase tracking-wider text-emerald-950 bg-emerald-50 px-2 py-0.5 mb-2 border-l-4 border-emerald-800">
-              Education & Honors
-            </h2>
-            <div className="space-y-1.5 text-xs">
-              {education.map((e) => (
-                <div key={e.id}>
-                  <div className="font-bold">{e.degree} &bull; {e.institute}</div>
-                  <div className="text-slate-500 font-mono text-[11px]">{e.endYear}{e.score ? ` • ${/^[0-9./\s]+$/.test(e.score.trim()) ? `GPA: ${e.score.trim()}` : e.score.trim()}` : ''}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {skills.length > 0 && (
-          <div className="avoid-break no-justify">
-            <h2 className="text-xs font-bold uppercase tracking-wider text-emerald-950 bg-emerald-50 px-2 py-0.5 mb-2 border-l-4 border-emerald-800">
-              Financial Modeling & Skills
-            </h2>
-            <p className="text-xs text-slate-800 leading-relaxed no-justify">
-              {skills.map((s) => s.name).join(' &bull; ')}
-            </p>
-          </div>
-        )}
-      </div>
+      {(educationBlock || skillsBlock) && (
+        <div className="mb-4 no-justify" style={{ marginBottom: '16px' }}>
+          {educationBlock && skillsBlock ? (
+            <ResumeTwoColumnTable
+              leftWidth="50%"
+              rightWidth="50%"
+              gapPx={24}
+              left={educationBlock}
+              right={skillsBlock}
+            />
+          ) : (
+            educationBlock || skillsBlock
+          )}
+        </div>
+      )}
 
       {(certifications.length > 0 || achievements.length > 0) && (
         <div className="mb-3 avoid-break">
@@ -156,11 +175,13 @@ export const FinanceProfessionalResumeTemplate: React.FC<{ data: DocumentData }>
       {customSections.map((sec) => (
         <div key={sec.id} className="mb-2 avoid-break">
           <h2 className="text-xs font-bold uppercase tracking-wider text-emerald-950 bg-emerald-50 px-2 py-0.5 mb-1 border-l-4 border-emerald-800">{sec.title}</h2>
-          {sec.items ? (
-            <div className="grid grid-cols-2 gap-2 text-xs">
-              {sec.items.map((i) => <div key={i.id}><span className="font-semibold">{i.key}:</span> {i.value}</div>)}
-            </div>
-          ) : <p className="text-xs text-slate-700">{sec.content}</p>}
+          <ResumeCustomSectionBody
+            items={sec.items}
+            content={sec.content}
+            textClassName="text-xs text-slate-700"
+            keyClassName="font-semibold text-slate-900"
+            columns={2}
+          />
         </div>
       ))}
     </div>

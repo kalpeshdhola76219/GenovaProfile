@@ -3,7 +3,9 @@ import { DocumentData } from '../../types/document';
 import { FONT_FAMILY_CSS_MAP } from '../../utils/fontClassMap';
 import {
   CONTACT_ROW_STYLE,
+  RESUME_SHEET_BASE_STYLE,
   ResumeBulletItem,
+  ResumeCustomSectionBody,
   ResumeDescriptionBlock,
   ResumeHeaderTable,
   ResumeSplitRow,
@@ -31,6 +33,9 @@ export const ATSProfessionalResumeTemplate: React.FC<{ data: DocumentData }> = (
     <div
       className="document-page-sheet p-9 font-jakarta text-slate-900 bg-white"
       style={{
+        ...RESUME_SHEET_BASE_STYLE,
+        backgroundColor: '#ffffff',
+        padding: '36px',
         fontFamily: FONT_FAMILY_CSS_MAP.jakarta,
         fontSize: customization.fontSize === 'sm' ? '12px' : customization.fontSize === 'lg' ? '15px' : '13px',
       }}
@@ -84,7 +89,7 @@ export const ATSProfessionalResumeTemplate: React.FC<{ data: DocumentData }> = (
           </h2>
           <div className="space-y-3">
             {experience.map((exp, idx) => (
-              <div key={exp.id || `exp-${idx}`} data-entry>
+              <div key={exp.id || `exp-${idx}`} data-entry="true">
                 <ResumeSplitRow
                   className="text-xs"
                   leftClassName="font-bold text-slate-900"
@@ -145,7 +150,7 @@ export const ATSProfessionalResumeTemplate: React.FC<{ data: DocumentData }> = (
               const hasInstitute = Boolean(edu.institute && edu.institute.trim());
 
               return (
-                <div key={edu.id || `edu-${idx}`} data-entry className="text-xs">
+                <div key={edu.id || `edu-${idx}`} data-entry="true" className="text-xs">
                   <ResumeSplitRow
                     left={
                       <>
@@ -194,7 +199,7 @@ export const ATSProfessionalResumeTemplate: React.FC<{ data: DocumentData }> = (
           </h2>
           <div className="space-y-2 text-xs">
             {projects.map((proj, idx) => (
-              <div key={proj.id || `proj-${idx}`} data-entry className="text-xs">
+              <div key={proj.id || `proj-${idx}`} data-entry="true" className="text-xs">
                 <ResumeSplitRow
                   className="font-bold"
                   wrapRight
@@ -236,17 +241,16 @@ export const ATSProfessionalResumeTemplate: React.FC<{ data: DocumentData }> = (
           <h2 className="text-xs font-black uppercase tracking-wider mb-1 pb-0.5 border-b border-slate-200" style={{ color: primary }}>
             {sec.title}
           </h2>
-          {sec.items ? (
-            <div className="grid grid-cols-2 gap-2 text-xs">
-              {sec.items.map((it) => (
-                <div key={it.id}><span className="font-semibold text-slate-700">{it.key}:</span> {it.value}</div>
-              ))}
-            </div>
-          ) : (
-            <p className="text-xs text-slate-700">{sec.content}</p>
-          )}
+          <ResumeCustomSectionBody
+            items={sec.items}
+            content={sec.content}
+            columns={2}
+            textClassName="text-xs text-slate-700"
+            keyClassName="font-semibold text-slate-700"
+          />
         </div>
       ))}
     </div>
   );
 };
+

@@ -3,20 +3,56 @@ import { DocumentData } from '../../types/document';
 import { FONT_FAMILY_CSS_MAP } from '../../utils/fontClassMap';
 import {
   BULLET_LIST_STYLE,
+  RESUME_SHEET_BASE_STYLE,
   ResumeBulletItem,
+  ResumeCustomSectionBody,
   ResumeDescriptionBlock,
   ResumeHeaderTable,
   ResumeSplitRow,
+  ResumeTwoColumnTable,
   sanitizeDocumentTextFields,
 } from './resumeTemplateUtils';
 
 export const ExecutivePremiumResumeTemplate: React.FC<{ data: DocumentData }> = ({ data }) => {
   const { personal, contact, summary, experience, education, skills, projects, certifications, achievements, customSections, customization } = sanitizeDocumentTextFields(data);
 
+  const educationBlock = education.length > 0 ? (
+    <div className="avoid-break">
+      <h2 className="text-xs font-bold uppercase tracking-widest text-stone-900 font-cinzel border-b border-stone-300 pb-1 mb-2">
+        Education
+      </h2>
+      <div className="space-y-1.5 text-xs">
+        {education.map((e) => (
+          <div key={e.id}>
+            <div className="font-bold text-sm text-stone-950">{e.degree}</div>
+            <div className="text-stone-600 font-sans">
+              {e.institute} • {e.endYear}
+              {e.score ? ` • ${/^[0-9./\s]+$/.test(e.score.trim()) ? `GPA: ${e.score.trim()}` : e.score.trim()}` : ''}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  ) : null;
+
+  const skillsBlock = skills.length > 0 ? (
+    <div className="avoid-break no-justify">
+      <h2 className="text-xs font-bold uppercase tracking-widest text-stone-900 font-cinzel border-b border-stone-300 pb-1 mb-2">
+        Core Competencies
+      </h2>
+      <p className="text-xs text-stone-800 leading-relaxed no-justify">
+        {skills.map((s) => s.name).join(' • ')}
+      </p>
+    </div>
+  ) : null;
+
   return (
     <div
       className="document-page-sheet p-8 font-cormorant text-stone-900 bg-white"
       style={{
+        ...RESUME_SHEET_BASE_STYLE,
+        backgroundColor: '#ffffff',
+        padding: '32px',
         fontFamily: FONT_FAMILY_CSS_MAP.cormorant,
         fontSize: customization.fontSize === 'sm' ? '13px' : customization.fontSize === 'lg' ? '16px' : '14px',
       }}
@@ -52,13 +88,13 @@ export const ExecutivePremiumResumeTemplate: React.FC<{ data: DocumentData }> = 
       )}
 
       {experience.length > 0 && (
-        <div className="mb-5 avoid-break">
+        <div className="mb-5">
           <h2 className="text-xs font-bold uppercase tracking-widest text-stone-900 font-cinzel border-b border-stone-300 pb-1 mb-3">
             Executive History
           </h2>
           <div className="space-y-4">
             {experience.map((exp) => (
-              <div key={exp.id} data-entry>
+              <div key={exp.id} data-entry="true">
                 <ResumeSplitRow
                   leftClassName="font-bold text-base text-stone-950"
                   left={<>{exp.jobTitle} • <span className="font-semibold text-stone-700">{exp.company}</span></>}
@@ -84,13 +120,13 @@ export const ExecutivePremiumResumeTemplate: React.FC<{ data: DocumentData }> = 
       )}
 
       {projects && projects.length > 0 && (
-        <div className="mb-4 avoid-break">
+        <div className="mb-4">
           <h2 className="text-xs font-bold uppercase tracking-widest text-stone-900 font-cinzel border-b border-stone-300 pb-1 mb-2">
             Key Initiatives & Strategic Projects
           </h2>
           <div className="space-y-2 text-xs">
             {projects.map((p) => (
-              <div key={p.id} data-entry>
+              <div key={p.id} data-entry="true" className="avoid-break">
                 <ResumeSplitRow
                   className="font-bold text-stone-900"
                   wrapRight
@@ -105,34 +141,15 @@ export const ExecutivePremiumResumeTemplate: React.FC<{ data: DocumentData }> = 
         </div>
       )}
 
-      <div className="grid grid-cols-2 gap-6 mb-4 no-justify">
-        {education.length > 0 && (
-          <div className="avoid-break">
-            <h2 className="text-xs font-bold uppercase tracking-widest text-stone-900 font-cinzel border-b border-stone-300 pb-1 mb-2">
-              Education
-            </h2>
-            <div className="space-y-1.5 text-xs">
-              {education.map((e) => (
-                <div key={e.id}>
-                  <div className="font-bold text-sm text-stone-950">{e.degree}</div>
-                  <div className="text-stone-600 font-sans">{e.institute} • {e.endYear}{e.score ? ` • ${/^[0-9./\s]+$/.test(e.score.trim()) ? `GPA: ${e.score.trim()}` : e.score.trim()}` : ''}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {skills.length > 0 && (
-          <div className="avoid-break no-justify">
-            <h2 className="text-xs font-bold uppercase tracking-widest text-stone-900 font-cinzel border-b border-stone-300 pb-1 mb-2">
-              Core Competencies
-            </h2>
-            <p className="text-xs text-stone-800 leading-relaxed no-justify">
-              {skills.map((s) => s.name).join(' • ')}
-            </p>
-          </div>
-        )}
-      </div>
+      {(educationBlock || skillsBlock) && (
+        <div className="mb-4 no-justify" style={{ marginBottom: '16px' }}>
+          {educationBlock && skillsBlock ? (
+            <ResumeTwoColumnTable gapPx={24} left={educationBlock} right={skillsBlock} />
+          ) : (
+            educationBlock || skillsBlock
+          )}
+        </div>
+      )}
 
       {(certifications.length > 0 || achievements.length > 0) && (
         <div className="mb-3 avoid-break">
@@ -157,13 +174,15 @@ export const ExecutivePremiumResumeTemplate: React.FC<{ data: DocumentData }> = 
       {customSections.map((sec) => (
         <div key={sec.id} className="mb-2 avoid-break">
           <h2 className="text-xs font-bold uppercase tracking-widest text-stone-900 font-cinzel border-b border-stone-300 pb-1 mb-1">{sec.title}</h2>
-          {sec.items ? (
-            <div className="grid grid-cols-2 gap-2 text-xs">
-              {sec.items.map((i) => <div key={i.id}><strong>{i.key}:</strong> {i.value}</div>)}
-            </div>
-          ) : <p className="text-xs text-stone-700">{sec.content}</p>}
+          <ResumeCustomSectionBody
+            items={sec.items}
+            content={sec.content}
+            columns={2}
+            textClassName="text-xs text-stone-700"
+          />
         </div>
       ))}
     </div>
   );
 };
+

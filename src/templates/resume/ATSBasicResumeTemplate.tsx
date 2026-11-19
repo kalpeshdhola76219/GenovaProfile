@@ -4,7 +4,9 @@ import { FONT_FAMILY_CSS_MAP } from '../../utils/fontClassMap';
 import {
   BULLET_LIST_STYLE,
   CONTACT_CENTER_ROW_STYLE,
+  RESUME_SHEET_BASE_STYLE,
   ResumeBulletItem,
+  ResumeCustomSectionBody,
   ResumeDescriptionBlock,
   ResumeSplitRow,
   sanitizeDocumentTextFields,
@@ -17,6 +19,9 @@ export const ATSBasicResumeTemplate: React.FC<{ data: DocumentData }> = ({ data 
     <div
       className="document-page-sheet p-10 font-sans text-black bg-white leading-normal"
       style={{
+        ...RESUME_SHEET_BASE_STYLE,
+        backgroundColor: '#ffffff',
+        padding: '40px',
         fontFamily: FONT_FAMILY_CSS_MAP.sans,
         fontSize: customization.fontSize === 'sm' ? '12px' : customization.fontSize === 'lg' ? '15px' : '13px',
       }}
@@ -56,7 +61,7 @@ export const ATSBasicResumeTemplate: React.FC<{ data: DocumentData }> = ({ data 
           </h2>
           <div className="space-y-3">
             {experience.map((exp) => (
-              <div key={exp.id} data-entry>
+              <div key={exp.id} data-entry="true">
                 <ResumeSplitRow
                   className="text-xs font-bold"
                   left={<>{exp.jobTitle}, {exp.company}</>}
@@ -82,13 +87,13 @@ export const ATSBasicResumeTemplate: React.FC<{ data: DocumentData }> = ({ data 
 
       {/* Education */}
       {education.length > 0 && (
-        <div className="mb-4 avoid-break">
+        <div className="mb-4">
           <h2 className="text-xs font-bold uppercase tracking-wider border-b border-black pb-0.5 mb-1.5">
             EDUCATION
           </h2>
           <div className="space-y-2">
             {education.map((edu) => (
-              <div key={edu.id} data-entry>
+              <div key={edu.id} data-entry="true" className="avoid-break">
                 <ResumeSplitRow
                   className="text-xs font-bold"
                   left={<>{edu.degree} - {edu.institute}{edu.score ? ` • ${/^[0-9./\s]+$/.test(edu.score.trim()) ? `GPA: ${edu.score.trim()}` : edu.score.trim()}` : ''}</>}
@@ -108,20 +113,20 @@ export const ATSBasicResumeTemplate: React.FC<{ data: DocumentData }> = ({ data 
             SKILLS & COMPETENCIES
           </h2>
           <p className="text-xs leading-relaxed no-justify">
-            {skills.map((s) => s.name).join(' &bull; ')}
+            {skills.map((s) => s.name).join(' • ')}
           </p>
         </div>
       )}
 
       {/* Projects */}
       {projects.length > 0 && (
-        <div className="mb-4 avoid-break">
+        <div className="mb-4">
           <h2 className="text-xs font-bold uppercase tracking-wider border-b border-black pb-0.5 mb-1.5">
             KEY PROJECTS
           </h2>
           <div className="space-y-2">
             {projects.map((proj) => (
-              <div key={proj.id} data-entry>
+              <div key={proj.id} data-entry="true" className="avoid-break">
                 <ResumeSplitRow
                   className="text-xs font-bold"
                   wrapRight
@@ -164,17 +169,16 @@ export const ATSBasicResumeTemplate: React.FC<{ data: DocumentData }> = ({ data 
           <h2 className="text-xs font-bold uppercase tracking-wider border-b border-black pb-0.5 mb-1.5">
             {sec.title.toUpperCase()}
           </h2>
-          {sec.items ? (
-            <div className="text-xs space-y-1">
-              {sec.items.map((it) => (
-                <div key={it.id}><strong>{it.key}:</strong> {it.value}</div>
-              ))}
-            </div>
-          ) : (
-            <p className="text-xs">{sec.content}</p>
-          )}
+          <ResumeCustomSectionBody
+            items={sec.items}
+            content={sec.content}
+            columns={2}
+            textClassName="text-xs text-black"
+            keyClassName="font-bold"
+          />
         </div>
       ))}
     </div>
   );
 };
+

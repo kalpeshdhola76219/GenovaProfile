@@ -2,9 +2,12 @@ import React from 'react';
 import { DocumentData } from '../../types/document';
 import { getStaticFontClass, getFontFamilyCss, FONT_FAMILY_CSS_MAP } from '../../utils/fontClassMap';
 import {
+  RESUME_SHEET_BASE_STYLE,
+  ResumeCustomSectionBody,
   ResumeDescriptionBlock,
   ResumeHeaderTable,
   ResumeSplitRow,
+  ResumeTwoColumnTable,
   sanitizeDocumentTextFields,
 } from './resumeTemplateUtils';
 
@@ -28,10 +31,51 @@ export const PremiumMinimalExecutiveResumeTemplate: React.FC<{ data: DocumentDat
   const displayExperience = experience || [];
   const displayEducation = education || [];
 
+  const educationBlock = displayEducation.length > 0 ? (
+    <div className="avoid-break">
+      <h2 className="text-xs font-bold uppercase tracking-widest text-slate-900 border-b border-slate-200 pb-1 mb-2.5">
+        Education & Degrees
+      </h2>
+      <div className="space-y-2 text-xs">
+        {displayEducation.map((e) => (
+          <div key={e.id}>
+            <div className="font-bold text-slate-900">{e.degree}</div>
+            <div className="text-slate-600">{e.institute} {e.endYear ? `(${e.endYear})` : ''}{e.score ? ` • ${/^[0-9./\s]+$/.test(e.score.trim()) ? `GPA: ${e.score.trim()}` : e.score.trim()}` : ''}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  ) : null;
+
+  const honorsBlock = ((certifications && certifications.length > 0) || (achievements && achievements.length > 0)) ? (
+    <div className="avoid-break">
+      <h2 className="text-xs font-bold uppercase tracking-widest text-slate-900 border-b border-slate-200 pb-1 mb-2.5">
+        Certifications & Board Honors
+      </h2>
+      <div className="space-y-1.5 text-xs text-slate-700">
+        {certifications && certifications.map((c) => (
+          <div key={c.id}>
+            <strong className="text-slate-900">{c.name}</strong> • {c.issuer} {c.issueDate ? `(${c.issueDate})` : ''}
+          </div>
+        ))}
+        {achievements && achievements.map((a) => (
+          <div key={a.id}>
+            <strong className="text-slate-900">{a.title}</strong>: {a.description}
+          </div>
+        ))}
+      </div>
+    </div>
+  ) : null;
+
   return (
     <div
       className={`document-page-sheet p-10 bg-white text-slate-900 shadow-sm ${baseFontSize}`}
-      style={{ fontFamily: FONT_FAMILY_CSS_MAP.sans }}
+      style={{
+        ...RESUME_SHEET_BASE_STYLE,
+        backgroundColor: '#ffffff',
+        padding: '40px',
+        fontFamily: FONT_FAMILY_CSS_MAP.sans,
+      }}
     >
       <div className="border-b-2 pb-5 mb-6" style={{ borderColor: primary }}>
         <ResumeHeaderTable
@@ -74,7 +118,7 @@ export const PremiumMinimalExecutiveResumeTemplate: React.FC<{ data: DocumentDat
           <h2 className="text-xs font-bold uppercase tracking-widest text-slate-900 border-b border-slate-200 pb-1 mb-2.5 font-sans">
             Core Leadership & Strategic Competencies
           </h2>
-          <div className="flex flex-wrap gap-2 text-xs font-sans no-justify">
+          <div className="flex flex-wrap gap-2 text-xs font-sans no-justify" style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
             {displaySkills.map((s) => (
               <span key={s.id} className="px-2.5 py-1 bg-slate-100 rounded text-slate-800 font-medium">
                 {s.name}
@@ -85,7 +129,7 @@ export const PremiumMinimalExecutiveResumeTemplate: React.FC<{ data: DocumentDat
       )}
 
       {displayExperience.length > 0 && (
-        <div className="mb-6 avoid-break">
+        <div className="mb-6">
           <h2 className="text-xs font-bold uppercase tracking-widest text-slate-900 border-b border-slate-200 pb-1 mb-3.5 font-sans">
             Executive & Leadership Experience
           </h2>
@@ -129,13 +173,13 @@ export const PremiumMinimalExecutiveResumeTemplate: React.FC<{ data: DocumentDat
       )}
 
       {projects && projects.length > 0 && (
-        <div className="mb-6 avoid-break font-sans">
+        <div className="mb-6 font-sans">
           <h2 className="text-xs font-bold uppercase tracking-widest text-slate-900 border-b border-slate-200 pb-1 mb-2.5">
             Key Initiatives & Strategic Projects
           </h2>
           <div className="space-y-3">
             {projects.map((p) => (
-              <div key={p.id} data-entry="true" className="text-xs">
+              <div key={p.id} data-entry="true" className="text-xs avoid-break">
                 <ResumeSplitRow
                   wrapRight
                   leftClassName="font-bold text-slate-900"
@@ -151,42 +195,18 @@ export const PremiumMinimalExecutiveResumeTemplate: React.FC<{ data: DocumentDat
         </div>
       )}
 
-      {(displayEducation.length > 0 || (certifications && certifications.length > 0) || (achievements && achievements.length > 0)) && (
-        <div className={`grid ${displayEducation.length > 0 && ((certifications && certifications.length > 0) || (achievements && achievements.length > 0)) ? 'grid-cols-2' : 'grid-cols-1'} gap-6 mb-6 font-sans no-justify`}>
-          {displayEducation.length > 0 && (
-            <div className="avoid-break">
-              <h2 className="text-xs font-bold uppercase tracking-widest text-slate-900 border-b border-slate-200 pb-1 mb-2.5">
-                Education & Degrees
-              </h2>
-              <div className="space-y-2 text-xs">
-                {displayEducation.map((e) => (
-                  <div key={e.id}>
-                    <div className="font-bold text-slate-900">{e.degree}</div>
-                    <div className="text-slate-600">{e.institute} {e.endYear ? `(${e.endYear})` : ''}{e.score ? ` • ${/^[0-9./\s]+$/.test(e.score.trim()) ? `GPA: ${e.score.trim()}` : e.score.trim()}` : ''}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {((certifications && certifications.length > 0) || (achievements && achievements.length > 0)) && (
-            <div className="avoid-break">
-              <h2 className="text-xs font-bold uppercase tracking-widest text-slate-900 border-b border-slate-200 pb-1 mb-2.5">
-                Certifications & Board Honors
-              </h2>
-              <div className="space-y-1.5 text-xs text-slate-700">
-                {certifications && certifications.map((c) => (
-                  <div key={c.id}>
-                    <strong className="text-slate-900">{c.name}</strong> • {c.issuer} {c.issueDate ? `(${c.issueDate})` : ''}
-                  </div>
-                ))}
-                {achievements && achievements.map((a) => (
-                  <div key={a.id}>
-                    <strong className="text-slate-900">{a.title}</strong>: {a.description}
-                  </div>
-                ))}
-              </div>
-            </div>
+      {(educationBlock || honorsBlock) && (
+        <div className="mb-6 font-sans no-justify" style={{ marginBottom: '24px' }}>
+          {educationBlock && honorsBlock ? (
+            <ResumeTwoColumnTable
+              leftWidth="50%"
+              rightWidth="50%"
+              gapPx={24}
+              left={educationBlock}
+              right={honorsBlock}
+            />
+          ) : (
+            educationBlock || honorsBlock
           )}
         </div>
       )}
@@ -196,7 +216,13 @@ export const PremiumMinimalExecutiveResumeTemplate: React.FC<{ data: DocumentDat
           <h2 className="text-xs font-bold uppercase tracking-widest text-slate-900 border-b border-slate-200 pb-1 mb-2">
             {sec.title}
           </h2>
-          <p className="text-xs text-slate-700 leading-relaxed">{sec.content}</p>
+          <ResumeCustomSectionBody
+            items={sec.items}
+            content={sec.content}
+            textClassName="text-xs text-slate-700"
+            keyClassName="font-semibold text-slate-900"
+            columns={2}
+          />
         </div>
       ))}
     </div>

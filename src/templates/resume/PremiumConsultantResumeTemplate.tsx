@@ -3,8 +3,11 @@ import { DocumentData } from '../../types/document';
 import { getStaticFontClass, getFontFamilyCss, FONT_FAMILY_CSS_MAP } from '../../utils/fontClassMap';
 import {
   CONTACT_CENTER_ROW_STYLE,
+  RESUME_SHEET_BASE_STYLE,
   ResumeDescriptionBlock,
   ResumeSplitRow,
+  ResumeTwoColGrid,
+  ResumeTwoColumnTable,
   sanitizeDocumentTextFields,
 } from './resumeTemplateUtils';
 
@@ -24,16 +27,55 @@ export const PremiumConsultantResumeTemplate: React.FC<{ data: DocumentData }> =
   } = sanitizeDocumentTextFields(data);
 
   const navy = customization.primaryColor || '#172554'; // Deep Oxford Navy
-  const charcoal = customization.secondaryColor || '#334155'; // Clean Slate
   const fontClass = getStaticFontClass(customization.fontFamily, 'cormorant');
   const fontFamilyCss = getFontFamilyCss(customization.fontFamily, 'cormorant');
   const baseFontSize =
     customization.fontSize === 'sm' ? 'text-[12px]' : customization.fontSize === 'lg' ? 'text-[15px]' : 'text-[13px]';
 
+  const skillsBlock = skills && skills.length > 0 ? (
+    <div className="avoid-break no-justify">
+      <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-300 pb-1 mb-2">
+        Functional Competencies
+      </h2>
+      <div className="flex flex-wrap gap-1.5 text-xs no-justify" style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+        {skills.map((s) => (
+          <span key={s.id} className="px-2 py-0.5 bg-slate-100 text-slate-800 rounded text-[11px] font-medium">
+            {s.name}
+          </span>
+        ))}
+      </div>
+    </div>
+  ) : null;
+
+  const certBlock = ((certifications && certifications.length > 0) || (achievements && achievements.length > 0)) ? (
+    <div className="avoid-break">
+      <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-300 pb-1 mb-2">
+        Certifications & Affiliations
+      </h2>
+      <div className="space-y-1 text-xs text-slate-700">
+        {certifications.map((c) => (
+          <div key={c.id}>
+            <strong>{c.name}</strong> ({c.issuer})
+          </div>
+        ))}
+        {achievements.map((a) => (
+          <div key={a.id}>
+            <strong>{a.title}</strong>{a.description ? `: ${a.description}` : ''}
+          </div>
+        ))}
+      </div>
+    </div>
+  ) : null;
+
   return (
     <div
       className={`document-page-sheet p-10 bg-white text-stone-900 shadow-sm ${baseFontSize}`}
-      style={{ fontFamily: FONT_FAMILY_CSS_MAP.sans }}
+      style={{
+        ...RESUME_SHEET_BASE_STYLE,
+        backgroundColor: '#ffffff',
+        padding: '40px',
+        fontFamily: FONT_FAMILY_CSS_MAP.sans,
+      }}
     >
       <div className="text-center pb-5 mb-5 border-b-2" style={{ borderColor: navy }}>
         <h1 className={`text-3xl font-extrabold uppercase tracking-widest text-slate-900 ${fontClass}`} style={{ fontFamily: fontFamilyCss }}>
@@ -63,7 +105,7 @@ export const PremiumConsultantResumeTemplate: React.FC<{ data: DocumentData }> =
       )}
 
       {experience && experience.length > 0 && (
-        <div className="mb-5 avoid-break font-sans">
+        <div className="mb-5 font-sans">
           <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-300 pb-1 mb-3">
             Management Consulting & Advisory Engagements
           </h2>
@@ -112,13 +154,13 @@ export const PremiumConsultantResumeTemplate: React.FC<{ data: DocumentData }> =
       )}
 
       {education && education.length > 0 && (
-        <div className="mb-5 avoid-break font-sans">
+        <div className="mb-5 font-sans">
           <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-300 pb-1 mb-2.5">
             Education & Academic Honors
           </h2>
           <div className="space-y-2 text-xs">
             {education.map((e) => (
-              <div key={e.id} data-entry="true">
+              <div key={e.id} data-entry="true" className="avoid-break">
                 <ResumeSplitRow
                   left={
                     <>
@@ -141,13 +183,13 @@ export const PremiumConsultantResumeTemplate: React.FC<{ data: DocumentData }> =
       )}
 
       {projects && projects.length > 0 && (
-        <div className="mb-5 avoid-break font-sans">
+        <div className="mb-5 font-sans">
           <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-300 pb-1 mb-2.5">
             Key Client Engagements & Strategic Programs
           </h2>
           <div className="space-y-3 text-xs">
             {projects.map((p) => (
-              <div key={p.id} data-entry="true">
+              <div key={p.id} data-entry="true" className="avoid-break">
                 <ResumeSplitRow
                   className="font-bold text-slate-900"
                   wrapRight
@@ -162,52 +204,35 @@ export const PremiumConsultantResumeTemplate: React.FC<{ data: DocumentData }> =
         </div>
       )}
 
-      <div className="grid grid-cols-2 gap-6 avoid-break font-sans no-justify">
-        {skills && skills.length > 0 && (
-          <div className="no-justify">
-            <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-300 pb-1 mb-2">
-              Functional Competencies
-            </h2>
-            <div className="flex flex-wrap gap-1.5 text-xs no-justify">
-              {skills.map((s) => (
-                <span key={s.id} className="px-2 py-0.5 bg-slate-100 text-slate-800 rounded text-[11px] font-medium">
-                  {s.name}
-                </span>
-              ))}
-            </div>
-          </div>
-        )}
-        {((certifications && certifications.length > 0) || (achievements && achievements.length > 0)) && (
-          <div>
-            <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-300 pb-1 mb-2">
-              Certifications & Affiliations
-            </h2>
-            <div className="space-y-1 text-xs text-slate-700">
-              {certifications.map((c) => (
-                <div key={c.id}>
-                  <strong>{c.name}</strong> ({c.issuer})
-                </div>
-              ))}
-              {achievements.map((a) => (
-                <div key={a.id}>
-                  <strong>{a.title}</strong>{a.description ? `: ${a.description}` : ''}
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
+      {(skillsBlock || certBlock) && (
+        <div className="font-sans no-justify" style={{ marginBottom: '20px' }}>
+          {skillsBlock && certBlock ? (
+            <ResumeTwoColumnTable
+              leftWidth="50%"
+              rightWidth="50%"
+              gapPx={24}
+              left={skillsBlock}
+              right={certBlock}
+            />
+          ) : (
+            skillsBlock || certBlock
+          )}
+        </div>
+      )}
 
       {customSections && customSections.length > 0 && (
-        <div className="mt-5 space-y-4 avoid-break font-sans">
-          {customSections.map((sec) => (
-            <div key={sec.id} className="avoid-break">
+        <div className="mt-5 font-sans">
+          {customSections.map((sec, idx) => (
+            <div key={sec.id} className="avoid-break" style={{ marginBottom: idx < customSections.length - 1 ? '16px' : '0px' }}>
               <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-300 pb-1 mb-2">
                 {sec.title}
               </h2>
-              {sec.items && sec.items.length > 0 ? (
-                <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
-                  {sec.items.map((i) => (
+              {sec.items && sec.items.length > 0 && (
+                <ResumeTwoColGrid
+                  className="text-xs"
+                  gapX={16}
+                  gapY={4}
+                  items={sec.items.map((i) => (
                     <div key={i.id} className="py-0.5 border-b border-slate-100">
                       <ResumeSplitRow
                         wrapRight
@@ -218,9 +243,10 @@ export const PremiumConsultantResumeTemplate: React.FC<{ data: DocumentData }> =
                       />
                     </div>
                   ))}
-                </div>
-              ) : (
-                <p className="text-xs text-slate-800 leading-relaxed whitespace-pre-line">{sec.content}</p>
+                />
+              )}
+              {sec.content && sec.content.trim() && (
+                <p className="text-xs text-slate-800 leading-relaxed whitespace-pre-line mt-1">{sec.content}</p>
               )}
             </div>
           ))}
