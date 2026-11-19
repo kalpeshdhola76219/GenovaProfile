@@ -2,35 +2,18 @@ import React from 'react';
 import { DocumentData } from '../../types/document';
 import { getStaticFontClass, getFontFamilyCss, FONT_FAMILY_CSS_MAP } from '../../utils/fontClassMap';
 import {
-  RESUME_SHEET_BASE_STYLE,
-  ResumeCustomSectionBody,
   ResumeDescriptionBlock,
   ResumeHeaderTable,
   ResumeSplitRow,
-  ResumeTwoColumnTable,
   sanitizeDocumentTextFields,
 } from './resumeTemplateUtils';
 
 export const PremiumInternationalResumeTemplate: React.FC<{ data: DocumentData }> = ({ data }) => {
-  const {
-    personal,
-    contact,
-    summary,
-    experience = [],
-    education = [],
-    skills = [],
-    projects = [],
-    certifications = [],
-    achievements = [],
-    customSections = [],
-    customization,
-  } = sanitizeDocumentTextFields(data);
-
+  const { personal, contact, summary, experience = [], education = [], skills = [], projects = [], certifications = [], achievements = [], customSections = [], customization } = sanitizeDocumentTextFields(data);
   const primary = customization.primaryColor || '#1e3a8a';
   const fontClass = getStaticFontClass(customization.fontFamily, 'jakarta');
   const fontFamilyCss = getFontFamilyCss(customization.fontFamily, 'jakarta');
-  const baseFontSize =
-    customization.fontSize === 'sm' ? 'text-[12px]' : customization.fontSize === 'lg' ? 'text-[15px]' : 'text-[13px]';
+  const baseFontSize = customization.fontSize === 'sm' ? 'text-[12px]' : customization.fontSize === 'lg' ? 'text-[15px]' : 'text-[13px]';
 
   const displayFullName = personal.fullName || '';
   const displayTitle = personal.professionalTitle || '';
@@ -42,48 +25,16 @@ export const PremiumInternationalResumeTemplate: React.FC<{ data: DocumentData }
 
   return (
     <div
-      className={`document-page-sheet bg-white text-slate-800 shadow-sm ${baseFontSize}`}
-      style={{
-        ...RESUME_SHEET_BASE_STYLE,
-        backgroundColor: '#ffffff',
-        fontFamily: FONT_FAMILY_CSS_MAP.jakarta,
-      }}
+      className={`document-page-sheet min-h-[1123px] bg-white text-slate-800 shadow-sm flex flex-col ${baseFontSize}`}
+      style={{ fontFamily: FONT_FAMILY_CSS_MAP.jakarta }}
     >
-      {/* Full-height Left Sidebar Background & Divider across all pages */}
-      <div
-        aria-hidden="true"
-        style={{
-          position: 'absolute',
-          left: 0,
-          top: 0,
-          bottom: 0,
-          width: '32%',
-          backgroundColor: '#f8fafc',
-          borderRight: '1px solid #e2e8f0',
-          pointerEvents: 'none',
-          zIndex: 0,
-        }}
-      />
-
       {/* Header Banner */}
-      <div
-        className="p-8 text-white"
-        style={{
-          backgroundColor: primary,
-          position: 'relative',
-          zIndex: 2,
-          padding: '32px',
-          color: '#ffffff',
-        }}
-      >
+      <div className="p-8 text-white" style={{ backgroundColor: primary }}>
         <ResumeHeaderTable
           verticalAlign="middle"
           left={
             <>
-              <h1
-                className={`text-2xl font-extrabold uppercase tracking-wide text-white ${fontClass}`}
-                style={{ fontFamily: fontFamilyCss }}
-              >
+              <h1 className={`text-2xl font-extrabold uppercase tracking-wide text-white ${fontClass}`} style={{ fontFamily: fontFamilyCss }}>
                 {displayFullName || 'FULL NAME'}
               </h1>
               {displayTitle && (
@@ -106,211 +57,183 @@ export const PremiumInternationalResumeTemplate: React.FC<{ data: DocumentData }
         />
       </div>
 
-      {/* Main Body (Inline CSS Table) */}
-      <ResumeTwoColumnTable
-        leftWidth="32%"
-        rightWidth="68%"
-        gapPx={0}
-        style={{ position: 'relative', zIndex: 1 }}
-        leftClassName="no-justify"
-        leftStyle={{ padding: '24px' }}
-        rightStyle={{ padding: '28px' }}
-        left={
-          <div>
-            {skills.length > 0 && (
-              <div style={{ marginBottom: '22px' }}>
-                <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-300 pb-1 mb-2.5">
-                  Core Competencies
-                </h2>
-                <div className="space-y-1.5 text-xs">
-                  {skills.map((s) => (
-                    <ResumeSplitRow
-                      key={s.id}
-                      wrapRight
-                      leftClassName="font-medium text-slate-700"
-                      left={s.name}
-                      rightClassName="text-[10px] text-slate-400 capitalize"
-                      right={s.level || 'Expert'}
-                      rightWidth="68px"
-                    />
-                  ))}
-                </div>
+      {/* Main Grid */}
+      <div className="grid grid-cols-12 flex-1">
+        {/* Left Sidebar (4 cols) */}
+        <div className="col-span-4 bg-slate-50 p-6 border-r border-slate-200 space-y-6 no-justify">
+          {skills.length > 0 && (
+            <div>
+              <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-300 pb-1 mb-2.5">
+                Core Competencies
+              </h2>
+              <div className="space-y-1.5 text-xs">
+                {skills.map((s) => (
+                  <ResumeSplitRow
+                    key={s.id}
+                    wrapRight
+                    leftClassName="font-medium text-slate-700"
+                    left={s.name}
+                    rightClassName="text-[10px] text-slate-400 capitalize"
+                    right={s.level || 'Expert'}
+                    rightWidth="68px"
+                  />
+                ))}
               </div>
-            )}
+            </div>
+          )}
 
-            {education.length > 0 && (
-              <div style={{ marginBottom: '22px' }}>
-                <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-300 pb-1 mb-2.5">
-                  Education & Degrees
-                </h2>
-                <div className="space-y-3 text-xs">
-                  {education.map((e) => (
-                    <div key={e.id}>
-                      <div className="font-bold text-slate-900">{e.degree}</div>
-                      <div className="text-slate-600">{e.institute}</div>
-                      <div className="text-[11px] text-slate-400">
-                        {e.endYear}
-                        {e.score
-                          ? ` • ${/^[0-9./\s]+$/.test(e.score.trim()) ? `GPA: ${e.score.trim()}` : e.score.trim()}`
-                          : ''}
-                      </div>
+          {education.length > 0 && (
+            <div>
+              <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-300 pb-1 mb-2.5">
+                Education & Degrees
+              </h2>
+              <div className="space-y-3 text-xs">
+                {education.map((e) => (
+                  <div key={e.id}>
+                    <div className="font-bold text-slate-900">{e.degree}</div>
+                    <div className="text-slate-600">{e.institute}</div>
+                    <div className="text-[11px] text-slate-400">
+                      {e.endYear}
+                      {e.score ? ` • ${/^[0-9./\s]+$/.test(e.score.trim()) ? `GPA: ${e.score.trim()}` : e.score.trim()}` : ''}
                     </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {certifications.length > 0 && (
-              <div style={{ marginBottom: achievements.length > 0 ? '22px' : '0px' }}>
-                <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-300 pb-1 mb-2.5">
-                  Accreditations
-                </h2>
-                <div className="space-y-2 text-xs">
-                  {certifications.map((c) => (
-                    <div key={c.id}>
-                      <div className="font-semibold text-slate-900">{c.name}</div>
-                      <div className="text-slate-500 text-[11px]">{c.issuer}</div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {achievements.length > 0 && (
-              <div>
-                <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-300 pb-1 mb-2.5">
-                  Honors & Awards
-                </h2>
-                <div className="space-y-2 text-xs">
-                  {achievements.map((a) => (
-                    <div key={a.id}>
-                      <div className="font-semibold text-slate-900">{a.title}</div>
-                      {a.description && <div className="text-slate-500 text-[11px]">{a.description}</div>}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        }
-        right={
-          <div>
-            {displaySummary && (
-              <div className="avoid-break" style={{ marginBottom: '22px' }}>
-                <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-200 pb-1 mb-2">
-                  Executive Profile
-                </h2>
-                <p className="text-xs text-slate-700 leading-relaxed">{displaySummary}</p>
-              </div>
-            )}
-
-            {experience.length > 0 && (
-              <div style={{ marginBottom: '22px' }}>
-                <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-200 pb-1 mb-3">
-                  Professional Experience
-                </h2>
-                <div>
-                  {experience.map((exp, idx) => (
-                    <div
-                      key={exp.id}
-                      data-entry="true"
-                      className="relative pl-4 border-l-2"
-                      style={{
-                        borderColor: primary,
-                        borderLeft: `2px solid ${primary}`,
-                        paddingLeft: '16px',
-                        marginBottom: idx < experience.length - 1 ? '16px' : '0px',
-                      }}
-                    >
-                      <ResumeSplitRow
-                        leftClassName="font-bold text-sm text-slate-900"
-                        left={exp.jobTitle}
-                        rightClassName="text-xs text-slate-500 font-medium"
-                        right={
-                          <>
-                            {exp.startDate} –{' '}
-                            {exp.currentlyWorking && (!exp.endDate || exp.endDate.trim().toLowerCase() === 'present')
-                              ? 'Present'
-                              : exp.endDate || 'Present'}
-                          </>
-                        }
-                      />
-                      <div className="text-xs font-semibold text-slate-600 mb-1">
-                        {exp.company} {exp.location ? `• ${exp.location}` : ''}
-                      </div>
-                      <ResumeDescriptionBlock
-                        text={exp.description}
-                        wrapperClassName="mt-1 space-y-1 text-xs text-slate-700"
-                        markerClassName="text-slate-400"
-                        paragraphClassName="text-xs text-slate-700 mt-1 whitespace-pre-line leading-relaxed"
-                      />
-                      {exp.achievements && (
-                        <ResumeDescriptionBlock
-                          text={exp.achievements}
-                          wrapperClassName="mt-1 space-y-1 text-xs text-slate-800"
-                          markerClassName="text-slate-500"
-                          paragraphClassName="text-xs text-slate-800 mt-1 whitespace-pre-line leading-relaxed"
-                        />
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {projects.length > 0 && (
-              <div style={{ marginBottom: customSections.length > 0 ? '22px' : '0px' }}>
-                <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-200 pb-1 mb-3">
-                  Key Initiatives & Projects
-                </h2>
-                <div>
-                  {projects.map((p, idx) => (
-                    <div
-                      key={p.id}
-                      data-entry="true"
-                      className="text-xs avoid-break"
-                      style={{ marginBottom: idx < projects.length - 1 ? '10px' : '0px' }}
-                    >
-                      <ResumeSplitRow
-                        wrapRight
-                        leftClassName="font-bold text-slate-900"
-                        left={p.name}
-                        rightClassName="text-slate-500 text-[11px]"
-                        right={p.role}
-                      />
-                      {p.technologies && <div className="text-[11px] text-slate-500">Tech: {p.technologies}</div>}
-                      {p.description && <p className="text-slate-600 mt-0.5">{p.description}</p>}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {customSections.length > 0 && (
-              <div>
-                {customSections.map((sec, idx) => (
-                  <div
-                    key={sec.id}
-                    className="avoid-break"
-                    style={{ marginBottom: idx < customSections.length - 1 ? '16px' : '0px' }}
-                  >
-                    <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-200 pb-1 mb-2">
-                      {sec.title}
-                    </h2>
-                    <ResumeCustomSectionBody
-                      items={sec.items}
-                      content={sec.content}
-                      columns={2}
-                      textClassName="text-xs text-slate-700"
-                    />
                   </div>
                 ))}
               </div>
-            )}
-          </div>
-        }
-      />
+            </div>
+          )}
+
+          {certifications.length > 0 && (
+            <div>
+              <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-300 pb-1 mb-2.5">
+                Accreditations
+              </h2>
+              <div className="space-y-2 text-xs">
+                {certifications.map((c) => (
+                  <div key={c.id}>
+                    <div className="font-semibold text-slate-900">{c.name}</div>
+                    <div className="text-slate-500 text-[11px]">{c.issuer}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {achievements.length > 0 && (
+            <div>
+              <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-300 pb-1 mb-2.5">
+                Honors & Awards
+              </h2>
+              <div className="space-y-2 text-xs">
+                {achievements.map((a) => (
+                  <div key={a.id}>
+                    <div className="font-semibold text-slate-900">{a.title}</div>
+                    {a.description && <div className="text-slate-500 text-[11px]">{a.description}</div>}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Right Main Content (8 cols) */}
+        <div className="col-span-8 p-7 space-y-6">
+          {displaySummary && (
+            <div className="avoid-break">
+              <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-200 pb-1 mb-2">
+                Executive Profile
+              </h2>
+              <p className="text-xs text-slate-700 leading-relaxed">{displaySummary}</p>
+            </div>
+          )}
+
+          {experience.length > 0 && (
+            <div>
+              <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-200 pb-1 mb-3">
+                Professional Experience
+              </h2>
+              <div className="space-y-4">
+                {experience.map((exp) => (
+                  <div key={exp.id} data-entry="true" className="relative pl-4 border-l-2" style={{ borderColor: primary }}>
+                    <ResumeSplitRow
+                      leftClassName="font-bold text-sm text-slate-900"
+                      left={exp.jobTitle}
+                      rightClassName="text-xs text-slate-500 font-medium"
+                      right={
+                        <>
+                          {exp.startDate} – {(exp.currentlyWorking && (!exp.endDate || exp.endDate.trim().toLowerCase() === 'present')) ? 'Present' : (exp.endDate || 'Present')}
+                        </>
+                      }
+                    />
+                    <div className="text-xs font-semibold text-slate-600 mb-1">
+                      {exp.company} {exp.location ? `• ${exp.location}` : ''}
+                    </div>
+                    <ResumeDescriptionBlock
+                      text={exp.description}
+                      wrapperClassName="mt-1 space-y-1 text-xs text-slate-700"
+                      markerClassName="text-slate-400"
+                      paragraphClassName="text-xs text-slate-700 mt-1 whitespace-pre-line leading-relaxed"
+                    />
+                    {exp.achievements && (
+                      <ResumeDescriptionBlock
+                        text={exp.achievements}
+                        wrapperClassName="mt-1 space-y-1 text-xs text-slate-800"
+                        markerClassName="text-slate-500"
+                        paragraphClassName="text-xs text-slate-800 mt-1 whitespace-pre-line leading-relaxed"
+                      />
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {projects.length > 0 && (
+            <div>
+              <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-200 pb-1 mb-3">
+                Key Initiatives & Projects
+              </h2>
+              <div className="space-y-2.5 text-xs">
+                {projects.map((p) => (
+                  <div key={p.id} data-entry="true" className="avoid-break">
+                    <ResumeSplitRow
+                      wrapRight
+                      leftClassName="font-bold text-slate-900"
+                      left={p.name}
+                      rightClassName="text-slate-500 text-[11px]"
+                      right={p.role}
+                    />
+                    {p.technologies && <div className="text-[11px] text-slate-500">Tech: {p.technologies}</div>}
+                    {p.description && <p className="text-slate-600 mt-0.5">{p.description}</p>}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {customSections.length > 0 && (
+            <div className="space-y-4">
+              {customSections.map((sec) => (
+                <div key={sec.id} className="avoid-break">
+                  <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-200 pb-1 mb-2">
+                    {sec.title}
+                  </h2>
+                  {sec.items && sec.items.length > 0 ? (
+                    <div className="grid grid-cols-2 gap-1 text-xs text-slate-700">
+                      {sec.items.map((it) => (
+                        <div key={it.id}>
+                          <span className="font-semibold">{it.key}:</span> {it.value}
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-xs text-slate-700 whitespace-pre-line leading-relaxed">{sec.content}</p>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 };
-

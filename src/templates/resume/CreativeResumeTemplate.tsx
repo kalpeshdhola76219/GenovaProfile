@@ -3,12 +3,8 @@ import { DocumentData } from '../../types/document';
 import { FONT_FAMILY_CSS_MAP } from '../../utils/fontClassMap';
 import {
   CONTACT_ROW_STYLE,
-  RESUME_SHEET_BASE_STYLE,
-  ResumeCustomSectionBody,
   ResumeDescriptionBlock,
   ResumeSplitRow,
-  ResumeTwoColGrid,
-  ResumeTwoColumnTable,
   sanitizeDocumentTextFields,
 } from './resumeTemplateUtils';
 
@@ -16,43 +12,10 @@ export const CreativeResumeTemplate: React.FC<{ data: DocumentData }> = ({ data 
   const { personal, contact, summary, experience, education, skills, projects, certifications, customSections, customization } = sanitizeDocumentTextFields(data);
   const accent = customization.accentColor || '#ea580c'; // Vibrant Terracotta / Orange
 
-  const educationBlock = education.length > 0 ? (
-    <div className="avoid-break">
-      <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 mb-2">Education</h2>
-      <div className="space-y-1.5 text-xs">
-        {education.map((e) => (
-          <div key={e.id}>
-            <div className="font-bold">{e.degree}</div>
-            <div className="text-slate-500">
-              {e.institute} &bull; {e.endYear}
-              {e.score ? ` • ${/^[0-9./\s]+$/.test(e.score.trim()) ? `GPA: ${e.score.trim()}` : e.score.trim()}` : ''}
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  ) : null;
-
-  const toolkitBlock = skills.length > 0 ? (
-    <div className="avoid-break no-justify">
-      <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 mb-2">Toolkit</h2>
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }} className="no-justify">
-        {skills.map((s) => (
-          <span key={s.id} className="text-xs bg-slate-100 text-slate-800 px-2 py-0.5 rounded font-medium">
-            {s.name}
-          </span>
-        ))}
-      </div>
-    </div>
-  ) : null;
-
   return (
     <div
-      className="document-page-sheet p-8 font-jakarta text-slate-800 bg-white"
+      className="document-page-sheet p-8 font-jakarta text-slate-800 bg-white min-h-[1123px]"
       style={{
-        ...RESUME_SHEET_BASE_STYLE,
-        backgroundColor: '#ffffff',
-        padding: '32px',
         fontFamily: FONT_FAMILY_CSS_MAP.jakarta,
         fontSize: customization.fontSize === 'sm' ? '12px' : customization.fontSize === 'lg' ? '15px' : '13px',
       }}
@@ -120,27 +83,47 @@ export const CreativeResumeTemplate: React.FC<{ data: DocumentData }> = ({ data 
             <span className="w-2 h-2 rounded-full" style={{ display: 'inline-block', width: '8px', height: '8px', borderRadius: '9999px', backgroundColor: accent }}></span>
             Portfolio & Selected Works
           </h2>
-          <ResumeTwoColGrid
-            className="text-xs"
-            gapX={12}
-            gapY={12}
-            items={projects.map((p) => (
+          <div className="grid grid-cols-2 gap-3 text-xs">
+            {projects.map((p) => (
               <div key={p.id} className="p-2.5 rounded-lg border border-slate-200 bg-slate-50/40 avoid-break">
                 <div className="font-bold text-slate-900">{p.name}</div>
                 {p.technologies && <div className="text-[11px] text-orange-600">{p.technologies}</div>}
                 <p className="text-slate-600 mt-1">{p.description}</p>
               </div>
             ))}
-          />
+          </div>
         </div>
       )}
 
-      {(educationBlock || toolkitBlock) && (
-        <div className="mb-4 no-justify" style={{ marginBottom: '16px' }}>
-          {educationBlock && toolkitBlock ? (
-            <ResumeTwoColumnTable gapPx={24} left={educationBlock} right={toolkitBlock} />
-          ) : (
-            educationBlock || toolkitBlock
+      {(education.length > 0 || skills.length > 0) && (
+        <div className="grid grid-cols-2 gap-6 mb-4 no-justify">
+          {education.length > 0 && (
+            <div className="avoid-break">
+              <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 mb-2">Education</h2>
+              <div className="space-y-1.5 text-xs">
+                {education.map((e) => (
+                  <div key={e.id}>
+                    <div className="font-bold">{e.degree}</div>
+                    <div className="text-slate-500">
+                      {e.institute} &bull; {e.endYear}
+                      {e.score ? ` • ${/^[0-9./\s]+$/.test(e.score.trim()) ? `GPA: ${e.score.trim()}` : e.score.trim()}` : ''}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          {skills.length > 0 && (
+            <div className="avoid-break no-justify">
+              <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 mb-2">Toolkit</h2>
+              <div className="flex flex-wrap gap-1 no-justify">
+                {skills.map((s) => (
+                  <span key={s.id} className="text-xs bg-slate-100 text-slate-800 px-2 py-0.5 rounded font-medium">
+                    {s.name}
+                  </span>
+                ))}
+              </div>
+            </div>
           )}
         </div>
       )}
@@ -150,11 +133,8 @@ export const CreativeResumeTemplate: React.FC<{ data: DocumentData }> = ({ data 
           <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 mb-2">
             Certifications & Accreditations
           </h2>
-          <ResumeTwoColGrid
-            className="text-xs"
-            gapX={12}
-            gapY={12}
-            items={certifications.map((c) => (
+          <div className="grid grid-cols-2 gap-3 text-xs">
+            {certifications.map((c) => (
               <div key={c.id} className="p-2 rounded-lg border border-slate-200 bg-slate-50/40 avoid-break">
                 <div className="font-bold text-slate-900">{c.name}</div>
                 <ResumeSplitRow
@@ -166,19 +146,22 @@ export const CreativeResumeTemplate: React.FC<{ data: DocumentData }> = ({ data 
                 />
               </div>
             ))}
-          />
+          </div>
         </div>
       )}
 
       {customSections.map((sec) => (
         <div key={sec.id} className="mb-2 avoid-break">
           <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 mb-1">{sec.title}</h2>
-          <ResumeCustomSectionBody
-            items={sec.items}
-            content={sec.content}
-            columns={2}
-            textClassName="text-xs text-slate-700"
-          />
+          {sec.items && sec.items.length > 0 ? (
+            <div className="grid grid-cols-2 gap-1 text-xs text-slate-700">
+              {sec.items.map((it) => (
+                <div key={it.id}><span className="font-bold">{it.key}:</span> {it.value}</div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-xs text-slate-700 whitespace-pre-line">{sec.content}</p>
+          )}
         </div>
       ))}
     </div>

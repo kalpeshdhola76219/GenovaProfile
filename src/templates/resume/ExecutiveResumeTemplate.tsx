@@ -4,52 +4,19 @@ import { FONT_FAMILY_CSS_MAP } from '../../utils/fontClassMap';
 import {
   BULLET_LIST_STYLE,
   CONTACT_CENTER_ROW_STYLE,
-  RESUME_SHEET_BASE_STYLE,
   ResumeBulletItem,
-  ResumeCustomSectionBody,
   ResumeDescriptionBlock,
   ResumeSplitRow,
-  ResumeTwoColumnTable,
   sanitizeDocumentTextFields,
 } from './resumeTemplateUtils';
 
 export const ExecutiveResumeTemplate: React.FC<{ data: DocumentData }> = ({ data }) => {
   const { personal, contact, summary, experience, education, skills, projects, certifications, achievements, customSections, customization } = sanitizeDocumentTextFields(data);
 
-  const educationBlock = education.length > 0 ? (
-    <div className="avoid-break">
-      <h2 className="text-xs font-bold uppercase tracking-widest text-stone-900 font-cinzel border-b border-stone-300 pb-1 mb-2">
-        Education & Credentials
-      </h2>
-      <div className="space-y-2">
-        {education.map((e) => (
-          <div key={e.id}>
-            <div className="font-bold text-stone-950 text-sm">{e.degree}</div>
-            <div className="text-xs text-stone-600">{e.institute} &bull; {e.endYear}{e.score ? ` • ${/^[0-9./\s]+$/.test(e.score.trim()) ? `GPA: ${e.score.trim()}` : e.score.trim()}` : ''}</div>
-          </div>
-        ))}
-      </div>
-    </div>
-  ) : null;
-
-  const skillsBlock = skills.length > 0 ? (
-    <div className="avoid-break no-justify">
-      <h2 className="text-xs font-bold uppercase tracking-widest text-stone-900 font-cinzel border-b border-stone-300 pb-1 mb-2">
-        Strategic Competencies
-      </h2>
-      <p className="text-xs text-stone-800 leading-relaxed no-justify">
-        {skills.map((s) => s.name).join(' • ')}
-      </p>
-    </div>
-  ) : null;
-
   return (
     <div
-      className="document-page-sheet p-10 font-cormorant text-stone-900 bg-white"
+      className="document-page-sheet p-10 font-cormorant text-stone-900 bg-white min-h-[1123px]"
       style={{
-        ...RESUME_SHEET_BASE_STYLE,
-        backgroundColor: '#ffffff',
-        padding: '40px',
         fontFamily: FONT_FAMILY_CSS_MAP.cormorant,
         fontSize: customization.fontSize === 'sm' ? '13px' : customization.fontSize === 'lg' ? '16px' : '14px',
       }}
@@ -134,18 +101,32 @@ export const ExecutiveResumeTemplate: React.FC<{ data: DocumentData }> = ({ data
         </div>
       )}
 
-      {(educationBlock || skillsBlock) && (
-        <div className="mb-6 no-justify" style={{ marginBottom: '24px' }}>
-          {educationBlock && skillsBlock ? (
-            <ResumeTwoColumnTable
-              leftWidth="50%"
-              rightWidth="50%"
-              gapPx={24}
-              left={educationBlock}
-              right={skillsBlock}
-            />
-          ) : (
-            educationBlock || skillsBlock
+      {(education.length > 0 || skills.length > 0) && (
+        <div className="grid grid-cols-2 gap-6 mb-6 no-justify">
+          {education.length > 0 && (
+            <div className="avoid-break">
+              <h2 className="text-xs font-bold uppercase tracking-widest text-stone-900 font-cinzel border-b border-stone-300 pb-1 mb-2">
+                Education & Credentials
+              </h2>
+              <div className="space-y-2">
+                {education.map((e) => (
+                  <div key={e.id}>
+                    <div className="font-bold text-stone-950 text-sm">{e.degree}</div>
+                    <div className="text-xs text-stone-600">{e.institute} &bull; {e.endYear}{e.score ? ` • ${/^[0-9./\s]+$/.test(e.score.trim()) ? `GPA: ${e.score.trim()}` : e.score.trim()}` : ''}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          {skills.length > 0 && (
+            <div className="avoid-break no-justify">
+              <h2 className="text-xs font-bold uppercase tracking-widest text-stone-900 font-cinzel border-b border-stone-300 pb-1 mb-2">
+                Strategic Competencies
+              </h2>
+              <p className="text-xs text-stone-800 leading-relaxed no-justify">
+                {skills.map((s) => s.name).join(' • ')}
+              </p>
+            </div>
           )}
         </div>
       )}
@@ -173,13 +154,15 @@ export const ExecutiveResumeTemplate: React.FC<{ data: DocumentData }> = ({ data
       {customSections.map((sec) => (
         <div key={sec.id} className="mb-3 avoid-break">
           <h2 className="text-xs font-bold uppercase tracking-widest text-stone-900 font-cinzel border-b border-stone-300 pb-1 mb-1">{sec.title}</h2>
-          <ResumeCustomSectionBody
-            items={sec.items}
-            content={sec.content}
-            textClassName="text-xs text-stone-700"
-            keyClassName="font-semibold text-stone-900"
-            columns={2}
-          />
+          {sec.items && sec.items.length > 0 ? (
+            <div className="grid grid-cols-2 gap-1 text-xs text-stone-700">
+              {sec.items.map((it) => (
+                <div key={it.id}><span className="font-semibold text-stone-900">{it.key}:</span> {it.value}</div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-xs text-stone-700 whitespace-pre-line">{sec.content}</p>
+          )}
         </div>
       ))}
     </div>

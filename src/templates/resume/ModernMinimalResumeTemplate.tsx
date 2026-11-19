@@ -2,53 +2,20 @@ import React from 'react';
 import { DocumentData } from '../../types/document';
 import { FONT_FAMILY_CSS_MAP } from '../../utils/fontClassMap';
 import {
-  RESUME_SHEET_BASE_STYLE,
   ResumeBulletItem,
-  ResumeCustomSectionBody,
   ResumeDescriptionBlock,
   ResumeHeaderTable,
   ResumeSplitRow,
-  ResumeTwoColumnTable,
   sanitizeDocumentTextFields,
 } from './resumeTemplateUtils';
 
 export const ModernMinimalResumeTemplate: React.FC<{ data: DocumentData }> = ({ data }) => {
   const { personal, contact, summary, experience, education, skills, projects, certifications, achievements, customSections, customization } = sanitizeDocumentTextFields(data);
 
-  const educationBlock = education.length > 0 ? (
-    <div className="avoid-break">
-      <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-200 pb-0.5 mb-1.5">
-        Education
-      </h2>
-      <div className="space-y-1 text-xs">
-        {education.map((e) => (
-          <div key={e.id}>
-            <div className="font-bold">{e.degree}</div>
-            <div className="text-slate-500">{e.institute} &bull; {e.endYear}{e.score ? ` • ${/^[0-9./\s]+$/.test(e.score.trim()) ? `GPA: ${e.score.trim()}` : e.score.trim()}` : ''}</div>
-          </div>
-        ))}
-      </div>
-    </div>
-  ) : null;
-
-  const skillsBlock = skills.length > 0 ? (
-    <div className="avoid-break no-justify">
-      <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-200 pb-0.5 mb-1.5">
-        Skills
-      </h2>
-      <p className="text-xs text-slate-700 leading-relaxed no-justify">
-        {skills.map((s) => s.name).join(' • ')}
-      </p>
-    </div>
-  ) : null;
-
   return (
     <div
-      className="document-page-sheet p-8 font-jakarta text-slate-800 bg-white"
+      className="document-page-sheet p-8 font-jakarta text-slate-800 bg-white min-h-[1123px]"
       style={{
-        ...RESUME_SHEET_BASE_STYLE,
-        backgroundColor: '#ffffff',
-        padding: '32px',
         fontFamily: FONT_FAMILY_CSS_MAP.jakarta,
         fontSize: customization.fontSize === 'sm' ? '12px' : customization.fontSize === 'lg' ? '15px' : '13px',
       }}
@@ -116,18 +83,32 @@ export const ModernMinimalResumeTemplate: React.FC<{ data: DocumentData }> = ({ 
         </div>
       )}
 
-      {(educationBlock || skillsBlock) && (
-        <div className="mb-4 no-justify" style={{ marginBottom: '16px' }}>
-          {educationBlock && skillsBlock ? (
-            <ResumeTwoColumnTable
-              leftWidth="50%"
-              rightWidth="50%"
-              gapPx={24}
-              left={educationBlock}
-              right={skillsBlock}
-            />
-          ) : (
-            educationBlock || skillsBlock
+      {(education.length > 0 || skills.length > 0) && (
+        <div className="grid grid-cols-2 gap-6 mb-4 no-justify">
+          {education.length > 0 && (
+            <div className="avoid-break">
+              <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-200 pb-0.5 mb-1.5">
+                Education
+              </h2>
+              <div className="space-y-1 text-xs">
+                {education.map((e) => (
+                  <div key={e.id}>
+                    <div className="font-bold">{e.degree}</div>
+                    <div className="text-slate-500">{e.institute} &bull; {e.endYear}{e.score ? ` • ${/^[0-9./\s]+$/.test(e.score.trim()) ? `GPA: ${e.score.trim()}` : e.score.trim()}` : ''}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          {skills.length > 0 && (
+            <div className="avoid-break no-justify">
+              <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-200 pb-0.5 mb-1.5">
+                Skills
+              </h2>
+              <p className="text-xs text-slate-700 leading-relaxed no-justify">
+                {skills.map((s) => s.name).join(' • ')}
+              </p>
+            </div>
           )}
         </div>
       )}
@@ -177,13 +158,15 @@ export const ModernMinimalResumeTemplate: React.FC<{ data: DocumentData }> = ({ 
       {customSections.map((sec) => (
         <div key={sec.id} className="mb-2 avoid-break">
           <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-200 pb-0.5 mb-1">{sec.title}</h2>
-          <ResumeCustomSectionBody
-            items={sec.items}
-            content={sec.content}
-            textClassName="text-xs text-slate-700"
-            keyClassName="font-bold text-slate-900"
-            columns={2}
-          />
+          {sec.items && sec.items.length > 0 ? (
+            <div className="grid grid-cols-2 gap-1 text-xs text-slate-700">
+              {sec.items.map((it) => (
+                <div key={it.id}><span className="font-bold text-slate-900">{it.key}:</span> {it.value}</div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-xs text-slate-700 whitespace-pre-line">{sec.content}</p>
+          )}
         </div>
       ))}
     </div>

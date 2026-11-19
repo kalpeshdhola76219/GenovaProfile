@@ -3,9 +3,7 @@ import { DocumentData } from '../../types/document';
 import { FONT_FAMILY_CSS_MAP } from '../../utils/fontClassMap';
 import {
   CONTACT_ROW_STYLE,
-  RESUME_SHEET_BASE_STYLE,
   ResumeBulletItem,
-  ResumeCustomSectionBody,
   ResumeDescriptionBlock,
   ResumeHeaderTable,
   ResumeSplitRow,
@@ -31,11 +29,8 @@ export const ATSProfessionalResumeTemplate: React.FC<{ data: DocumentData }> = (
 
   return (
     <div
-      className="document-page-sheet p-9 font-jakarta text-slate-900 bg-white"
+      className="document-page-sheet min-h-[1123px] p-9 font-jakarta text-slate-900 bg-white"
       style={{
-        ...RESUME_SHEET_BASE_STYLE,
-        backgroundColor: '#ffffff',
-        padding: '36px',
         fontFamily: FONT_FAMILY_CSS_MAP.jakarta,
         fontSize: customization.fontSize === 'sm' ? '12px' : customization.fontSize === 'lg' ? '15px' : '13px',
       }}
@@ -241,16 +236,19 @@ export const ATSProfessionalResumeTemplate: React.FC<{ data: DocumentData }> = (
           <h2 className="text-xs font-black uppercase tracking-wider mb-1 pb-0.5 border-b border-slate-200" style={{ color: primary }}>
             {sec.title}
           </h2>
-          <ResumeCustomSectionBody
-            items={sec.items}
-            content={sec.content}
-            columns={2}
-            textClassName="text-xs text-slate-700"
-            keyClassName="font-semibold text-slate-700"
-          />
+          {sec.items && sec.items.length > 0 ? (
+            <div className="grid grid-cols-2 gap-1 text-xs">
+              {sec.items.map((it) => (
+                <div key={it.id}>
+                  <span className="font-semibold text-slate-700">{it.key}:</span> {it.value}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-xs text-slate-700 whitespace-pre-line">{sec.content}</p>
+          )}
         </div>
       ))}
     </div>
   );
 };
-

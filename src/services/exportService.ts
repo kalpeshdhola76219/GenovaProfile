@@ -776,12 +776,11 @@ function layoutClonedMultiPageSheet(
   clonedDoc.body.style.zoom = '1';
   clonedDoc.body.style.transform = 'none';
 
-  clonedRoot.style.setProperty('--a4-sheet-min-height', '0px');
   clonedRoot.style.width = `${EXPORT_A4_WIDTH_PX}px`;
   clonedRoot.style.minWidth = `${EXPORT_A4_WIDTH_PX}px`;
   clonedRoot.style.maxWidth = `${EXPORT_A4_WIDTH_PX}px`;
   clonedRoot.style.height = 'auto';
-  clonedRoot.style.minHeight = '0px';
+  clonedRoot.style.minHeight = `${EXPORT_A4_HEIGHT_PX}px`;
   clonedRoot.style.maxHeight = 'none';
   clonedRoot.style.overflow = 'visible';
   clonedRoot.style.transform = 'none';
@@ -792,12 +791,11 @@ function layoutClonedMultiPageSheet(
   clonedRoot.style.boxSizing = 'border-box';
 
   if (flowRoot !== clonedRoot) {
-    flowRoot.style.setProperty('--a4-sheet-min-height', '0px');
     flowRoot.style.width = `${EXPORT_A4_WIDTH_PX}px`;
     flowRoot.style.minWidth = `${EXPORT_A4_WIDTH_PX}px`;
     flowRoot.style.maxWidth = `${EXPORT_A4_WIDTH_PX}px`;
     flowRoot.style.height = 'auto';
-    flowRoot.style.minHeight = '0px';
+    flowRoot.style.minHeight = `${EXPORT_A4_HEIGHT_PX}px`;
     flowRoot.style.maxHeight = 'none';
     flowRoot.style.overflow = 'visible';
     flowRoot.style.transform = 'none';
@@ -845,7 +843,6 @@ function layoutClonedMultiPageSheet(
     for (let i = 0; i < blocks.length; i++) {
       const el = blocks[i];
       if (pushedElements.has(el)) continue;
-      if (/^(TABLE|TBODY|THEAD|TR|TD|TH)$/.test(el.tagName)) continue;
 
       const rect = getRelRect(el);
       if (rect.height < 6) continue;
@@ -865,7 +862,6 @@ function layoutClonedMultiPageSheet(
         if (!orphaned) {
           for (let j = i + 1; j < blocks.length; j++) {
             const candidate = blocks[j];
-            if (/^(TABLE|TBODY|THEAD|TR|TD|TH)$/.test(candidate.tagName)) continue;
             if (el.contains(candidate) || candidate.contains(el)) continue;
             const cRect = getRelRect(candidate);
             if (cRect.top >= rect.bottom - 2 && cRect.top - rect.bottom <= 70) {
@@ -942,7 +938,6 @@ function layoutClonedMultiPageSheet(
     ) as HTMLElement[];
     for (const leaf of leafCandidates) {
       if (pushedElements.has(leaf)) continue;
-      if (/^(TABLE|TBODY|THEAD|TR|TD|TH)$/.test(leaf.tagName)) continue;
       const lRect = getRelRect(leaf);
       if (lRect.height <= 4 || lRect.height > 220) continue;
       // Skip multi-column layout wrappers (only check leaf grid cells <= 60px tall)
@@ -959,26 +954,22 @@ function layoutClonedMultiPageSheet(
   // Measure final rendered bottom across all non-empty leaf elements
   void flowRoot.offsetHeight;
   const rootTop = flowRoot.getBoundingClientRect().top;
-  let maxLeafBottom = 0;
+  let maxBottom = flowRoot.scrollHeight;
   const allEls = Array.from(flowRoot.querySelectorAll('h1, h2, h3, p, div, li, span, td, th, img')) as HTMLElement[];
   for (const el of allEls) {
-    if (el.closest('[aria-hidden="true"]')) continue;
     if ((el.children.length === 0 && (el.textContent || '').trim().length > 0) || el.tagName === 'IMG') {
       const b = el.getBoundingClientRect().bottom - rootTop;
-      if (b > maxLeafBottom) maxLeafBottom = b;
+      if (b > maxBottom) maxBottom = b;
     }
   }
 
-  const measuredBottom = maxLeafBottom > 0 ? maxLeafBottom + 10 : flowRoot.scrollHeight;
-  const totalPages = Math.max(1, Math.ceil(measuredBottom / EXPORT_A4_HEIGHT_PX));
+  const totalPages = Math.max(1, Math.ceil((maxBottom + 20) / EXPORT_A4_HEIGHT_PX));
   const finalHeightPx = totalPages * EXPORT_A4_HEIGHT_PX;
 
-  clonedRoot.style.setProperty('--a4-sheet-min-height', `${finalHeightPx}px`);
   clonedRoot.style.height = `${finalHeightPx}px`;
   clonedRoot.style.minHeight = `${finalHeightPx}px`;
   clonedRoot.style.maxHeight = `${finalHeightPx}px`;
   if (flowRoot !== clonedRoot) {
-    flowRoot.style.setProperty('--a4-sheet-min-height', `${finalHeightPx}px`);
     flowRoot.style.height = `${finalHeightPx}px`;
     flowRoot.style.minHeight = `${finalHeightPx}px`;
   }

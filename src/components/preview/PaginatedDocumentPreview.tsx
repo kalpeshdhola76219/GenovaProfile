@@ -228,11 +228,6 @@ const MultiPagePaginatedDocumentPreview: React.FC<PaginatedDocumentPreviewProps>
         {pageBreaks.map((page, idx) => {
           const isFirstPage = idx === 0;
           const isLastPage = page.isLastPage;
-          const nextPage = pageBreaks[idx + 1];
-          const descenderPad =
-            nextPage && nextPage.startY > page.endY
-              ? Math.min(5, Math.max(0, nextPage.startY - page.endY - 1))
-              : 0;
 
           return (
             <div
@@ -275,24 +270,21 @@ const MultiPagePaginatedDocumentPreview: React.FC<PaginatedDocumentPreviewProps>
                     marginTop: idx > 0 ? '32px' : '0px',
                     height: isFirstPage
                       ? isMultiPage
-                        ? `${Math.min(A4_DIMENSIONS.heightPx - 16, page.endY + descenderPad)}px`
+                        ? `${page.endY}px`
                         : `${A4_DIMENSIONS.heightPx}px`
                       : isLastPage
-                      ? `${Math.max(A4_DIMENSIONS.heightPx - 32, page.contentHeight)}px`
-                      : `${Math.min(1065, page.contentHeight + descenderPad)}px`,
+                      ? `${page.contentHeight}px`
+                      : `${Math.min(1065, page.contentHeight)}px`,
                     padding: 0,
                   }}
                 >
                   <div
                     data-page-flow="true"
-                    style={
-                      {
-                        position: 'relative',
-                        transform: idx > 0 ? `translateY(-${page.startY}px)` : 'none',
-                        width: '100%',
-                        '--a4-sheet-min-height': `${pageCount * A4_DIMENSIONS.heightPx}px`,
-                      } as React.CSSProperties
-                    }
+                    style={{
+                      position: 'relative',
+                      transform: idx > 0 ? `translateY(-${page.startY}px)` : 'none',
+                      width: '100%',
+                    }}
                   >
                     <TemplateComponent data={data} />
                   </div>
