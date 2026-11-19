@@ -21,8 +21,10 @@ export const METADATA_RIGHT_STYLE: React.CSSProperties = {
   display: 'table-cell',
   verticalAlign: 'top',
   textAlign: 'right',
-  width: '140px',
+  width: '145px',
   whiteSpace: 'nowrap',
+  wordBreak: 'normal',
+  overflowWrap: 'normal',
 };
 
 export const METADATA_WIDE_RIGHT_STYLE: React.CSSProperties = {
@@ -185,12 +187,15 @@ export const ResumeSplitRow: React.FC<{
           <td
             className={leftClassName}
             style={{
+              width: 'auto',
               verticalAlign,
               textAlign: 'left',
               padding: 0,
               paddingRight: hasRight ? '12px' : 0,
               border: 'none',
               background: 'transparent',
+              wordBreak: 'normal',
+              overflowWrap: 'break-word',
               ...leftStyle,
             }}
           >
@@ -205,8 +210,9 @@ export const ResumeSplitRow: React.FC<{
                 padding: 0,
                 border: 'none',
                 background: 'transparent',
-                width: rightWidth ?? (wrapRight ? '40%' : '152px'),
+                width: rightWidth ?? (wrapRight ? '40%' : '145px'),
                 whiteSpace: wrapRight ? 'normal' : 'nowrap',
+                wordBreak: 'normal',
                 overflowWrap: wrapRight ? 'anywhere' : 'normal',
                 ...rightStyle,
               }}

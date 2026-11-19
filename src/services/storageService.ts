@@ -187,13 +187,20 @@ export const storageService = {
         }
       }
       if (!raw) {
-        const initial = [sampleResumeDocument, sampleCoverLetterDocument, sampleBiodataDocument];
+        const initial = [sampleResumeDocument, sampleCoverLetterDocument, sampleBiodataDocument].map(sanitizeDocument);
         localStorage.setItem(STORAGE_KEY, JSON.stringify(initial));
-        return initial.map(sanitizeDocument);
+        return initial;
       }
       const parsed = JSON.parse(raw);
       const list = Array.isArray(parsed) ? parsed : [sampleResumeDocument, sampleCoverLetterDocument, sampleBiodataDocument];
-      return list.map(sanitizeDocument);
+      const sanitized = list.map(sanitizeDocument);
+      try {
+        const sanitizedRaw = JSON.stringify(sanitized);
+        if (sanitizedRaw !== raw) {
+          localStorage.setItem(STORAGE_KEY, sanitizedRaw);
+        }
+      } catch {}
+      return sanitized;
     } catch (e) {
       console.error('Failed to load documents from storage:', e);
       return [sampleResumeDocument, sampleCoverLetterDocument, sampleBiodataDocument].map(sanitizeDocument);

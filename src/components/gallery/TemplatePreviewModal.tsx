@@ -105,23 +105,23 @@ export const TemplatePreviewModal: React.FC<TemplatePreviewModalProps> = ({
     if (!template) return null;
     if (template.type === 'resume') {
       if (template.id === 'resume-prem-international') {
-        return { ...sampleInternationalResumeDocument, templateId: template.id };
+        return sanitizeDocumentTextFields({ ...sampleInternationalResumeDocument, templateId: template.id });
       }
       if (template.id === 'resume-modern-corporate') {
-        return { ...sampleModernCorporateResumeDocument, templateId: template.id };
+        return sanitizeDocumentTextFields({ ...sampleModernCorporateResumeDocument, templateId: template.id });
       }
       if (template.id === 'resume-monaco-sovereign') {
-        return { ...sampleMonacoSovereignResumeDocument, templateId: template.id };
+        return sanitizeDocumentTextFields({ ...sampleMonacoSovereignResumeDocument, templateId: template.id });
       }
-      return { ...sampleResumeDocument, templateId: template.id };
+      return sanitizeDocumentTextFields({ ...sampleResumeDocument, templateId: template.id });
     }
     if (template.type === 'biodata') {
-      return { ...sampleBiodataDocument, templateId: template.id };
+      return sanitizeDocumentTextFields({ ...sampleBiodataDocument, templateId: template.id });
     }
     if (template.type === 'cover-letter') {
-      return { ...sampleCoverLetterDocument, templateId: template.id };
+      return sanitizeDocumentTextFields({ ...sampleCoverLetterDocument, templateId: template.id });
     }
-    return getPreviewDataForTemplate(template.id, template.type);
+    return sanitizeDocumentTextFields(getPreviewDataForTemplate(template.id, template.type));
   }, [template]);
 
   if (!isOpen || !template) return null;

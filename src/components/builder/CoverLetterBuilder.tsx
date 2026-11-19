@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { DocumentData } from '../../types/document';
 import { storageService, sanitizeDocument } from '../../services/storageService';
+import { sanitizeDocumentTextFields } from '../../utils/textSanitizer';
 import { exportService, generateExportFilename } from '../../services/exportService';
 import { sessionService } from '../../services/sessionService';
 import { CoverLetterForm } from '../forms/CoverLetterForm';
@@ -136,7 +137,7 @@ export const CoverLetterBuilder: React.FC<CoverLetterBuilderProps> = ({
     invalidatePreparedBlob(false);
     setIsDocumentEditedSinceBuild(false);
     hasAutoBuiltRef.current = false;
-  }, [initialDocument.id, initialDocument.templateId]);
+  }, [initialDocument.id, initialDocument.templateId, initialDocument.updatedAt]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -146,9 +147,10 @@ export const CoverLetterBuilder: React.FC<CoverLetterBuilderProps> = ({
   }, [doc]);
 
   const handleDocumentChange = (updated: DocumentData) => {
+    const clean = sanitizeDocumentTextFields(updated);
     invalidatePreparedBlob(true);
-    setDoc(updated);
-    onDocumentChange?.(updated);
+    setDoc(clean);
+    onDocumentChange?.(clean);
   };
 
   const handleManualSave = () => {

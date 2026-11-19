@@ -102,7 +102,7 @@ export const TwoColumnResumeTemplate: React.FC<{ data: DocumentData }> = ({ data
                     leftClassName="text-slate-900"
                     left={exp.jobTitle}
                     rightClassName="text-slate-500 font-normal text-[11px]"
-                    rightWidth="136px"
+                    rightWidth="145px"
                     right={
                       <>
                         {exp.startDate} - {(exp.currentlyWorking && (!exp.endDate || exp.endDate.trim().toLowerCase() === 'present')) ? 'Present' : (exp.endDate || 'Present')}

@@ -33,6 +33,11 @@ export const EXPORT_CONFIG = {
   jpegQuality: 1.0,
 } as const;
 
+const EXPORT_A4_WIDTH_PX = 794;
+const EXPORT_A4_HEIGHT_PX = 1123;
+const EXPORT_PAGE_TOP_MARGIN_PX = 36;
+const EXPORT_PAGE_BOTTOM_MARGIN_PX = 40;
+
 let isExportInProgress = false;
 
 export function calculateOptimalExportScale(element: HTMLElement, _targetDpi: number = 300): number {
@@ -248,6 +253,10 @@ export function sanitizeClonedDocumentForExport(
   clonedTarget: HTMLElement,
   liveTarget: HTMLElement
 ): void {
+  // Normalize iframe defaultView devicePixelRatio so Windows 125%/150% scaling and
+  // high-DPR mobile browsers compute identical line heights and cell geometry
+  normalizeWindowDevicePixelRatio(clonedDoc.defaultView);
+
   try {
     const styleElements = clonedDoc.querySelectorAll('style');
     styleElements.forEach((styleTag) => {
@@ -343,6 +352,16 @@ export function sanitizeClonedDocumentForExport(
           (clonedEl.style as any).hyphens = 'none';
           (clonedEl.style as any).webkitHyphens = 'none';
         }
+        // Preserve nowrap on date/metadata table cells so inherited overflow-wrap: break-word
+        // never causes html2canvas-pro to wrap dates onto multiple lines
+        if (
+          (clonedEl.tagName === 'TD' || clonedEl.tagName === 'TH') &&
+          (computed.whiteSpace === 'nowrap' || clonedEl.style.whiteSpace === 'nowrap')
+        ) {
+          clonedEl.style.whiteSpace = 'nowrap';
+          clonedEl.style.wordBreak = 'normal';
+          clonedEl.style.overflowWrap = 'normal';
+        }
         if (
           clonedEl.style.cssText &&
           (clonedEl.style.cssText.includes('oklch') ||
@@ -361,27 +380,55 @@ export function sanitizeClonedDocumentForExport(
   try {
     clonedDoc.documentElement.style.zoom = '1';
     clonedDoc.documentElement.style.transform = 'none';
+    clonedDoc.documentElement.style.margin = '0';
+    clonedDoc.documentElement.style.padding = '0';
+    clonedDoc.documentElement.style.width = `${EXPORT_A4_WIDTH_PX}px`;
+    clonedDoc.documentElement.style.overflow = 'visible';
+
     clonedDoc.body.style.zoom = '1';
     clonedDoc.body.style.transform = 'none';
     clonedDoc.body.style.margin = '0';
+    clonedDoc.body.style.padding = '0';
+    clonedDoc.body.style.width = `${EXPORT_A4_WIDTH_PX}px`;
+    clonedDoc.body.style.minWidth = `${EXPORT_A4_WIDTH_PX}px`;
+    clonedDoc.body.style.maxWidth = `${EXPORT_A4_WIDTH_PX}px`;
+    clonedDoc.body.style.overflow = 'visible';
+    clonedDoc.body.style.boxSizing = 'border-box';
 
+    // Neutralize responsive/zoomed ancestor wrappers (e.g. mobile 360px zoom container + sm:p-6)
+    // so clonedTarget always starts at x=0 with exact 794px border-box width
     let parent = clonedTarget.parentElement;
     while (parent && parent !== clonedDoc.documentElement) {
       parent.style.transform = 'none';
       parent.style.transition = 'none';
       parent.style.zoom = '1';
+      parent.style.margin = '0';
+      parent.style.padding = '0';
+      parent.style.border = 'none';
+      parent.style.width = `${EXPORT_A4_WIDTH_PX}px`;
+      parent.style.minWidth = `${EXPORT_A4_WIDTH_PX}px`;
+      parent.style.maxWidth = 'none';
+      parent.style.display = 'block';
+      parent.style.overflow = 'visible';
+      parent.style.position = 'static';
+      parent.style.left = 'auto';
+      parent.style.top = 'auto';
+      parent.style.boxSizing = 'border-box';
       parent = parent.parentElement;
     }
+
     const liveComputedTarget = window.getComputedStyle(liveTarget);
     clonedTarget.style.transform = 'none';
     clonedTarget.style.transition = 'none';
     clonedTarget.style.zoom = '1';
     clonedTarget.style.margin = '0';
+    clonedTarget.style.border = 'none';
+    clonedTarget.style.borderRadius = '0';
     clonedTarget.style.boxShadow = 'none';
-    clonedTarget.style.width = '794px';
-    clonedTarget.style.maxWidth = '794px';
-    clonedTarget.style.minWidth = '794px';
-    clonedTarget.style.height = liveTarget.style.height || `${liveTarget.offsetHeight || 1123}px`;
+    clonedTarget.style.width = `${EXPORT_A4_WIDTH_PX}px`;
+    clonedTarget.style.maxWidth = `${EXPORT_A4_WIDTH_PX}px`;
+    clonedTarget.style.minWidth = `${EXPORT_A4_WIDTH_PX}px`;
+    clonedTarget.style.height = liveTarget.style.height || `${liveTarget.offsetHeight || EXPORT_A4_HEIGHT_PX}px`;
     clonedTarget.style.boxSizing = 'border-box';
     clonedTarget.style.wordBreak = 'normal';
     clonedTarget.style.overflowWrap = 'break-word';
@@ -389,6 +436,35 @@ export function sanitizeClonedDocumentForExport(
     (clonedTarget.style as any).webkitHyphens = 'none';
     clonedTarget.style.textRendering = liveComputedTarget.textRendering || 'auto';
   } catch {}
+}
+
+/**
+ * Forces a Window's devicePixelRatio to 1 and returns a restore callback.
+ */
+function normalizeWindowDevicePixelRatio(targetWin: Window | null | undefined): () => void {
+  if (!targetWin) return () => {};
+  const ownDesc = Object.getOwnPropertyDescriptor(targetWin, 'devicePixelRatio');
+  let patched = false;
+  try {
+    Object.defineProperty(targetWin, 'devicePixelRatio', {
+      configurable: true,
+      get: () => 1,
+    });
+    patched = true;
+  } catch {
+    patched = false;
+  }
+
+  return () => {
+    if (!patched) return;
+    try {
+      if (ownDesc) {
+        Object.defineProperty(targetWin, 'devicePixelRatio', ownDesc);
+      } else {
+        delete (targetWin as unknown as Record<string, unknown>).devicePixelRatio;
+      }
+    } catch {}
+  };
 }
 
 /**
@@ -400,30 +476,11 @@ async function withNormalizedDevicePixelRatio<T>(task: () => Promise<T>): Promis
   if (typeof window === 'undefined') {
     return await task();
   }
-  const ownDesc = Object.getOwnPropertyDescriptor(window, 'devicePixelRatio');
-  let patched = false;
-  try {
-    Object.defineProperty(window, 'devicePixelRatio', {
-      configurable: true,
-      get: () => 1,
-    });
-    patched = true;
-  } catch {
-    patched = false;
-  }
-
+  const restore = normalizeWindowDevicePixelRatio(window);
   try {
     return await task();
   } finally {
-    if (patched) {
-      try {
-        if (ownDesc) {
-          Object.defineProperty(window, 'devicePixelRatio', ownDesc);
-        } else {
-          delete (window as unknown as Record<string, unknown>).devicePixelRatio;
-        }
-      } catch {}
-    }
+    restore();
   }
 }
 
@@ -729,11 +786,6 @@ export function saveBlob(blob: Blob, filename: string): void {
   }, 15000);
 }
 
-const EXPORT_A4_WIDTH_PX = 794;
-const EXPORT_A4_HEIGHT_PX = 1123;
-const EXPORT_PAGE_TOP_MARGIN_PX = 36;
-const EXPORT_PAGE_BOTTOM_MARGIN_PX = 40;
-
 /**
  * Unwraps any live preview height/transform clipping on a cloned multi-page resume sheet
  * and inserts normal-flow marginTop spacers before any heading, entry, card, or bullet row
@@ -745,6 +797,8 @@ function layoutClonedMultiPageSheet(
   clonedDoc: Document,
   safeBgColor: string
 ): number {
+  normalizeWindowDevicePixelRatio(clonedDoc.defaultView);
+
   // Unclip any preview window wrapper inside or above flowRoot (e.g. translateY / height clip)
   const viewportEls = Array.from(
     clonedRoot.querySelectorAll('[data-page-viewport="true"], [data-page-flow="true"]')
@@ -776,16 +830,20 @@ function layoutClonedMultiPageSheet(
   clonedDoc.body.style.zoom = '1';
   clonedDoc.body.style.transform = 'none';
 
+  // Lock width to exact 794px and clear minHeight/border BEFORE measuring natural content height
+  // so 1-page templates with Tailwind min-h-[1123px] never falsely inflate into a 2-page PDF.
   clonedRoot.style.width = `${EXPORT_A4_WIDTH_PX}px`;
   clonedRoot.style.minWidth = `${EXPORT_A4_WIDTH_PX}px`;
   clonedRoot.style.maxWidth = `${EXPORT_A4_WIDTH_PX}px`;
   clonedRoot.style.height = 'auto';
-  clonedRoot.style.minHeight = `${EXPORT_A4_HEIGHT_PX}px`;
+  clonedRoot.style.minHeight = '0px';
   clonedRoot.style.maxHeight = 'none';
   clonedRoot.style.overflow = 'visible';
   clonedRoot.style.transform = 'none';
   clonedRoot.style.zoom = '1';
   clonedRoot.style.margin = '0';
+  clonedRoot.style.border = 'none';
+  clonedRoot.style.borderRadius = '0';
   clonedRoot.style.boxShadow = 'none';
   clonedRoot.style.backgroundColor = safeBgColor;
   clonedRoot.style.boxSizing = 'border-box';
@@ -795,12 +853,14 @@ function layoutClonedMultiPageSheet(
     flowRoot.style.minWidth = `${EXPORT_A4_WIDTH_PX}px`;
     flowRoot.style.maxWidth = `${EXPORT_A4_WIDTH_PX}px`;
     flowRoot.style.height = 'auto';
-    flowRoot.style.minHeight = `${EXPORT_A4_HEIGHT_PX}px`;
+    flowRoot.style.minHeight = '0px';
     flowRoot.style.maxHeight = 'none';
     flowRoot.style.overflow = 'visible';
     flowRoot.style.transform = 'none';
     flowRoot.style.zoom = '1';
     flowRoot.style.margin = '0';
+    flowRoot.style.border = 'none';
+    flowRoot.style.borderRadius = '0';
     flowRoot.style.boxShadow = 'none';
     flowRoot.style.boxSizing = 'border-box';
   }
@@ -819,6 +879,20 @@ function layoutClonedMultiPageSheet(
     };
   };
 
+  const measureContentBottom = (): number => {
+    void flowRoot.offsetHeight;
+    const rootTop = flowRoot.getBoundingClientRect().top;
+    let maxLeafBottom = 0;
+    const allEls = Array.from(flowRoot.querySelectorAll('h1, h2, h3, p, div, li, span, td, th, img')) as HTMLElement[];
+    for (const el of allEls) {
+      if ((el.children.length === 0 && (el.textContent || '').trim().length > 0) || el.tagName === 'IMG') {
+        const b = el.getBoundingClientRect().bottom - rootTop;
+        if (b > maxLeafBottom) maxLeafBottom = b;
+      }
+    }
+    return Math.max(maxLeafBottom, flowRoot.scrollHeight);
+  };
+
   const pushToNextPage = (el: HTMLElement, pageIdx: number) => {
     const curRect = getRelRect(el);
     const targetTop = (pageIdx + 1) * EXPORT_A4_HEIGHT_PX + EXPORT_PAGE_TOP_MARGIN_PX;
@@ -831,13 +905,15 @@ function layoutClonedMultiPageSheet(
     }
   };
 
-  const totalNaturalHeight = Math.max(flowRoot.scrollHeight, flowRoot.offsetHeight);
+  const totalNaturalHeight = measureContentBottom();
   if (totalNaturalHeight > EXPORT_A4_HEIGHT_PX) {
     const pushedElements = new Set<HTMLElement>();
 
-    // Pass 1: Scan entries, headings, and compact avoid-break sections in document order
+    // Pass 1: Scan entries, headings, compact avoid-break sections, and compact space-y items in document order
     const blocks = Array.from(
-      flowRoot.querySelectorAll('h1, h2, h3, [data-heading], [data-section-title], [data-entry], .avoid-break, [data-atomic]')
+      flowRoot.querySelectorAll(
+        'h1, h2, h3, [data-heading], [data-section-title], [data-entry], .avoid-break, [data-atomic], .space-y-1 > div, .space-y-1\\.5 > div, .space-y-2 > div, .space-y-2\\.5 > div, .space-y-3 > div, .space-y-4 > div'
+      )
     ) as HTMLElement[];
 
     for (let i = 0; i < blocks.length; i++) {
@@ -847,8 +923,21 @@ function layoutClonedMultiPageSheet(
       const rect = getRelRect(el);
       if (rect.height < 6) continue;
 
-      // Never treat an outer full-width multi-column wrapper (> 340px tall containing nested entries) as atomic
       const isHeading = /^(H1|H2|H3)$/.test(el.tagName) || el.hasAttribute('data-heading') || el.hasAttribute('data-section-title');
+      const isExplicitBlock =
+        isHeading ||
+        el.hasAttribute('data-entry') ||
+        el.hasAttribute('data-atomic') ||
+        el.classList.contains('avoid-break');
+
+      // Skip large generic wrappers (e.g. outer section containers) matched via .space-y-* > div
+      if (!isExplicitBlock) {
+        if (rect.height > 320 || el.querySelector('h2, h3, [data-heading], [data-section-title], [data-entry]')) {
+          continue;
+        }
+      }
+
+      // Never treat an outer full-width multi-column wrapper (> 320px tall without data-entry) as atomic
       if (!isHeading && el.classList.contains('avoid-break') && !el.hasAttribute('data-entry')) {
         if (rect.height > 320) continue;
       }
@@ -932,15 +1021,15 @@ function layoutClonedMultiPageSheet(
       }
     }
 
-    // Pass 2: Safety sweep over leaf paragraphs/bullets/grid cells so no single line gets sliced by 1123px
+    // Pass 2: Safety sweep over leaf paragraphs/bullets/tables/grid cells so no single line gets sliced by 1123px
     const leafCandidates = Array.from(
-      flowRoot.querySelectorAll('[data-bullet], li, p, .grid > div')
+      flowRoot.querySelectorAll('[data-bullet], li, p, table, .grid > div')
     ) as HTMLElement[];
     for (const leaf of leafCandidates) {
       if (pushedElements.has(leaf)) continue;
       const lRect = getRelRect(leaf);
       if (lRect.height <= 4 || lRect.height > 220) continue;
-      // Skip multi-column layout wrappers (only check leaf grid cells <= 60px tall)
+      // Skip multi-column layout wrappers (only check leaf grid cells <= 80px tall)
       if (leaf.parentElement?.classList.contains('grid') && lRect.height > 80) continue;
       const lPageIdx = Math.floor(Math.max(0, lRect.top) / EXPORT_A4_HEIGHT_PX);
       const lPageEnd = (lPageIdx + 1) * EXPORT_A4_HEIGHT_PX - EXPORT_PAGE_BOTTOM_MARGIN_PX;
@@ -951,19 +1040,12 @@ function layoutClonedMultiPageSheet(
     }
   }
 
-  // Measure final rendered bottom across all non-empty leaf elements
-  void flowRoot.offsetHeight;
-  const rootTop = flowRoot.getBoundingClientRect().top;
-  let maxBottom = flowRoot.scrollHeight;
-  const allEls = Array.from(flowRoot.querySelectorAll('h1, h2, h3, p, div, li, span, td, th, img')) as HTMLElement[];
-  for (const el of allEls) {
-    if ((el.children.length === 0 && (el.textContent || '').trim().length > 0) || el.tagName === 'IMG') {
-      const b = el.getBoundingClientRect().bottom - rootTop;
-      if (b > maxBottom) maxBottom = b;
-    }
-  }
-
-  const totalPages = Math.max(1, Math.ceil((maxBottom + 20) / EXPORT_A4_HEIGHT_PX));
+  // Measure final rendered bottom across all non-empty leaf elements (without min-height inflation)
+  const maxBottom = measureContentBottom();
+  const totalPages =
+    maxBottom <= EXPORT_A4_HEIGHT_PX
+      ? 1
+      : Math.max(1, Math.ceil((maxBottom + 12) / EXPORT_A4_HEIGHT_PX));
   const finalHeightPx = totalPages * EXPORT_A4_HEIGHT_PX;
 
   clonedRoot.style.height = `${finalHeightPx}px`;
@@ -1067,9 +1149,11 @@ export async function generatePdfBlob(
           imageTimeout: 15000,
           width: EXPORT_A4_WIDTH_PX,
           windowWidth: EXPORT_A4_WIDTH_PX,
+          windowHeight: EXPORT_A4_HEIGHT_PX,
           scrollX: 0,
           scrollY: 0,
           onclone: (clonedDoc: Document, clonedElement: HTMLElement) => {
+            normalizeWindowDevicePixelRatio(clonedDoc.defaultView);
             if (isCoverLetter) {
               rebuildCoverLetterBodyLinesForExport(clonedDoc, clonedElement, sheet);
             }
@@ -1163,9 +1247,11 @@ export async function generatePdfBlob(
         imageTimeout: 15000,
         width: EXPORT_A4_WIDTH_PX,
         windowWidth: EXPORT_A4_WIDTH_PX,
+        windowHeight: EXPORT_A4_HEIGHT_PX,
         scrollX: 0,
         scrollY: 0,
         onclone: (clonedDoc: Document, clonedElement: HTMLElement) => {
+          normalizeWindowDevicePixelRatio(clonedDoc.defaultView);
           sanitizeClonedDocumentForExport(clonedDoc, clonedElement, firstSheet);
           const templateSheet = (clonedElement.querySelector('.document-page-sheet') as HTMLElement | null) || clonedElement;
           resolvedTotalPages = layoutClonedMultiPageSheet(clonedElement, templateSheet, clonedDoc, safeBgColor);
@@ -1279,9 +1365,11 @@ export async function generatePngBlob(
         imageTimeout: 15000,
         width: EXPORT_A4_WIDTH_PX,
         windowWidth: EXPORT_A4_WIDTH_PX,
+        windowHeight: EXPORT_A4_HEIGHT_PX,
         scrollX: 0,
         scrollY: 0,
         onclone: (clonedDoc: Document, clonedElement: HTMLElement) => {
+          normalizeWindowDevicePixelRatio(clonedDoc.defaultView);
           if (isCoverLetter) {
             rebuildCoverLetterBodyLinesForExport(clonedDoc, clonedElement, targetElement);
           }

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { DocumentData } from '../../types/document';
 import { storageService, sanitizeDocument } from '../../services/storageService';
+import { sanitizeDocumentTextFields } from '../../utils/textSanitizer';
 import { exportService, generateExportFilename } from '../../services/exportService';
 import { sessionService } from '../../services/sessionService';
 import { BiodataForm } from '../forms/BiodataForm';
@@ -146,9 +147,10 @@ export const DocumentBuilder: React.FC<DocumentBuilderProps> = ({
 
   // Requirement 4: The rule that edited documents rebuild the file
   const handleDocumentChange = (updated: DocumentData) => {
+    const clean = sanitizeDocumentTextFields(updated);
     invalidatePreparedBlob(true);
-    setDoc(updated);
-    onDocumentChange?.(updated);
+    setDoc(clean);
+    onDocumentChange?.(clean);
   };
 
   const handleManualSave = () => {
