@@ -30,41 +30,41 @@ export const RefundPolicyPage: React.FC<RefundPolicyPageProps> = ({ onNavigate }
       <div className="bg-white p-6 sm:p-10 rounded-3xl border border-slate-200 shadow-xs space-y-6 text-xs text-slate-700 leading-relaxed">
         {/* Section 1 */}
         <section className="space-y-2">
-          <h2 className="text-sm font-extrabold text-slate-900">1. Instant Digital Product Delivery</h2>
+          <h2 className="text-sm font-extrabold text-slate-900">1. Instant Digital PDF Delivery &amp; Cancellation Policy</h2>
           <p>
-            {BUSINESS.name} provides digital profile creation software. All templates, resumes, matrimonial biodatas, cover letters, and invitations are delivered digitally via immediate web browser download in high-resolution PDF and PNG formats.
+            {BUSINESS.name} provides digital document creation software. All templates—resumes, matrimonial biodatas, and cover letters—are delivered digitally via immediate web browser download in watermark-free 300 DPI A4 PDF and PNG formats.
           </p>
           <p>
-            Because delivery of digital files is instantaneous upon payment confirmation, cancellations after digital delivery has commenced are not possible.
+            Because digital PDF delivery is instantaneous upon payment confirmation, <strong>cancellations are not possible once a document has been unlocked</strong>. You can create, edit, and preview your document for free before paying.
           </p>
         </section>
 
         {/* Section 2 */}
         <section className="space-y-2 pt-4 border-t border-slate-100">
-          <h2 className="text-sm font-extrabold text-slate-900">2. Eligible Refund Conditions</h2>
+          <h2 className="text-sm font-extrabold text-slate-900">2. 100% Refund Eligibility Conditions</h2>
           <p>
-            We take pride in our service. We offer full refunds exclusively under the following specific circumstances:
+            We offer a <strong>100% refund within 5–7 business days</strong> to your original payment method under the following verified circumstances:
           </p>
           <div className="space-y-2 pt-1">
             <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 flex items-start gap-2.5">
               <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
               <div>
-                <strong className="text-slate-900 block font-semibold">1. Payment Deducted, Document Not Unlocked:</strong>
-                <span>Money was deducted from your bank or UPI account, but due to a technical error, your document could not be unlocked or delivered.</span>
+                <strong className="text-slate-900 block font-semibold">1. Duplicate Payments:</strong>
+                <span>You were charged more than once for the same document and template design due to a network or gateway retry.</span>
               </div>
             </div>
             <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 flex items-start gap-2.5">
               <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
               <div>
-                <strong className="text-slate-900 block font-semibold">2. Duplicate Payment:</strong>
-                <span>You were charged multiple times for the same document and template design due to a network glitch.</span>
+                <strong className="text-slate-900 block font-semibold">2. Failed Technical Delivery Within 24 Hours:</strong>
+                <span>Payment was deducted from your bank, card, or UPI account, but a technical issue prevented your document from being unlocked or delivered, and our support team cannot resolve delivery within 24 hours.</span>
               </div>
             </div>
             <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 flex items-start gap-2.5">
               <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
               <div>
-                <strong className="text-slate-900 block font-semibold">3. Technical Fault on Our Side:</strong>
-                <span>A reproducible server-side technical defect prevented the document from rendering or generating properly that our support team was unable to resolve.</span>
+                <strong className="text-slate-900 block font-semibold">3. Overcharges:</strong>
+                <span>You were charged an amount higher than the displayed INR template price due to a verified billing or gateway discrepancy.</span>
               </div>
             </div>
           </div>
@@ -99,15 +99,15 @@ export const RefundPolicyPage: React.FC<RefundPolicyPageProps> = ({ onNavigate }
 
         {/* Section 5 */}
         <section className="space-y-2 pt-4 border-t border-slate-100">
-          <h2 className="text-sm font-extrabold text-slate-900">5. Review & Processing Timeline</h2>
+          <h2 className="text-sm font-extrabold text-slate-900">5. Review &amp; 5–7 Business Days Refund Timeline</h2>
           <p>
-            Our customer support and finance team reviews refund requests within <strong>3 working days</strong>.
+            Our customer support team verifies eligible refund requests within <strong>24–48 hours</strong> (1–2 business days).
           </p>
           <p>
-            Once approved, the refund is initiated directly to the original payment source (UPI account, debit card, or credit card) via our payment gateway partner, Cashfree.
+            Once approved, a <strong>100% refund</strong> is initiated directly back to the original payment source (UPI account, debit/credit card, or net banking) via Cashfree Payments.
           </p>
           <p>
-            Depending on your issuing bank&apos;s settlement schedule, the refunded amount typically reflects in your statement within <strong>5 to 7 working days</strong>.
+            Depending on your issuing bank&apos;s settlement cycle, the refunded amount reflects in your account within <strong>5–7 business days</strong>.
           </p>
         </section>
 
@@ -115,22 +115,27 @@ export const RefundPolicyPage: React.FC<RefundPolicyPageProps> = ({ onNavigate }
         <section className="space-y-2 pt-4 border-t border-slate-100">
           <h2 className="text-sm font-extrabold text-slate-900">6. Failed or Dropped Transactions</h2>
           <p>
-            If money was debited from your bank account but you received a failure screen or did not receive an order confirmation, the transaction was not captured by Cashfree.
+            If money was debited from your bank account but you received a failure screen or did not receive an order confirmation, the transaction was not captured by Cashfree Payments.
           </p>
           <p>
-            In such banking gateway timeout scenarios, the money is held in an interim settlement account and is normally reversed to your original bank account automatically by your bank according to RBI guidelines. If the deduction does not reverse within 5 business days, please write to us with your bank transaction UTR reference so we can verify the status with Cashfree.
+            In such banking gateway timeout scenarios, the money is held in an interim settlement account and is normally reversed to your original bank account automatically by your bank according to RBI guidelines. If the deduction does not reverse within 5 business days, please write to us with your bank transaction UTR reference so we can verify the status with Cashfree Payments.
           </p>
         </section>
 
         {/* Section 7 */}
         <section className="space-y-2 pt-4 border-t border-slate-100">
           <h2 className="text-sm font-extrabold text-slate-900">7. Contact Information</h2>
-          <div className="space-y-1 text-slate-600 pt-1">
-            <p><strong>Business Name:</strong> {BUSINESS.name}</p>
-            <p><strong>Email:</strong> <a href={`mailto:${BUSINESS.email}`} className="text-indigo-600 underline font-medium">{BUSINESS.email}</a></p>
-            <p><strong>Support Hours:</strong> {BUSINESS.hours}</p>
-            <p className="text-[11px] text-slate-500">Expected reply time: {BUSINESS.replyTime}</p>
-            {BUSINESS.phone ? <p><strong>Customer Helpline:</strong> {BUSINESS.phone}</p> : null}
+          <div className="space-y-1.5 text-slate-600 pt-1">
+            <p><strong>Brand Name:</strong> {BUSINESS.name}</p>
+            <p><strong>Support Email:</strong> <a href={`mailto:${BUSINESS.email}`} className="text-indigo-600 underline font-medium">{BUSINESS.email}</a></p>
+            {BUSINESS.phone ? (
+              <p>
+                <strong>Support Phone / WhatsApp:</strong>{' '}
+                <a href={BUSINESS.phoneHref} className="text-indigo-600 underline font-medium">{BUSINESS.phone}</a>
+              </p>
+            ) : null}
+            <p><strong>Location:</strong> {BUSINESS.location}</p>
+            <p className="text-[11px] text-slate-500">{BUSINESS.phoneHoursNote}</p>
           </div>
         </section>
       </div>

@@ -41,7 +41,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigate }) => {
           Pricing & Digital Delivery
         </h2>
         <p>
-          We offer both free starter templates and paid premium designs. Free templates can be edited and downloaded at no cost without creating an account. Paid designs require a single, one-time payment in Indian Rupees (INR) processed securely by Cashfree Payments before instant download. We do not operate subscriptions or recurring plans.
+          We offer both free starter templates (₹0) and paid premium designs (₹40 – ₹100 one-time per template). Creation and live watermarked preview are free without creating an account. Free templates can be downloaded immediately at no cost. Paid designs require a single, one-time payment in Indian Rupees (INR) processed securely via PCI-DSS compliant Cashfree Payments to unlock watermark-free 300 DPI A4 PDF &amp; PNG exports plus 30-day cloud recovery. We do not operate subscriptions or recurring plans.
         </p>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4">
@@ -58,7 +58,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigate }) => {
               <Download className="w-4 h-4 text-emerald-600" /> Instant Download
             </h3>
             <p className="text-[11px] text-slate-500">
-              Download your document directly to your device as a crisp PDF or high-resolution PNG image.
+              Download your document directly to your device as a crisp 300 DPI A4 PDF or high-resolution PNG image.
             </p>
           </div>
           <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-1">
@@ -66,23 +66,28 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigate }) => {
               <ShieldCheck className="w-4 h-4 text-[#8B5CF6]" /> Secure Checkout
             </h3>
             <p className="text-[11px] text-slate-500">
-              All transactions are handled securely by RBI-authorized payment aggregator Cashfree.
+              All transactions are handled securely by PCI-DSS compliant payment gateway partner Cashfree Payments.
             </p>
           </div>
         </div>
 
         <h2 className="text-base font-extrabold text-slate-900 pt-4 border-t border-slate-100">
-          Customer Support
+          Business &amp; Customer Support
         </h2>
         <p>
-          Have questions or need assistance with an order? Our support desk is available to assist you:
+          {BUSINESS.legalOperator}. Have questions or need assistance with an order? Our support desk is available to assist you:
         </p>
-        <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-1 text-slate-700">
-          <p><strong>Business Name:</strong> {BUSINESS.name}</p>
+        <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-1.5 text-slate-700">
+          <p><strong>Brand Name:</strong> {BUSINESS.name}</p>
           <p><strong>Support Email:</strong> <a href={`mailto:${BUSINESS.email}`} className="text-indigo-600 underline font-medium">{BUSINESS.email}</a></p>
-          <p><strong>Hours:</strong> {BUSINESS.hours}</p>
-          <p className="text-[11px] text-slate-500">Expected response: {BUSINESS.replyTime}</p>
-          {BUSINESS.phone ? <p><strong>Phone:</strong> {BUSINESS.phone}</p> : null}
+          {BUSINESS.phone ? (
+            <p>
+              <strong>Support Phone / WhatsApp:</strong>{' '}
+              <a href={BUSINESS.phoneHref} className="text-indigo-600 underline font-medium">{BUSINESS.phone}</a>
+            </p>
+          ) : null}
+          <p><strong>Location:</strong> {BUSINESS.location}</p>
+          <p className="text-[11px] text-slate-500">{BUSINESS.phoneHoursNote}</p>
         </div>
       </div>
 

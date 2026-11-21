@@ -29,12 +29,13 @@ export const TermsPage: React.FC<TermsPageProps> = ({ onNavigate }) => {
       <div className="bg-white p-6 sm:p-10 rounded-3xl border border-slate-200 shadow-xs space-y-6 text-xs text-slate-700 leading-relaxed">
         {/* Section 1 */}
         <section className="space-y-2">
-          <h2 className="text-sm font-extrabold text-slate-900">1. Who We Are & Acceptance of Terms</h2>
+          <h2 className="text-sm font-extrabold text-slate-900">1. Who We Are &amp; Acceptance of Terms</h2>
           <p>
-            Welcome to {BUSINESS.name} (<a href="https://genovaprofile.com" className="text-indigo-600 underline">genovaprofile.com</a>), operated by <strong>{BUSINESS.name}</strong> (&quot;we&quot;, &quot;us&quot;, or &quot;our&quot;).
+            Welcome to <strong>Genova Profile, operated by Kalpesh Dhola (Surat, Gujarat, India)</strong> (
+            <a href="https://genovaprofile.com" className="text-indigo-600 underline">genovaprofile.com</a>, &quot;we&quot;, &quot;us&quot;, or &quot;our&quot;).
           </p>
           <p>
-            By accessing or using {BUSINESS.name} to browse, create, edit, preview, or download documents including resumes, curriculum vitae (CVs), marriage biodatas, executive cover letters, and event invitations, you agree to be bound by these Terms & Conditions. If you do not agree with any part of these Terms, you must immediately discontinue use of the platform.
+            By accessing or using {BUSINESS.name} to browse, create, edit, preview, or download documents including resumes, curriculum vitae (CVs), marriage biodatas, and executive cover letters, you agree to be bound by these Terms &amp; Conditions. If you do not agree with any part of these Terms, you must immediately discontinue use of the platform.
           </p>
         </section>
 
@@ -66,29 +67,32 @@ export const TermsPage: React.FC<TermsPageProps> = ({ onNavigate }) => {
 
         {/* Section 4 */}
         <section className="space-y-2 pt-3 border-t border-slate-100">
-          <h2 className="text-sm font-extrabold text-slate-900">4. Pricing & Payments via Cashfree</h2>
+          <h2 className="text-sm font-extrabold text-slate-900">4. Pricing &amp; Payments via Cashfree</h2>
           <p>
             {BUSINESS.name} operates on clear per-template pricing:
           </p>
           <ul className="list-disc list-inside space-y-1 pl-2 text-slate-600">
-            <li>Free starter templates are ₹0 and do not require mobile numbers or payment information.</li>
-            <li>Premium and luxury templates are priced individually as shown in the template catalog and checkout screen.</li>
+            <li>Creation and live watermarked preview are free without creating an account. Free starter templates are ₹0 and do not require mobile numbers or payment information.</li>
+            <li>Premium and royal templates are priced individually (₹40 – ₹100 one-time per template) as shown in the template catalog and checkout screen, unlocking watermark-free 300 DPI A4 PDF &amp; PNG export plus 30-day cloud recovery.</li>
             <li>All prices are quoted in <strong>Indian Rupees (INR)</strong> and are the final amount payable.</li>
             <li>There are <strong>zero recurring subscriptions</strong>, renewal fees, or hidden handling costs.</li>
           </ul>
           <p className="pt-1">
-            All online transactions are securely processed by our payment gateway partner, <strong>Cashfree Payments India Private Limited</strong> (&quot;Cashfree&quot;), supporting UPI, Indian debit/credit cards, and net banking. We do not store full card numbers, CVVs, or UPI PINs on our servers.
+            All online transactions are securely processed by our PCI-DSS compliant payment gateway partner, <strong>Cashfree Payments India Private Limited</strong> (&quot;Cashfree Payments&quot;), supporting UPI, Indian debit/credit cards, and net banking. We maintain zero storage of card numbers, CVVs, UPI PINs, or net-banking credentials on our servers.
           </p>
         </section>
 
         {/* Section 5 */}
         <section className="space-y-2 pt-3 border-t border-slate-100">
-          <h2 className="text-sm font-extrabold text-slate-900">5. Digital Delivery & Refund Policy</h2>
+          <h2 className="text-sm font-extrabold text-slate-900">5. Digital Delivery &amp; Refund Policy</h2>
           <p>
-            All purchased documents are delivered instantaneously upon payment confirmation via direct browser download in high-resolution PDF and PNG formats. No physical goods are shipped.
+            All purchased documents are delivered instantaneously upon payment confirmation via direct browser download in high-resolution 300 DPI A4 PDF and PNG formats. No physical goods are shipped.
           </p>
           <p>
-            Because delivery is instantaneous, cancellations after delivery are not possible. Refunds are provided solely for payment debits without document unlock, duplicate charges for the same document, or unresolvable technical faults on our side within 7 calendar days. For full details, review our <button type="button" onClick={() => handleNavigate('refund-policy')} className="text-indigo-600 underline font-semibold cursor-pointer">Refund & Cancellation Policy</button>.
+            Because digital PDF delivery is instantaneous, cancellations once unlocked are not possible. We provide a <strong>100% refund within 5–7 business days</strong> for verified duplicate payments, failed technical delivery unresolved within 24 hours, or overcharges. For full details, review our{' '}
+            <button type="button" onClick={() => handleNavigate('refund-policy')} className="text-indigo-600 underline font-semibold cursor-pointer">
+              Refund &amp; Cancellation Policy
+            </button>.
           </p>
         </section>
 
@@ -135,31 +139,39 @@ export const TermsPage: React.FC<TermsPageProps> = ({ onNavigate }) => {
 
         {/* Section 10 */}
         <section className="space-y-2 pt-3 border-t border-slate-100">
-          <h2 className="text-sm font-extrabold text-slate-900">10. Governing Law & Dispute Resolution</h2>
+          <h2 className="text-sm font-extrabold text-slate-900">10. Governing Law &amp; Dispute Resolution</h2>
           <p>
-            These Terms shall be governed by, construed, and enforced in accordance with the laws of <strong>India</strong>. Any legal suit, action, or proceeding arising out of or related to these Terms or transactions on {BUSINESS.name} shall be subject to the exclusive jurisdiction of the competent courts located at <strong>Surat, Gujarat</strong>.
+            These Terms &amp; Conditions shall be governed by, construed, and enforced in accordance with the laws of <strong>India</strong>. Any dispute, claim, suit, or legal proceeding arising out of or relating to these Terms or transactions on {BUSINESS.name} shall be subject to the exclusive jurisdiction of the courts in <strong>Surat, Gujarat, India</strong>.
           </p>
         </section>
 
         {/* Section 11 */}
         <section className="space-y-2 pt-3 border-t border-slate-100">
-          <h2 className="text-sm font-extrabold text-slate-900">11. Contact & Customer Support</h2>
+          <h2 className="text-sm font-extrabold text-slate-900">11. Contact &amp; Customer Support</h2>
           <p>
             If you have questions, notices, or formal inquiries concerning these Terms or transactions on our platform, please reach out through our official channels:
           </p>
-          <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-2 max-w-md">
-            <strong className="text-slate-900 block font-semibold">{BUSINESS.name} Support</strong>
+          <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-1.5 max-w-lg">
+            <strong className="text-slate-900 block font-semibold">{BUSINESS.legalOperator}</strong>
             <p>
-              Email:{' '}
+              <strong>Support Email:</strong>{' '}
               <a href={`mailto:${BUSINESS.email}`} className="text-indigo-600 underline font-medium">
                 {BUSINESS.email}
               </a>
             </p>
-            <p>Support Hours: {BUSINESS.hours}</p>
+            {BUSINESS.phone ? (
+              <p>
+                <strong>Support Phone / WhatsApp:</strong>{' '}
+                <a href={BUSINESS.phoneHref} className="text-indigo-600 underline font-medium">
+                  {BUSINESS.phone}
+                </a>
+              </p>
+            ) : null}
+            <p><strong>Location:</strong> {BUSINESS.location}</p>
+            <p className="text-[11px] text-slate-500">{BUSINESS.phoneHoursNote}</p>
             <p className="text-[11px] text-slate-500">
-              Expected reply time: {BUSINESS.replyTime}. For complaints write to the same email; we reply within 7 days.
+              Expected reply time: {BUSINESS.replyTime}. For complaints write to {BUSINESS.email}; we reply within 7 days.
             </p>
-            {BUSINESS.phone ? <p>Helpline: {BUSINESS.phone}</p> : null}
           </div>
         </section>
       </div>

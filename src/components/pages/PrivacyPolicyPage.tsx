@@ -105,13 +105,20 @@ export const PrivacyPolicyPage: React.FC<PrivacyPolicyPageProps> = ({ onNavigate
             1. Who We Are and How to Contact Us
           </h2>
           <p>
-            {BUSINESS.name} (&quot;we&quot;, &quot;us&quot;, &quot;our&quot;) operates the website <a href="https://genovaprofile.com" className="text-indigo-600 underline">genovaprofile.com</a> for creating resumes, marriage biodatas, cover letters, and event invitations.
+            <strong>Genova Profile, operated by Kalpesh Dhola (Surat, Gujarat, India)</strong> (&quot;we&quot;, &quot;us&quot;, &quot;our&quot;) operates the website{' '}
+            <a href="https://genovaprofile.com" className="text-indigo-600 underline">genovaprofile.com</a>{' '}
+            for creating professional resumes, marriage biodatas, and cover letters.
           </p>
           <p>
             For privacy queries, data requests, or complaints, reach out to our team at{' '}
             <a href={`mailto:${BUSINESS.email}`} className="text-indigo-600 underline font-medium">
               {BUSINESS.email}
-            </a>; we reply within 7 days.
+            </a>{' '}
+            or call/WhatsApp{' '}
+            <a href={BUSINESS.phoneHref} className="text-indigo-600 underline font-medium">
+              {BUSINESS.phone}
+            </a>{' '}
+            ({BUSINESS.hours}); we reply within 7 days.
           </p>
         </section>
 
@@ -169,7 +176,9 @@ export const PrivacyPolicyPage: React.FC<PrivacyPolicyPageProps> = ({ onNavigate
                 <tr>
                   <td className="p-3 font-semibold text-slate-900">Payment Metadata</td>
                   <td className="p-3 text-slate-600">Cashfree order ID, paid amount, currency, timestamp, payment status</td>
-                  <td className="p-3 text-slate-600">To unlock paid templates and maintain statutory financial records under Indian law. We never see or store card numbers, CVVs, or UPI PINs.</td>
+                  <td className="p-3 text-slate-600">
+                    To unlock paid templates and maintain statutory financial records under Indian law. All payments are processed through <strong>PCI-DSS compliant Cashfree Payments</strong>. We maintain <strong>zero storage of credit/debit card numbers, CVVs, UPI PINs, or net-banking credentials</strong> on our servers.
+                  </td>
                 </tr>
               </tbody>
             </table>
@@ -205,9 +214,9 @@ export const PrivacyPolicyPage: React.FC<PrivacyPolicyPageProps> = ({ onNavigate
           </p>
           <div className="space-y-2">
             <div className="p-3 bg-slate-50 rounded-xl border border-slate-200">
-              <span className="font-bold text-slate-900 block">Cashfree Payments India Pvt. Ltd. (Payment Gateway)</span>
+              <span className="font-bold text-slate-900 block">Cashfree Payments India Pvt. Ltd. (PCI-DSS Compliant Payment Gateway)</span>
               <span className="text-slate-600 text-[11px]">
-                When purchasing a paid template, your order amount and transient phone number are sent directly to Cashfree to generate a payment session. Cashfree processes your UPI, card, or net banking payment. Cashfree does not receive your resume or biodata contents.
+                When purchasing a paid template, payment processing is handled end-to-end by PCI-DSS compliant Cashfree Payments. Your order amount and transient mobile number are passed to Cashfree to create a secure payment session for UPI, card, or net-banking checkout. Genova Profile never accesses or stores your card details, CVV, UPI PIN, or net-banking credentials, and Cashfree does not receive your resume or biodata contents.
               </span>
             </div>
             <div className="p-3 bg-slate-50 rounded-xl border border-slate-200">
@@ -310,10 +319,10 @@ export const PrivacyPolicyPage: React.FC<PrivacyPolicyPageProps> = ({ onNavigate
         <section className="space-y-2">
           <h2 className="text-sm font-bold text-slate-900 flex items-center gap-2">
             <Lock className="w-4 h-4 text-slate-500" />
-            8. Security Practices
+            8. Security Practices &amp; Zero Payment Credential Storage
           </h2>
           <p>
-            All data in transit is encrypted using industry-standard HTTPS/TLS. Database access is restricted behind authenticated service keys.
+            All data in transit is encrypted using industry-standard HTTPS/TLS. Database access is restricted behind authenticated service keys. Payment transactions are processed exclusively via PCI-DSS compliant Cashfree Payments, with zero storage of credit/debit card details, UPI PINs, or net-banking credentials on Genova Profile servers. Paid documents are retained for {PAID_DOCUMENT_RETENTION_DAYS} days for re-downloads and recovery, and you retain full delete control at any time using the tools below.
           </p>
         </section>
 
@@ -340,15 +349,30 @@ export const PrivacyPolicyPage: React.FC<PrivacyPolicyPageProps> = ({ onNavigate
         {/* 11. Complaints & Grievance Redressal */}
         <section className="space-y-2 p-4 bg-slate-50 rounded-2xl border border-slate-200">
           <h2 className="text-sm font-bold text-slate-900">
-            11. Contact & Complaints Redressal
+            11. Contact &amp; Complaints Redressal
           </h2>
+          <p className="text-slate-700">
+            <strong>Operator:</strong> {BUSINESS.legalOperator}
+          </p>
           <p className="text-slate-600">
-            For privacy queries, data requests, or complaints, write to{' '}
+            <strong>Location:</strong> {BUSINESS.location}
+          </p>
+          <p className="text-slate-600">
+            <strong>Support Email:</strong>{' '}
             <a href={`mailto:${BUSINESS.email}`} className="text-indigo-600 underline font-medium">
               {BUSINESS.email}
-            </a>
-            ; we reply within 7 days.
+            </a>{' '}
+            (24/7 email intake; we reply to privacy complaints within 7 days)
           </p>
+          {BUSINESS.phone ? (
+            <p className="text-slate-600">
+              <strong>Support Phone / WhatsApp:</strong>{' '}
+              <a href={BUSINESS.phoneHref} className="text-indigo-600 underline font-medium">
+                {BUSINESS.phone}
+              </a>{' '}
+              ({BUSINESS.hours})
+            </p>
+          ) : null}
         </section>
 
         {/* DATA PURGE ACTIONS */}

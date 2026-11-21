@@ -1,6 +1,6 @@
 import React from 'react';
 import { GenovaDocLogo } from '../common/GenovaDocLogo';
-import { ShieldCheck, Heart, FileText, Mail, Phone, RefreshCw, Lock, Sparkles } from 'lucide-react';
+import { ShieldCheck, Heart, FileText, Mail, Phone, MapPin, RefreshCw } from 'lucide-react';
 import { BUSINESS } from '../../config/business';
 
 interface FooterProps {
@@ -36,19 +36,25 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
                   {BUSINESS.email}
                 </a>
               </div>
-              <div className="text-slate-400">
-                Support Hours: {BUSINESS.hours}
-              </div>
               {BUSINESS.phone ? (
                 <div className="flex items-center gap-2">
                   <Phone className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
-                  <span>{BUSINESS.phone}</span>
+                  <a href={BUSINESS.phoneHref} className="hover:text-white transition-colors">
+                    {BUSINESS.phone}
+                  </a>
                 </div>
               ) : null}
+              <div className="flex items-center gap-2">
+                <MapPin className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
+                <span>{BUSINESS.location}</span>
+              </div>
+              <div className="text-slate-400">
+                Support Hours: {BUSINESS.hours}
+              </div>
             </div>
             <div className="flex items-center gap-2 text-emerald-400 font-medium text-[11px] pt-1">
               <ShieldCheck className="w-4 h-4 text-emerald-400" />
-              <span>Payments secured by Cashfree</span>
+              <span>Payments secured by Cashfree Payments</span>
             </div>
           </div>
 
@@ -217,6 +223,16 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
           </div>
           <div className="flex flex-wrap gap-4 sm:gap-6 justify-center">
             <a
+              href="/about"
+              onClick={(e) => {
+                e.preventDefault();
+                onNavigate('about');
+              }}
+              className="hover:text-slate-400 cursor-pointer"
+            >
+              About Us
+            </a>
+            <a
               href="/privacy-policy"
               onClick={(e) => {
                 e.preventDefault();
@@ -224,7 +240,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
               }}
               className="hover:text-slate-400 cursor-pointer"
             >
-              Privacy
+              Privacy Policy
             </a>
             <a
               href="/terms"

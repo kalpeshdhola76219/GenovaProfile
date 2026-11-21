@@ -7,10 +7,13 @@ export const PAID_DOCUMENT_RETENTION_DAYS = 30;
 export const BUSINESS_DETAILS = {
   name: BUSINESS.name,
   legalName: BUSINESS.legalName,
+  legalOperator: BUSINESS.legalOperator,
   domain: BUSINESS.domain,
   website: BUSINESS.website,
-  address: '', // NO postal address anywhere
-  phone: BUSINESS.phone, // Empty string by default; never show placeholder
+  address: BUSINESS.location, // City, State & PIN only (no house/street address)
+  location: BUSINESS.location,
+  phone: BUSINESS.phone,
+  phoneHoursNote: BUSINESS.phoneHoursNote,
   supportEmail: BUSINESS.email,
   businessHours: BUSINESS.hours,
   expectedReplyTime: BUSINESS.replyTime,

@@ -643,6 +643,133 @@ export const HomePage: React.FC<HomePageProps> = ({
         </div>
       </section>
 
+      {/* 5. Transparent One-Time Export Pricing (INR) */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center max-w-3xl mx-auto mb-10 space-y-2">
+          <span className="text-xs font-bold uppercase tracking-wider text-[#0066FF]">
+            Transparent INR Pricing &bull; Zero Subscriptions
+          </span>
+          <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900">
+            Create &amp; Preview Free. Pay Once Only When You Export Premium Designs.
+          </h2>
+          <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+            No monthly plans or hidden charges. Create and preview any document for free with watermarked preview on premium designs, or pay a single one-time fee in Indian Rupees (INR) to unlock watermark-free 300 DPI A4 PDF export and 30-day cloud recovery.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-5xl mx-auto">
+          {/* Free Tier Card */}
+          <div className="bg-white rounded-3xl p-6 sm:p-8 border border-emerald-200 shadow-2xs flex flex-col justify-between space-y-6">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-800 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-md">
+                  Free Forever
+                </span>
+                <span className="text-xs font-semibold text-slate-500">No Login Required</span>
+              </div>
+              <div>
+                <div className="flex items-baseline gap-2">
+                  <span className="text-4xl font-black text-slate-900">₹0</span>
+                  <span className="text-xs font-medium text-slate-500">INR / starter templates</span>
+                </div>
+                <h3 className="text-base font-extrabold text-slate-900 mt-2">
+                  Free Creation, Live Preview &amp; Starter Exports
+                </h3>
+              </div>
+              <ul className="space-y-2.5 text-xs text-slate-600">
+                <li className="flex items-start gap-2">
+                  <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                  <span><strong>Free creation &amp; editing</strong> across all {resumeTotalCount + biodataTotalCount + coverLetterTotalCount} templates with live preview (watermarked preview on premium templates).</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                  <span><strong>Free watermark-free PDF export</strong> on 42 starter templates (12 Resumes, 20 Matrimonial Profiles, and all 10 Cover Letters).</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <Check className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                  <span>Switch templates anytime with 100% data preservation and zero payment required.</span>
+                </li>
+              </ul>
+            </div>
+            <button
+              type="button"
+              onClick={() => onBrowseTemplates()}
+              className="w-full py-3 px-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-colors inline-flex items-center justify-center gap-1.5 cursor-pointer shadow-xs"
+            >
+              <span>Start Creating Free (₹0)</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
+
+          {/* Paid One-Time Export Card */}
+          <div className="bg-white rounded-3xl p-6 sm:p-8 border-2 border-[#0066FF] shadow-md flex flex-col justify-between space-y-6">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-[#0066FF] bg-blue-50 border border-blue-200 px-2.5 py-1 rounded-md">
+                  One-Time Export Pass
+                </span>
+                <span className="text-xs font-semibold text-slate-500">Per Template</span>
+              </div>
+              <div>
+                <div className="flex items-baseline gap-2">
+                  <span className="text-4xl font-black text-slate-900">₹40 – ₹100</span>
+                  <span className="text-xs font-medium text-slate-500">INR one-time</span>
+                </div>
+                <h3 className="text-base font-extrabold text-slate-900 mt-2">
+                  Premium Watermark-Free 300 DPI A4 PDF + 30-Day Recovery
+                </h3>
+              </div>
+              <ul className="space-y-2.5 text-xs text-slate-600">
+                <li className="flex items-start gap-2">
+                  <Check className="w-4 h-4 text-[#0066FF] shrink-0 mt-0.5" />
+                  <span><strong>Exact template pricing in INR:</strong> Resumes (₹40, ₹60, ₹100) &bull; Matrimonial Profiles (₹40, ₹50, ₹60, ₹80, ₹100).</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <Check className="w-4 h-4 text-[#0066FF] shrink-0 mt-0.5" />
+                  <span><strong>Instant watermark-free 300 DPI A4 PDF &amp; PNG download</strong> immediately after payment verification.</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <Check className="w-4 h-4 text-[#0066FF] shrink-0 mt-0.5" />
+                  <span><strong>30-day cloud recovery</strong> across devices via Receipt ID &amp; Recovery Code, plus full user delete control anytime.</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <Check className="w-4 h-4 text-[#0066FF] shrink-0 mt-0.5" />
+                  <span><strong>PCI-DSS compliant checkout via Cashfree Payments</strong> (UPI, Cards, NetBanking). Final INR price shown—zero recurring charges.</span>
+                </li>
+              </ul>
+            </div>
+            <div className="space-y-2.5">
+              <button
+                type="button"
+                onClick={() => onBrowseTemplates()}
+                className="w-full py-3 px-4 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition-colors inline-flex items-center justify-center gap-1.5 cursor-pointer shadow-xs"
+              >
+                <span>Browse All Templates &amp; Prices</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+              <p className="text-[11px] text-slate-500 text-center">
+                Covered by our{' '}
+                <button
+                  type="button"
+                  onClick={() => onNavigate('refund-policy')}
+                  className="text-indigo-600 underline font-medium cursor-pointer"
+                >
+                  Refund Policy
+                </button>{' '}
+                &amp;{' '}
+                <button
+                  type="button"
+                  onClick={() => onNavigate('privacy-policy')}
+                  className="text-indigo-600 underline font-medium cursor-pointer"
+                >
+                  Privacy Policy
+                </button>
+                .
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* 6. Accordion FAQ Section (5 Expandable Questions) */}
       <section className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">

@@ -32,7 +32,7 @@ export const SEO_CONFIG: Record<string, PageSeoConfig> = {
   },
   pricing: {
     title: 'Pricing – Genova Profile',
-    description: 'Pay only when you export. Free templates forever or unlock premium designer templates with one-time payment of ₹29 to ₹99.',
+    description: 'Create and preview free. Free starter templates (₹0) or unlock premium designer templates with a one-time payment of ₹40 to ₹100.',
     canonicalPath: '/pricing',
   },
   about: {

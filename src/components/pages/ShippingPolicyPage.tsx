@@ -121,12 +121,17 @@ export const ShippingPolicyPage: React.FC<ShippingPolicyPageProps> = ({ onNaviga
           <p>
             If you experience any difficulties downloading your purchased document, please write to our support team immediately:
           </p>
-          <div className="space-y-1 text-slate-600 pt-1">
-            <p><strong>Business Name:</strong> {BUSINESS.name}</p>
-            <p><strong>Email:</strong> <a href={`mailto:${BUSINESS.email}`} className="text-indigo-600 underline font-medium">{BUSINESS.email}</a></p>
-            <p><strong>Support Hours:</strong> {BUSINESS.hours}</p>
-            <p className="text-[11px] text-slate-500">Expected reply time: {BUSINESS.replyTime}</p>
-            {BUSINESS.phone ? <p><strong>Phone:</strong> {BUSINESS.phone}</p> : null}
+          <div className="space-y-1.5 text-slate-600 pt-1">
+            <p><strong>Brand Name:</strong> {BUSINESS.name}</p>
+            <p><strong>Support Email:</strong> <a href={`mailto:${BUSINESS.email}`} className="text-indigo-600 underline font-medium">{BUSINESS.email}</a></p>
+            {BUSINESS.phone ? (
+              <p>
+                <strong>Support Phone / WhatsApp:</strong>{' '}
+                <a href={BUSINESS.phoneHref} className="text-indigo-600 underline font-medium">{BUSINESS.phone}</a>
+              </p>
+            ) : null}
+            <p><strong>Location:</strong> {BUSINESS.location}</p>
+            <p className="text-[11px] text-slate-500">{BUSINESS.phoneHoursNote}</p>
           </div>
         </section>
       </div>

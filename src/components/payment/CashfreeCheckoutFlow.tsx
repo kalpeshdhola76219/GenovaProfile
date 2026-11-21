@@ -556,7 +556,7 @@ export const CashfreeCheckoutFlow: React.FC<CashfreeCheckoutFlowProps> = ({
                     {resolvedPriceINR === 0 ? 'Free' : `₹${resolvedPriceINR}`}
                   </span>
                 </div>
-                <div className="flex items-center gap-3 text-[10px] font-medium text-slate-500 pt-1 border-t border-slate-200/70">
+                <div className="flex flex-wrap items-center gap-3 text-[10px] font-medium text-slate-500 pt-1 border-t border-slate-200/70">
                   <span className="inline-flex items-center gap-1">
                     <QrCode className="w-3 h-3 text-[#0066FF]" /> UPI / QR
                   </span>
@@ -567,7 +567,7 @@ export const CashfreeCheckoutFlow: React.FC<CashfreeCheckoutFlowProps> = ({
                     <Lock className="w-3 h-3 text-blue-600" /> NetBanking
                   </span>
                   <span className="inline-flex items-center gap-1">
-                    <Sparkles className="w-3 h-3 text-purple-600" /> Instant PDF
+                    <Sparkles className="w-3 h-3 text-purple-600" /> 300 DPI A4 PDF + 30-Day Recovery
                   </span>
                 </div>
               </div>
@@ -648,34 +648,7 @@ export const CashfreeCheckoutFlow: React.FC<CashfreeCheckoutFlowProps> = ({
                     className="mt-0.5 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
                   />
                   <span className="text-[11px] leading-relaxed text-slate-700">
-                    I confirm that the mobile number provided belongs to me. I agree to the{' '}
-                    <a
-                      href="/terms"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-indigo-600 underline font-medium hover:text-indigo-800"
-                    >
-                      Terms of Service
-                    </a>
-                    ,{' '}
-                    <a
-                      href="/privacy-policy"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-indigo-600 underline font-medium hover:text-indigo-800"
-                    >
-                      Privacy Policy
-                    </a>
-                    , and{' '}
-                    <a
-                      href="/refund-policy"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-indigo-600 underline font-medium hover:text-indigo-800"
-                    >
-                      Refund Policy
-                    </a>
-                    .
+                    I confirm this mobile number belongs to me and consent to one-time INR payment processing via Cashfree Payments.
                   </span>
                 </label>
               </div>
@@ -698,6 +671,37 @@ export const CashfreeCheckoutFlow: React.FC<CashfreeCheckoutFlowProps> = ({
                 </span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </button>
+
+              <p className="text-[11px] leading-relaxed text-slate-500 text-center">
+                By proceeding, you agree to Genova Profile&apos;s{' '}
+                <a
+                  href="/terms"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-indigo-600 underline font-medium hover:text-indigo-800"
+                >
+                  Terms &amp; Conditions
+                </a>
+                ,{' '}
+                <a
+                  href="/privacy-policy"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-indigo-600 underline font-medium hover:text-indigo-800"
+                >
+                  Privacy Policy
+                </a>
+                , and{' '}
+                <a
+                  href="/refund-policy"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-indigo-600 underline font-medium hover:text-indigo-800"
+                >
+                  Refund Policy
+                </a>
+                .
+              </p>
 
               <div className="text-center pt-1">
                 <a

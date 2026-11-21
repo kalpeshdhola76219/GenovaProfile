@@ -3,6 +3,7 @@ import {
   Mail,
   Phone,
   Clock,
+  MapPin,
   ShieldCheck,
   Send,
   CheckCircle2,
@@ -339,11 +340,11 @@ export const ContactPage: React.FC<ContactPageProps> = ({ onNavigate }) => {
           {/* Business Info Card */}
           <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-xs space-y-5 text-xs">
             <h3 className="font-extrabold text-slate-900 text-sm uppercase tracking-wider">
-              Support & Business Information
+              Support &amp; Business Information
             </h3>
             <div className="space-y-4 text-slate-600">
               <div>
-                <strong className="text-slate-900 block font-semibold">Business Name:</strong>
+                <strong className="text-slate-900 block font-semibold">Brand Name:</strong>
                 <p className="text-slate-800 font-medium">{BUSINESS.name}</p>
               </div>
 
@@ -363,12 +364,42 @@ export const ContactPage: React.FC<ContactPageProps> = ({ onNavigate }) => {
               {BUSINESS.phone ? (
                 <div className="flex items-start gap-3">
                   <Phone className="w-4 h-4 text-indigo-600 shrink-0 mt-0.5" />
-                  <div>
-                    <strong className="text-slate-900 block font-semibold">Customer Helpline:</strong>
-                    <span className="text-slate-800 font-medium">{BUSINESS.phone}</span>
+                  <div className="space-y-1">
+                    <strong className="text-slate-900 block font-semibold">Support Phone / WhatsApp:</strong>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <a
+                        href={BUSINESS.phoneHref}
+                        className="text-slate-900 font-semibold hover:text-indigo-600 transition-colors"
+                      >
+                        {BUSINESS.phone}
+                      </a>
+                      <a
+                        href={BUSINESS.whatsappHref}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-[11px] font-semibold text-emerald-700 hover:underline inline-flex items-center gap-1"
+                      >
+                        <span>WhatsApp</span>
+                        <ExternalLink className="w-3 h-3" />
+                      </a>
+                    </div>
+                    <p className="text-[11px] text-slate-500 leading-relaxed">
+                      WhatsApp &amp; Support Calls: Mon–Sat, 10:00 AM – 6:00 PM IST. For 24/7 assistance, please email{' '}
+                      <a href={`mailto:${BUSINESS.email}`} className="text-indigo-600 underline font-medium">
+                        {BUSINESS.email}
+                      </a>
+                    </p>
                   </div>
                 </div>
               ) : null}
+
+              <div className="flex items-start gap-3">
+                <MapPin className="w-4 h-4 text-indigo-600 shrink-0 mt-0.5" />
+                <div>
+                  <strong className="text-slate-900 block font-semibold">Location:</strong>
+                  <p className="text-slate-800 font-medium">{BUSINESS.location}</p>
+                </div>
+              </div>
 
               <div className="flex items-start gap-3">
                 <Clock className="w-4 h-4 text-indigo-600 shrink-0 mt-0.5" />
@@ -380,9 +411,13 @@ export const ContactPage: React.FC<ContactPageProps> = ({ onNavigate }) => {
               </div>
 
               <div className="pt-3 border-t border-slate-100 text-[11px] text-slate-600 space-y-1">
-                <strong className="text-slate-800 block font-semibold">Complaints & Grievances:</strong>
+                <strong className="text-slate-800 block font-semibold">Complaints &amp; Grievances:</strong>
                 <p>
-                  For complaints write to the same email (<a href={`mailto:${BUSINESS.email}`} className="text-indigo-600 underline font-medium">{BUSINESS.email}</a>); we reply within 7 days.
+                  For complaints write to{' '}
+                  <a href={`mailto:${BUSINESS.email}`} className="text-indigo-600 underline font-medium">
+                    {BUSINESS.email}
+                  </a>
+                  ; we reply within 7 days.
                 </p>
               </div>
             </div>
