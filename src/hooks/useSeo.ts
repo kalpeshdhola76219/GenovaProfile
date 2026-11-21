@@ -64,7 +64,9 @@ export function useSeo({
       tag.setAttribute('content', content);
     };
 
-    // 4. Update OpenGraph Tags
+    // 4. Update OpenGraph & Robots Tags
+    setMetaName('robots', 'index, follow');
+    setMetaProperty('og:site_name', 'Genova Profile');
     setMetaProperty('og:title', title);
     setMetaProperty('og:description', description);
     setMetaProperty('og:url', canonicalUrl || `${BASE_URL}/`);
@@ -72,6 +74,7 @@ export function useSeo({
     setMetaProperty('og:image', ogImage);
 
     // 5. Update Twitter Tags
+    setMetaName('twitter:card', 'summary_large_image');
     setMetaName('twitter:title', title);
     setMetaName('twitter:description', description);
     setMetaName('twitter:image', ogImage);
