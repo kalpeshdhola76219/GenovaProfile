@@ -19,7 +19,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigate }) => {
           {BUSINESS.name}
         </h1>
         <p className="text-xs sm:text-sm text-slate-600 leading-relaxed max-w-2xl mx-auto">
-          {BUSINESS.name} is a web-based document creation platform helping individuals design and download polished marriage biodatas, professional resumes, and cover letters.
+          Genova Profile (genovaprofile.com) is an online document builder for creating ATS-friendly resumes, matrimonial biodatas, and cover letters.
         </p>
       </div>
 

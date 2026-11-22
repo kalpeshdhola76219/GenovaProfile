@@ -25,11 +25,11 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
               <GenovaDocLogo size="md" theme="dark" showTagline />
             </a>
             <p className="text-slate-400 text-xs leading-relaxed max-w-sm">
-              {BUSINESS.name} is an all-in-one profile and document studio. Design standout matrimonial biodatas, ATS-optimized resumes, and executive cover letters, then download instantly.
+              Genova Profile (genovaprofile.com) is an online document builder for creating ATS-friendly resumes, matrimonial biodatas, and cover letters.
             </p>
             {/* Merchant Details Block */}
             <div className="pt-2 border-t border-slate-800/80 space-y-1.5 text-[11px] text-slate-400">
-              <div className="text-slate-300 font-semibold">{BUSINESS.name}</div>
+              <div className="text-slate-300 font-semibold">GenovaProfile</div>
               <div className="flex items-center gap-2">
                 <Mail className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
                 <a href={`mailto:${BUSINESS.email}`} className="hover:text-white transition-colors">
@@ -219,7 +219,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
         {/* Bottom Bar */}
         <div className="pt-8 mt-8 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4 text-slate-500 text-[11px]">
           <div>
-            &copy; {new Date().getFullYear()} {BUSINESS.name}. All rights reserved. &bull; Payments secured by Cashfree
+            &copy; {new Date().getFullYear()} GenovaProfile. All rights reserved. &bull; Payments secured by Cashfree
           </div>
           <div className="flex flex-wrap gap-4 sm:gap-6 justify-center">
             <a

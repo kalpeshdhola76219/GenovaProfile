@@ -66,7 +66,7 @@ export function useSeo({
 
     // 4. Update OpenGraph & Robots Tags
     setMetaName('robots', 'index, follow');
-    setMetaProperty('og:site_name', 'Genova Profile');
+    setMetaProperty('og:site_name', 'GenovaProfile');
     setMetaProperty('og:title', title);
     setMetaProperty('og:description', description);
     setMetaProperty('og:url', canonicalUrl || `${BASE_URL}/`);

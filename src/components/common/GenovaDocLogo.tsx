@@ -63,7 +63,7 @@ export const GenovaDocLogo: React.FC<GenovaDocLogoProps> = ({
     >
       <img
         src="/genova-logo-transparent.png"
-        alt="Genova Profile Logo"
+        alt="GenovaProfile"
         width={iconPixelSize}
         height={iconPixelSize}
         className="w-full h-full object-contain transform scale-95"
@@ -83,22 +83,19 @@ export const GenovaDocLogo: React.FC<GenovaDocLogoProps> = ({
       <div className="flex flex-col justify-center">
         <div className="flex items-center gap-1.5 leading-none">
           <span
-            className={`font-black tracking-tight leading-none ${brandTextSize} ${
-              theme === 'dark' ? 'text-white' : 'text-slate-900'
-            }`}
+            className={`font-black tracking-tight leading-none ${brandTextSize}`}
             style={{ fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif" }}
           >
-            Genova
-          </span>
-          <span
-            className={`font-black tracking-tight leading-none ${brandTextSize} bg-gradient-to-r ${
-              theme === 'dark'
-                ? 'from-[#38BDF8] via-[#00D2C4] to-[#34D399]'
-                : 'from-[#0066FF] via-[#00C2CB] to-[#10B981]'
-            } bg-clip-text text-transparent`}
-            style={{ fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif" }}
-          >
-            Profile
+            <span className={theme === 'dark' ? 'text-white' : 'text-slate-900'}>Genova</span>
+            <span
+              className={`bg-gradient-to-r ${
+                theme === 'dark'
+                  ? 'from-[#38BDF8] via-[#00D2C4] to-[#34D399]'
+                  : 'from-[#0066FF] via-[#00C2CB] to-[#10B981]'
+              } bg-clip-text text-transparent`}
+            >
+              Profile
+            </span>
           </span>
           <span
             className={`font-bold uppercase tracking-wider rounded-md border ${badgeSize} ${

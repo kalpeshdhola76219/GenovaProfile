@@ -115,7 +115,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 onNavigate('home');
               }}
               className="group flex items-center hover:opacity-95 transition-opacity cursor-pointer focus:outline-hidden"
-              aria-label={`${BUSINESS.name} Home`}
+              aria-label="GenovaProfile Home"
             >
               <GenovaDocLogo size="md" />
             </a>

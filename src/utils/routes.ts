@@ -11,7 +11,7 @@ export interface PageSeoConfig {
 
 export const SEO_CONFIG: Record<string, PageSeoConfig> = {
   home: {
-    title: 'Genova Profile – Free ATS Resume, Matrimonial Biodata & Cover Letter Maker',
+    title: 'GenovaProfile – Free ATS Resume, Matrimonial Biodata & Cover Letter Maker',
     description: 'Create ATS-friendly resumes, traditional & modern matrimonial biodatas, and cover letters in minutes. Free live preview across 74+ templates and instant 300 DPI A4 PDF download.',
     canonicalPath: '/',
   },
