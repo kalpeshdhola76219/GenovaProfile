@@ -2,6 +2,8 @@ import React from 'react';
 import { DocumentData } from '../../types/document';
 import { getStaticFontClass, getFontFamilyCss, FONT_FAMILY_CSS_MAP } from '../../utils/fontClassMap';
 import {
+  formatResumeLocation,
+  getValidCertifications,
   ResumeDescriptionBlock,
   ResumeHeaderTable,
   ResumeSplitRow,
@@ -9,7 +11,8 @@ import {
 } from './resumeTemplateUtils';
 
 export const PremiumInternationalResumeTemplate: React.FC<{ data: DocumentData }> = ({ data }) => {
-  const { personal, contact, summary, experience = [], education = [], skills = [], projects = [], certifications = [], achievements = [], customSections = [], customization } = sanitizeDocumentTextFields(data);
+  const { personal, contact, summary, experience = [], education = [], skills = [], projects = [], certifications = [], customSections = [], customization } = sanitizeDocumentTextFields(data);
+  const validCertifications = getValidCertifications(certifications);
   const primary = customization.primaryColor || '#1e3a8a';
   const fontClass = getStaticFontClass(customization.fontFamily, 'jakarta');
   const fontFamilyCss = getFontFamilyCss(customization.fontFamily, 'jakarta');
@@ -19,7 +22,7 @@ export const PremiumInternationalResumeTemplate: React.FC<{ data: DocumentData }
   const displayTitle = personal.professionalTitle || '';
   const displayEmail = contact.email || '';
   const displayPhone = contact.phone || '';
-  const displayLocation = [contact.city, contact.state, contact.country].filter(Boolean).join(', ');
+  const displayLocation = formatResumeLocation(contact);
   const displayLinkedin = contact.linkedin || '';
   const displaySummary = summary || '';
 
@@ -102,32 +105,20 @@ export const PremiumInternationalResumeTemplate: React.FC<{ data: DocumentData }
             </div>
           )}
 
-          {certifications.length > 0 && (
+          {validCertifications.length > 0 && (
             <div>
               <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-300 pb-1 mb-2.5">
                 Accreditations
               </h2>
               <div className="space-y-2 text-xs">
-                {certifications.map((c) => (
+                {validCertifications.map((c) => (
                   <div key={c.id}>
                     <div className="font-semibold text-slate-900">{c.name}</div>
-                    <div className="text-slate-500 text-[11px]">{c.issuer}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {achievements.length > 0 && (
-            <div>
-              <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-300 pb-1 mb-2.5">
-                Honors & Awards
-              </h2>
-              <div className="space-y-2 text-xs">
-                {achievements.map((a) => (
-                  <div key={a.id}>
-                    <div className="font-semibold text-slate-900">{a.title}</div>
-                    {a.description && <div className="text-slate-500 text-[11px]">{a.description}</div>}
+                    {(c.issuer || c.issueDate) && (
+                      <div className="text-slate-500 text-[11px]">
+                        {c.issuer}{c.issuer && c.issueDate ? ' • ' : ''}{c.issueDate}
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>

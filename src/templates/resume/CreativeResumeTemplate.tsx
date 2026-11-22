@@ -3,6 +3,8 @@ import { DocumentData } from '../../types/document';
 import { FONT_FAMILY_CSS_MAP } from '../../utils/fontClassMap';
 import {
   CONTACT_ROW_STYLE,
+  formatResumeLocation,
+  getValidCertifications,
   ResumeDescriptionBlock,
   ResumeSplitRow,
   sanitizeDocumentTextFields,
@@ -10,6 +12,8 @@ import {
 
 export const CreativeResumeTemplate: React.FC<{ data: DocumentData }> = ({ data }) => {
   const { personal, contact, summary, experience, education, skills, projects, certifications, customSections, customization } = sanitizeDocumentTextFields(data);
+  const displayLocation = formatResumeLocation(contact);
+  const validCertifications = getValidCertifications(certifications);
   const accent = customization.accentColor || '#ea580c'; // Vibrant Terracotta / Orange
 
   return (
@@ -32,7 +36,7 @@ export const CreativeResumeTemplate: React.FC<{ data: DocumentData }> = ({ data 
           <div className="text-xs text-slate-600 mt-1 flex flex-wrap gap-x-4 no-justify" style={CONTACT_ROW_STYLE}>
             {contact.email && <span>{contact.email}</span>}
             {contact.phone && <span>&bull; {contact.phone}</span>}
-            {(contact.city || contact.state || contact.country) && <span>&bull; {[contact.city, contact.state, contact.country].filter(Boolean).join(', ')}</span>}
+            {displayLocation && <span>&bull; {displayLocation}</span>}
             {contact.linkedin && <span>&bull; {contact.linkedin}</span>}
             {(contact.portfolio || contact.website) && <span className="font-semibold text-orange-600">&bull; {contact.portfolio || contact.website}</span>}
           </div>
@@ -128,22 +132,24 @@ export const CreativeResumeTemplate: React.FC<{ data: DocumentData }> = ({ data 
         </div>
       )}
 
-      {certifications && certifications.length > 0 && (
+      {validCertifications.length > 0 && (
         <div className="mb-4">
           <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 mb-2">
             Certifications & Accreditations
           </h2>
           <div className="grid grid-cols-2 gap-3 text-xs">
-            {certifications.map((c) => (
+            {validCertifications.map((c) => (
               <div key={c.id} className="p-2 rounded-lg border border-slate-200 bg-slate-50/40 avoid-break">
                 <div className="font-bold text-slate-900">{c.name}</div>
-                <ResumeSplitRow
-                  className="text-slate-500 text-[11px] mt-0.5"
-                  left={c.issuer}
-                  rightClassName="text-slate-400 font-mono text-[10px]"
-                  right={c.issueDate}
-                  rightWidth="88px"
-                />
+                {(c.issuer || c.issueDate) && (
+                  <ResumeSplitRow
+                    className="text-slate-500 text-[11px] mt-0.5"
+                    left={c.issuer}
+                    rightClassName="text-slate-400 font-mono text-[10px]"
+                    right={c.issueDate}
+                    rightWidth="88px"
+                  />
+                )}
               </div>
             ))}
           </div>

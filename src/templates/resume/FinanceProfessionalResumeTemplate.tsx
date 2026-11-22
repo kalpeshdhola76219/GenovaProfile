@@ -3,6 +3,8 @@ import { DocumentData } from '../../types/document';
 import { FONT_FAMILY_CSS_MAP } from '../../utils/fontClassMap';
 import {
   BULLET_LIST_STYLE,
+  formatResumeLocation,
+  getValidCertifications,
   ResumeBulletItem,
   ResumeDescriptionBlock,
   ResumeHeaderTable,
@@ -11,7 +13,11 @@ import {
 } from './resumeTemplateUtils';
 
 export const FinanceProfessionalResumeTemplate: React.FC<{ data: DocumentData }> = ({ data }) => {
-  const { personal, contact, summary, experience, education, skills, projects, certifications, achievements, customSections, customization } = sanitizeDocumentTextFields(data);
+  const { personal, contact, summary, experience, education, skills, projects, certifications, customSections, customization } = sanitizeDocumentTextFields(data);
+  const displayLocation = formatResumeLocation(contact);
+  const validCertifications = getValidCertifications(certifications);
+  const primaryContactLine = [contact.phone, contact.email].filter(Boolean).join(' | ');
+  const secondaryContactLine = [displayLocation, contact.linkedin, contact.portfolio || contact.website].filter(Boolean).join(' | ');
 
   return (
     <div
@@ -38,8 +44,8 @@ export const FinanceProfessionalResumeTemplate: React.FC<{ data: DocumentData }>
         rightClassName="text-right text-xs text-slate-600 font-mono no-justify"
         right={
           <>
-            <div>{[contact.phone, contact.email].filter(Boolean).join(' | ')}</div>
-            <div>{[contact.city, contact.state, contact.country].filter(Boolean).join(', ')} {contact.linkedin ? `| ${contact.linkedin}` : ''} {(contact.portfolio || contact.website) ? `| ${contact.portfolio || contact.website}` : ''}</div>
+            {primaryContactLine && <div>{primaryContactLine}</div>}
+            {secondaryContactLine && <div>{secondaryContactLine}</div>}
           </>
         }
       />
@@ -133,20 +139,15 @@ export const FinanceProfessionalResumeTemplate: React.FC<{ data: DocumentData }>
         </div>
       )}
 
-      {(certifications.length > 0 || achievements.length > 0) && (
+      {validCertifications.length > 0 && (
         <div className="mb-3 avoid-break">
           <h2 className="text-xs font-bold uppercase tracking-wider text-emerald-950 bg-emerald-50 px-2 py-0.5 mb-1.5 border-l-4 border-emerald-800">
             Certifications (CFA / FRM / Licensures)
           </h2>
           <div className="text-xs space-y-1 text-slate-800" style={BULLET_LIST_STYLE}>
-            {certifications.map((c) => (
+            {validCertifications.map((c) => (
               <ResumeBulletItem key={c.id} markerClassName="text-emerald-700">
-                <strong>{c.name}</strong> &bull; {c.issuer}
-              </ResumeBulletItem>
-            ))}
-            {achievements.map((a) => (
-              <ResumeBulletItem key={a.id} markerClassName="text-emerald-700">
-                <strong>{a.title}</strong>: {a.description}
+                <strong>{c.name}</strong>{c.issuer ? <> &bull; {c.issuer}</> : ''}{c.issueDate ? ` (${c.issueDate})` : ''}
               </ResumeBulletItem>
             ))}
           </div>

@@ -3,6 +3,31 @@ import { sanitizeDocumentTextFields, sanitizeText } from '../../utils/textSaniti
 
 export { sanitizeDocumentTextFields, sanitizeText };
 
+export const formatResumeLocation = (
+  contact?: { city?: string; state?: string; country?: string },
+  separator = ', '
+): string => {
+  if (!contact) return '';
+  return [contact.city, contact.state, contact.country]
+    .map((part) => (typeof part === 'string' ? sanitizeText(part).trim() : ''))
+    .filter(Boolean)
+    .join(separator);
+};
+
+export const getValidCertifications = <
+  T extends { name?: string; issuer?: string; issueDate?: string }
+>(
+  certifications?: T[]
+): T[] => {
+  if (!Array.isArray(certifications)) return [];
+  return certifications.filter((c) => {
+    if (!c) return false;
+    const name = typeof c.name === 'string' ? sanitizeText(c.name).trim() : '';
+    const issuer = typeof c.issuer === 'string' ? sanitizeText(c.issuer).trim() : '';
+    return Boolean(name || issuer);
+  });
+};
+
 export const METADATA_ROW_STYLE: React.CSSProperties = {
   display: 'table',
   width: '100%',

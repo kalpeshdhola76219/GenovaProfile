@@ -3,6 +3,8 @@ import { DocumentData } from '../../types/document';
 import { FONT_FAMILY_CSS_MAP } from '../../utils/fontClassMap';
 import {
   BULLET_LIST_STYLE,
+  formatResumeLocation,
+  getValidCertifications,
   ResumeBulletItem,
   ResumeDescriptionBlock,
   ResumeHeaderTable,
@@ -11,7 +13,11 @@ import {
 } from './resumeTemplateUtils';
 
 export const CleanResumeTemplate: React.FC<{ data: DocumentData }> = ({ data }) => {
-  const { personal, contact, summary, experience, education, skills, projects, certifications, achievements, customSections, customization } = sanitizeDocumentTextFields(data);
+  const { personal, contact, summary, experience, education, skills, projects, certifications, customSections, customization } = sanitizeDocumentTextFields(data);
+  const displayLocation = formatResumeLocation(contact);
+  const validCertifications = getValidCertifications(certifications);
+  const primaryContactLine = [contact.email, contact.phone].filter(Boolean).join(' • ');
+  const secondaryContactLine = [displayLocation, contact.linkedin, contact.portfolio || contact.website].filter(Boolean).join(' • ');
 
   return (
     <div
@@ -38,8 +44,8 @@ export const CleanResumeTemplate: React.FC<{ data: DocumentData }> = ({ data }) 
         rightClassName="text-right text-xs text-slate-500 no-justify"
         right={
           <>
-            <div>{contact.email} {contact.phone ? `• ${contact.phone}` : ''}</div>
-            <div>{[contact.city, contact.state, contact.country].filter(Boolean).join(', ')} {contact.linkedin ? `• ${contact.linkedin}` : ''} {(contact.portfolio || contact.website) ? `• ${contact.portfolio || contact.website}` : ''}</div>
+            {primaryContactLine && <div>{primaryContactLine}</div>}
+            {secondaryContactLine && <div>{secondaryContactLine}</div>}
           </>
         }
       />
@@ -136,17 +142,16 @@ export const CleanResumeTemplate: React.FC<{ data: DocumentData }> = ({ data }) 
         </div>
       )}
 
-      {(certifications.length > 0 || achievements.length > 0) && (
+      {validCertifications.length > 0 && (
         <div className="mb-3 avoid-break">
           <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-200 pb-0.5 mb-1">
             Certifications & Honors
           </h2>
           <div className="text-xs text-slate-700 space-y-0.5" style={BULLET_LIST_STYLE}>
-            {certifications.map((c) => (
-              <ResumeBulletItem key={c.id}>{c.name} ({c.issuer})</ResumeBulletItem>
-            ))}
-            {achievements.map((a) => (
-              <ResumeBulletItem key={a.id}>{a.title}: {a.description}</ResumeBulletItem>
+            {validCertifications.map((c) => (
+              <ResumeBulletItem key={c.id}>
+                {c.name}{c.issuer ? ` (${c.issuer})` : ''}{c.issueDate ? ` • ${c.issueDate}` : ''}
+              </ResumeBulletItem>
             ))}
           </div>
         </div>

@@ -3,19 +3,22 @@ import { DocumentData } from '../../types/document';
 import { FONT_FAMILY_CSS_MAP } from '../../utils/fontClassMap';
 import {
   CONTACT_ROW_STYLE,
+  formatResumeLocation,
+  getValidCertifications,
   ResumeDescriptionBlock,
   ResumeSplitRow,
   sanitizeDocumentTextFields,
 } from './resumeTemplateUtils';
 
 export const ModernCorporateResumeTemplate: React.FC<{ data: DocumentData }> = ({ data }) => {
-  const { personal, contact, summary, experience, education, skills, projects, certifications, achievements, customSections, customization } = sanitizeDocumentTextFields(data);
+  const { personal, contact, summary, experience, education, skills, projects, certifications, customSections, customization } = sanitizeDocumentTextFields(data);
+  const validCertifications = getValidCertifications(certifications);
 
   const displayFullName = personal.fullName || '';
   const displayTitle = personal.professionalTitle || '';
   const displayEmail = contact.email || '';
   const displayPhone = contact.phone || '';
-  const displayLocation = [contact.city, contact.state, contact.country].filter(Boolean).join(', ');
+  const displayLocation = formatResumeLocation(contact);
   const displayLinkedin = contact.linkedin || '';
 
   const displaySummary = summary || '';
@@ -155,17 +158,16 @@ export const ModernCorporateResumeTemplate: React.FC<{ data: DocumentData }> = (
             </div>
           )}
 
-          {(certifications.length > 0 || achievements.length > 0) && (
+          {validCertifications.length > 0 && (
             <div className="avoid-break">
               <h2 className="text-xs font-bold uppercase tracking-wider text-blue-900 border-b-2 border-blue-900 pb-1 mb-2">
                 Credentials
               </h2>
               <div className="space-y-1.5 text-xs text-slate-700">
-                {certifications.map((c) => (
-                  <div key={c.id}><strong>{c.name}</strong> ({c.issuer})</div>
-                ))}
-                {achievements.map((a) => (
-                  <div key={a.id}><strong>{a.title}</strong></div>
+                {validCertifications.map((c) => (
+                  <div key={c.id}>
+                    <strong>{c.name}</strong>{c.issuer ? ` (${c.issuer})` : ''}{c.issueDate ? ` • ${c.issueDate}` : ''}
+                  </div>
                 ))}
               </div>
             </div>

@@ -2,6 +2,8 @@ import React from 'react';
 import { DocumentData } from '../../types/document';
 import { FONT_FAMILY_CSS_MAP } from '../../utils/fontClassMap';
 import {
+  formatResumeLocation,
+  getValidCertifications,
   ResumeBulletItem,
   ResumeDescriptionBlock,
   ResumeHeaderTable,
@@ -10,7 +12,9 @@ import {
 } from './resumeTemplateUtils';
 
 export const ProfessionalResumeTemplate: React.FC<{ data: DocumentData }> = ({ data }) => {
-  const { personal, contact, summary, experience, education, skills, projects, certifications, achievements, customSections, customization } = sanitizeDocumentTextFields(data);
+  const { personal, contact, summary, experience, education, skills, projects, certifications, customSections, customization } = sanitizeDocumentTextFields(data);
+  const displayLocation = formatResumeLocation(contact);
+  const validCertifications = getValidCertifications(certifications);
   const primary = customization.primaryColor || '#0369a1'; // Sky 700
 
   return (
@@ -41,7 +45,7 @@ export const ProfessionalResumeTemplate: React.FC<{ data: DocumentData }> = ({ d
           <>
             {contact.email && <div>{contact.email}</div>}
             {contact.phone && <div>{contact.phone}</div>}
-            {(contact.city || contact.state || contact.country) && <div>{[contact.city, contact.state, contact.country].filter(Boolean).join(', ')}</div>}
+            {displayLocation && <div>{displayLocation}</div>}
             {contact.linkedin && <div>{contact.linkedin}</div>}
             {(contact.portfolio || contact.website) && <div>{contact.portfolio || contact.website}</div>}
           </>
@@ -159,20 +163,15 @@ export const ProfessionalResumeTemplate: React.FC<{ data: DocumentData }> = ({ d
         </div>
       )}
 
-      {(certifications.length > 0 || achievements.length > 0) && (
+      {validCertifications.length > 0 && (
         <div className="mb-4 avoid-break">
           <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-200 pb-1 mb-1">
             Certifications
           </h2>
           <div className="text-xs space-y-1 text-slate-700">
-            {certifications.map((c) => (
+            {validCertifications.map((c) => (
               <ResumeBulletItem key={c.id} markerClassName="text-slate-400">
-                {c.name} ({c.issuer})
-              </ResumeBulletItem>
-            ))}
-            {achievements.map((a) => (
-              <ResumeBulletItem key={a.id} markerClassName="text-slate-400">
-                {a.title}: {a.description}
+                {c.name}{c.issuer ? ` (${c.issuer})` : ''}{c.issueDate ? ` • ${c.issueDate}` : ''}
               </ResumeBulletItem>
             ))}
           </div>

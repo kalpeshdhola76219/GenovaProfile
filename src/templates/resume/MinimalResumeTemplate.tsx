@@ -3,6 +3,8 @@ import { DocumentData } from '../../types/document';
 import { FONT_FAMILY_CSS_MAP } from '../../utils/fontClassMap';
 import {
   BULLET_LIST_STYLE,
+  formatResumeLocation,
+  getValidCertifications,
   ResumeBulletItem,
   ResumeDescriptionBlock,
   ResumeHeaderTable,
@@ -11,7 +13,9 @@ import {
 } from './resumeTemplateUtils';
 
 export const MinimalResumeTemplate: React.FC<{ data: DocumentData }> = ({ data }) => {
-  const { personal, contact, summary, experience, education, skills, projects, certifications, achievements, customSections, customization } = sanitizeDocumentTextFields(data);
+  const { personal, contact, summary, experience, education, skills, projects, certifications, customSections, customization } = sanitizeDocumentTextFields(data);
+  const displayLocation = formatResumeLocation(contact);
+  const validCertifications = getValidCertifications(certifications);
 
   return (
     <div
@@ -38,7 +42,7 @@ export const MinimalResumeTemplate: React.FC<{ data: DocumentData }> = ({ data }
           <>
             {contact.email && <div>{contact.email}</div>}
             {contact.phone && <div>{contact.phone}</div>}
-            {(contact.city || contact.state || contact.country) && <div>{[contact.city, contact.state, contact.country].filter(Boolean).join(', ')}</div>}
+            {displayLocation && <div>{displayLocation}</div>}
             {contact.linkedin && <div>{contact.linkedin}</div>}
             {(contact.portfolio || contact.website) && <div>{contact.portfolio || contact.website}</div>}
           </>
@@ -126,15 +130,14 @@ export const MinimalResumeTemplate: React.FC<{ data: DocumentData }> = ({ data }
         </div>
       )}
 
-      {(certifications.length > 0 || achievements.length > 0) && (
+      {validCertifications.length > 0 && (
         <div className="mb-4 avoid-break">
-          <h2 className="text-[11px] font-bold uppercase tracking-widest text-slate-400 mb-2">Recognition</h2>
+          <h2 className="text-[11px] font-bold uppercase tracking-widest text-slate-400 mb-2">Certifications</h2>
           <div className="text-xs text-slate-600 space-y-1" style={BULLET_LIST_STYLE}>
-            {certifications.map((c) => (
-              <ResumeBulletItem key={c.id}>{c.name} ({c.issuer})</ResumeBulletItem>
-            ))}
-            {achievements.map((a) => (
-              <ResumeBulletItem key={a.id}>{a.title}: {a.description}</ResumeBulletItem>
+            {validCertifications.map((c) => (
+              <ResumeBulletItem key={c.id}>
+                {c.name}{c.issuer ? ` (${c.issuer})` : ''}{c.issueDate ? ` • ${c.issueDate}` : ''}
+              </ResumeBulletItem>
             ))}
           </div>
         </div>

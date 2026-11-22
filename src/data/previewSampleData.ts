@@ -167,7 +167,7 @@ export const previewResumeSampleData: DocumentData = {
     email: 'priya.patel@devcloud.io',
     address: 'Koramangala 4th Block',
     city: 'Bengaluru',
-    state: 'Karnataka',
+    state: '',
     country: 'India',
     linkedin: 'linkedin.com/in/priyapatel-tech',
     portfolio: 'priyapatel.dev',

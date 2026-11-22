@@ -182,6 +182,8 @@ export const ResumeForm: React.FC<ResumeFormProps> = ({ data, onChange }) => {
     });
   };
 
+  const certificationsList = Array.isArray(data.certifications) ? data.certifications : [];
+
   const addCertification = () => {
     const newItem: CertificationItem = {
       id: `cert_${Date.now()}`,
@@ -189,20 +191,22 @@ export const ResumeForm: React.FC<ResumeFormProps> = ({ data, onChange }) => {
       issuer: '',
       issueDate: '',
     };
-    onChange({ ...data, certifications: [...data.certifications, newItem] });
+    onChange({ ...data, certifications: [...certificationsList, newItem], achievements: [] });
   };
 
   const updateCertification = (id: string, field: keyof CertificationItem, val: any) => {
     onChange({
       ...data,
-      certifications: data.certifications.map((c) => (c.id === id ? { ...c, [field]: val } : c)),
+      certifications: certificationsList.map((c) => (c.id === id ? { ...c, [field]: val } : c)),
+      achievements: [],
     });
   };
 
   const removeCertification = (id: string) => {
     onChange({
       ...data,
-      certifications: data.certifications.filter((c) => c.id !== id),
+      certifications: certificationsList.filter((c) => c.id !== id),
+      achievements: [],
     });
   };
 
@@ -509,25 +513,43 @@ export const ResumeForm: React.FC<ResumeFormProps> = ({ data, onChange }) => {
                 className="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white"
               />
             </div>
-            <div>
-              <label className="block font-semibold text-slate-700 mb-1">City & State</label>
-              <input
-                type="text"
-                value={data.contact.city || ''}
-                onChange={(e) => updateContact('city', e.target.value)}
-                placeholder="e.g. San Francisco, CA"
-                className="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white"
-              />
-            </div>
-            <div>
-              <label className="block font-semibold text-slate-700 mb-1">Country</label>
-              <input
-                type="text"
-                value={data.contact.country || ''}
-                onChange={(e) => updateContact('country', e.target.value)}
-                placeholder="e.g. United States or India"
-                className="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white"
-              />
+            <div className="sm:col-span-2 grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div>
+                <label className="block font-semibold text-slate-700 mb-1">City</label>
+                <input
+                  type="text"
+                  name="resume-contact-city"
+                  autoComplete="off"
+                  value={data.contact.city ?? ''}
+                  onChange={(e) => updateContact('city', e.target.value)}
+                  placeholder="e.g. Mumbai or London"
+                  className="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white"
+                />
+              </div>
+              <div>
+                <label className="block font-semibold text-slate-700 mb-1">State / Province</label>
+                <input
+                  type="text"
+                  name="resume-contact-state"
+                  autoComplete="off"
+                  value={data.contact.state ?? ''}
+                  onChange={(e) => updateContact('state', e.target.value)}
+                  placeholder="Optional (e.g. Gujarat)"
+                  className="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white"
+                />
+              </div>
+              <div>
+                <label className="block font-semibold text-slate-700 mb-1">Country</label>
+                <input
+                  type="text"
+                  name="resume-contact-country"
+                  autoComplete="off"
+                  value={data.contact.country ?? ''}
+                  onChange={(e) => updateContact('country', e.target.value)}
+                  placeholder="e.g. India or United Kingdom"
+                  className="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white"
+                />
+              </div>
             </div>
             <div>
               <label className="block font-semibold text-slate-700 mb-1">LinkedIn Profile</label>
@@ -890,9 +912,10 @@ export const ResumeForm: React.FC<ResumeFormProps> = ({ data, onChange }) => {
                       <label className="block font-semibold text-slate-700 mb-0.5">Location</label>
                       <input
                         type="text"
-                        value={exp.location || ''}
+                        autoComplete="off"
+                        value={exp.location ?? ''}
                         onChange={(e) => updateExperience(exp.id, 'location', e.target.value)}
-                        placeholder="e.g. San Francisco, CA / Remote"
+                        placeholder="e.g. Mumbai / Remote"
                         className="w-full px-2.5 py-1.5 rounded-lg border border-slate-300 bg-white"
                       />
                     </div>
@@ -1030,6 +1053,17 @@ export const ResumeForm: React.FC<ResumeFormProps> = ({ data, onChange }) => {
                       className="w-1/2 px-2.5 py-1.5 rounded-lg border border-slate-300 bg-white"
                     />
                   </div>
+                </div>
+                <div className="col-span-2">
+                  <label className="block font-semibold text-slate-700 mb-0.5">Location (Optional)</label>
+                  <input
+                    type="text"
+                    autoComplete="off"
+                    value={edu.location ?? ''}
+                    onChange={(e) => updateEducation(edu.id, 'location', e.target.value)}
+                    placeholder="e.g. Mumbai, India"
+                    className="w-full px-2.5 py-1.5 rounded-lg border border-slate-300 bg-white"
+                  />
                 </div>
               </div>
             </div>
@@ -1191,7 +1225,12 @@ export const ResumeForm: React.FC<ResumeFormProps> = ({ data, onChange }) => {
               <Plus className="w-3.5 h-3.5" /> Add Certification
             </button>
           </div>
-          {data.certifications.map((c) => (
+          {certificationsList.length === 0 && (
+            <div className="p-4 bg-slate-50 rounded-xl border border-dashed border-slate-300 text-slate-500 text-center">
+              No certifications added yet. Leave this empty to hide the Certifications section on your resume.
+            </div>
+          )}
+          {certificationsList.map((c) => (
             <div key={c.id} className="p-3 bg-slate-50 rounded-xl border border-slate-200 relative flex gap-2 items-center">
               <div className="grid grid-cols-3 gap-2 flex-1">
                 <div>

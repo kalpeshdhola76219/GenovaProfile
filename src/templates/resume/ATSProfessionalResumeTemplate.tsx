@@ -3,6 +3,8 @@ import { DocumentData } from '../../types/document';
 import { FONT_FAMILY_CSS_MAP } from '../../utils/fontClassMap';
 import {
   CONTACT_ROW_STYLE,
+  formatResumeLocation,
+  getValidCertifications,
   ResumeBulletItem,
   ResumeDescriptionBlock,
   ResumeHeaderTable,
@@ -21,10 +23,10 @@ export const ATSProfessionalResumeTemplate: React.FC<{ data: DocumentData }> = (
     skills = [],
     projects = [],
     certifications = [],
-    achievements = [],
     customSections = [],
     customization = {} as any,
   } = safeData || {};
+  const validCertifications = getValidCertifications(certifications);
   const primary = customization.primaryColor || '#0f172a';
 
   return (
@@ -53,7 +55,7 @@ export const ATSProfessionalResumeTemplate: React.FC<{ data: DocumentData }> = (
             <>
               {contact.email && <div>{contact.email}</div>}
               {contact.phone && <div>{contact.phone}</div>}
-              {(contact.city || contact.state || contact.country) && <div>{[contact.city, contact.state, contact.country].filter(Boolean).join(', ')}</div>}
+              {formatResumeLocation(contact) && <div>{formatResumeLocation(contact)}</div>}
             </>
           }
         />
@@ -210,21 +212,16 @@ export const ATSProfessionalResumeTemplate: React.FC<{ data: DocumentData }> = (
         </div>
       )}
 
-      {/* Certifications & Achievements */}
-      {(certifications.length > 0 || achievements.length > 0) && (
+      {/* Certifications */}
+      {validCertifications.length > 0 && (
         <div className="mb-4 avoid-break">
           <h2 className="text-xs font-black uppercase tracking-wider mb-1.5 pb-0.5 border-b border-slate-200" style={{ color: primary }}>
             Certifications & Recognition
           </h2>
           <div className="text-xs space-y-1 text-slate-700">
-            {certifications.map((c) => (
+            {validCertifications.map((c) => (
               <ResumeBulletItem key={c.id} markerClassName="text-slate-500">
-                <strong className="text-slate-900">{c.name}</strong> &bull; {c.issuer} {c.issueDate ? `(${c.issueDate})` : ''}
-              </ResumeBulletItem>
-            ))}
-            {achievements.map((a) => (
-              <ResumeBulletItem key={a.id} markerClassName="text-slate-500">
-                <strong className="text-slate-900">{a.title}</strong>: {a.description}
+                <strong className="text-slate-900">{c.name}</strong>{c.issuer ? <> &bull; {c.issuer}</> : ''}{c.issueDate ? ` (${c.issueDate})` : ''}
               </ResumeBulletItem>
             ))}
           </div>

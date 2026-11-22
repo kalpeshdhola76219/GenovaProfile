@@ -2,6 +2,8 @@ import React from 'react';
 import { DocumentData } from '../../types/document';
 import { FONT_FAMILY_CSS_MAP } from '../../utils/fontClassMap';
 import {
+  formatResumeLocation,
+  getValidCertifications,
   ResumeDescriptionBlock,
   ResumeHeaderTable,
   ResumeSplitRow,
@@ -10,6 +12,8 @@ import {
 
 export const MonacoSovereignTemplate: React.FC<{ data: DocumentData }> = ({ data }) => {
   const { personal, contact, summary, experience, education, skills, projects, certifications, customSections, customization, executiveMetrics, showExecutiveMetrics } = sanitizeDocumentTextFields(data);
+  const displayLocation = formatResumeLocation(contact, ' • ');
+  const validCertifications = getValidCertifications(certifications);
   const primary = customization.primaryColor || '#0a0a0c'; // Sovereign Obsidian
   const gold = customization.accentColor || '#c5a059'; // Monaco Champagne Gold
 
@@ -56,9 +60,7 @@ export const MonacoSovereignTemplate: React.FC<{ data: DocumentData }> = ({ data
           <>
             {contact.email && <div className="font-medium text-slate-800">{contact.email}</div>}
             {contact.phone && <div>{contact.phone}</div>}
-            <div>
-              {[contact.city, contact.state, contact.country].filter(Boolean).join(' • ') || 'London • New York • Singapore'}
-            </div>
+            {displayLocation && <div>{displayLocation}</div>}
             {contact.linkedin && <div className="text-[#c5a059] font-medium">{contact.linkedin}</div>}
             {(contact.portfolio || contact.website) && <div className="text-[#c5a059]">{contact.portfolio || contact.website}</div>}
           </>
@@ -226,16 +228,20 @@ export const MonacoSovereignTemplate: React.FC<{ data: DocumentData }> = ({ data
             </div>
           )}
 
-          {certifications.length > 0 && (
+          {validCertifications.length > 0 && (
             <div className="avoid-break">
               <h2 className="text-xs font-black uppercase tracking-[0.18em] border-b border-slate-200 pb-1.5 mb-3" style={{ color: primary }}>
                 Credentials
               </h2>
               <div className="space-y-1.5 text-xs text-slate-700">
-                {certifications.map((c) => (
+                {validCertifications.map((c) => (
                   <div key={c.id} className="text-[11px]">
                     <span className="font-bold text-slate-900">{c.name}</span>
-                    <span className="text-slate-500 block text-[10px]">{c.issuer} ({c.issueDate || 'Active'})</span>
+                    {(c.issuer || c.issueDate) && (
+                      <span className="text-slate-500 block text-[10px]">
+                        {c.issuer}{c.issuer && c.issueDate ? ' ' : ''}{c.issueDate ? `(${c.issueDate})` : ''}
+                      </span>
+                    )}
                   </div>
                 ))}
               </div>

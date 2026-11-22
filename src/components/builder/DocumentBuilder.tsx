@@ -60,7 +60,26 @@ export const DocumentBuilder: React.FC<DocumentBuilderProps> = ({
     return Math.max(0.35, Math.min(1.0, Number((availableWidth / 800).toFixed(2))));
   };
 
-  const [doc, setDoc] = useState<DocumentData>(() => sanitizeDocument(initialDocument));
+  const normalizeResumeState = (input: DocumentData): DocumentData => {
+    const sanitized = sanitizeDocument(input);
+    if (sanitized.type !== 'resume') return sanitized;
+    const isFreshlyCreated =
+      Boolean(sanitized.createdAt) &&
+      sanitized.createdAt === sanitized.updatedAt &&
+      sanitized.id !== 'doc_sample_resume';
+    const sampleCertIdPattern = /^(?:int_cert_|corp_cert_|ph_c|m_cert_|cert_)\d{1,2}$/;
+    const rawCerts = Array.isArray(sanitized.certifications) ? sanitized.certifications : [];
+    const certifications = isFreshlyCreated
+      ? rawCerts.filter((c) => c && typeof c.id === 'string' && !sampleCertIdPattern.test(c.id))
+      : rawCerts;
+    return {
+      ...sanitized,
+      certifications,
+      achievements: [],
+    };
+  };
+
+  const [doc, setDoc] = useState<DocumentData>(() => normalizeResumeState(initialDocument));
   const [zoom, setZoom] = useState<number>(() => calculateOptimalZoom());
   const [pageCount, setPageCount] = useState<number>(1);
   const [isSaving, setIsSaving] = useState(false);
@@ -128,7 +147,7 @@ export const DocumentBuilder: React.FC<DocumentBuilderProps> = ({
 
   // Sync state if initialDocument id or templateId changes
   useEffect(() => {
-    const sanitized = sanitizeDocument(initialDocument);
+    const sanitized = normalizeResumeState(initialDocument);
     setDoc(sanitized);
     setTempTitle(sanitized.title);
     invalidatePreparedBlob(false);
@@ -147,7 +166,15 @@ export const DocumentBuilder: React.FC<DocumentBuilderProps> = ({
 
   // Requirement 4: The rule that edited documents rebuild the file
   const handleDocumentChange = (updated: DocumentData) => {
-    const clean = sanitizeDocumentTextFields(updated);
+    const cleanText = sanitizeDocumentTextFields(updated);
+    const clean =
+      cleanText.type === 'resume'
+        ? {
+            ...cleanText,
+            certifications: Array.isArray(cleanText.certifications) ? cleanText.certifications : [],
+            achievements: [],
+          }
+        : cleanText;
     invalidatePreparedBlob(true);
     setDoc(clean);
     onDocumentChange?.(clean);

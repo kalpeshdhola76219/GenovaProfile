@@ -4,6 +4,8 @@ import { FONT_FAMILY_CSS_MAP } from '../../utils/fontClassMap';
 import {
   BULLET_LIST_STYLE,
   CONTACT_CENTER_ROW_STYLE,
+  formatResumeLocation,
+  getValidCertifications,
   ResumeBulletItem,
   ResumeDescriptionBlock,
   ResumeSplitRow,
@@ -11,7 +13,9 @@ import {
 } from './resumeTemplateUtils';
 
 export const ATSBasicResumeTemplate: React.FC<{ data: DocumentData }> = ({ data }) => {
-  const { personal, contact, summary, experience, education, skills, projects, certifications, achievements, customSections, customization } = sanitizeDocumentTextFields(data);
+  const { personal, contact, summary, experience, education, skills, projects, certifications, customSections, customization } = sanitizeDocumentTextFields(data);
+  const displayLocation = formatResumeLocation(contact);
+  const validCertifications = getValidCertifications(certifications);
 
   return (
     <div
@@ -32,7 +36,7 @@ export const ATSBasicResumeTemplate: React.FC<{ data: DocumentData }> = ({ data 
         <div className="text-xs mt-1 flex flex-wrap justify-center gap-x-3 text-black no-justify" style={CONTACT_CENTER_ROW_STYLE}>
           {contact.phone && <span>{contact.phone}</span>}
           {contact.email && <span>{contact.email}</span>}
-          {(contact.city || contact.state || contact.country) && <span>{[contact.city, contact.state, contact.country].filter(Boolean).join(', ')}</span>}
+          {displayLocation && <span>{displayLocation}</span>}
           {contact.linkedin && <span>{contact.linkedin}</span>}
           {(contact.portfolio || contact.website) && <span>{contact.portfolio || contact.website}</span>}
         </div>
@@ -137,21 +141,16 @@ export const ATSBasicResumeTemplate: React.FC<{ data: DocumentData }> = ({ data 
         </div>
       )}
 
-      {/* Certifications & Achievements */}
-      {(certifications.length > 0 || achievements.length > 0) && (
+      {/* Certifications */}
+      {validCertifications.length > 0 && (
         <div className="mb-4 avoid-break">
           <h2 className="text-xs font-bold uppercase tracking-wider border-b border-black pb-0.5 mb-1.5">
             CERTIFICATIONS & HONORS
           </h2>
           <div className="text-xs space-y-1 text-black" style={BULLET_LIST_STYLE}>
-            {certifications.map((c) => (
+            {validCertifications.map((c) => (
               <ResumeBulletItem key={c.id} markerClassName="text-black">
-                <strong>{c.name}</strong> - {c.issuer} ({c.issueDate || 'Verified'})
-              </ResumeBulletItem>
-            ))}
-            {achievements.map((a) => (
-              <ResumeBulletItem key={a.id} markerClassName="text-black">
-                <strong>{a.title}</strong>: {a.description}
+                <strong>{c.name}</strong>{c.issuer ? ` - ${c.issuer}` : ''}{c.issueDate ? ` (${c.issueDate})` : ''}
               </ResumeBulletItem>
             ))}
           </div>

@@ -136,18 +136,41 @@ export const sanitizeDocument = (doc: any): DocumentData => {
     customization.justifyText = true;
   }
 
+  const rawContact = doc.contact || {};
+  const normalizedContact = {
+    ...defaults.contact,
+    ...rawContact,
+    city: typeof rawContact.city === 'string' ? rawContact.city : '',
+    state: typeof rawContact.state === 'string' ? rawContact.state : '',
+    country: typeof rawContact.country === 'string' ? rawContact.country : '',
+  };
+
+  const normalizedEducation = Array.isArray(doc.education)
+    ? doc.education.map((edu: any) => ({
+        ...edu,
+        location: typeof edu?.location === 'string' ? edu.location : '',
+      }))
+    : defaults.education;
+
+  const normalizedExperience = Array.isArray(doc.experience)
+    ? doc.experience.map((exp: any) => ({
+        ...exp,
+        location: typeof exp?.location === 'string' ? exp.location : '',
+      }))
+    : defaults.experience;
+
   return sanitizeDocumentTextFields({
     ...defaults,
     ...doc,
     templateId: normalizedTemplateId,
     personal,
-    contact: { ...defaults.contact, ...(doc.contact || {}) },
+    contact: normalizedContact,
     family: { ...defaults.family, ...(doc.family || {}) },
     marriage: { ...defaults.marriage, ...(doc.marriage || {}) },
     coverLetter: sanitizeCoverLetterBlock(doc.coverLetter, defaults.coverLetter),
     customization,
-    education: Array.isArray(doc.education) ? doc.education : defaults.education,
-    experience: Array.isArray(doc.experience) ? doc.experience : defaults.experience,
+    education: normalizedEducation,
+    experience: normalizedExperience,
     skills: Array.isArray(doc.skills) ? doc.skills : defaults.skills,
     projects: Array.isArray(doc.projects) ? doc.projects : defaults.projects,
     certifications: Array.isArray(doc.certifications) ? doc.certifications : defaults.certifications,

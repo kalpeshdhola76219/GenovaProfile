@@ -3,6 +3,8 @@ import { DocumentData } from '../../types/document';
 import { FONT_FAMILY_CSS_MAP } from '../../utils/fontClassMap';
 import {
   BULLET_LIST_STYLE,
+  formatResumeLocation,
+  getValidCertifications,
   ResumeBulletItem,
   ResumeDescriptionBlock,
   ResumeHeaderTable,
@@ -11,7 +13,9 @@ import {
 } from './resumeTemplateUtils';
 
 export const ExecutivePremiumResumeTemplate: React.FC<{ data: DocumentData }> = ({ data }) => {
-  const { personal, contact, summary, experience, education, skills, projects, certifications, achievements, customSections, customization } = sanitizeDocumentTextFields(data);
+  const { personal, contact, summary, experience, education, skills, projects, certifications, customSections, customization } = sanitizeDocumentTextFields(data);
+  const displayLocation = formatResumeLocation(contact);
+  const validCertifications = getValidCertifications(certifications);
 
   return (
     <div
@@ -38,7 +42,7 @@ export const ExecutivePremiumResumeTemplate: React.FC<{ data: DocumentData }> = 
           <>
             {contact.email && <div>{contact.email}</div>}
             {contact.phone && <div>{contact.phone}</div>}
-            {(contact.city || contact.state || contact.country) && <div>{[contact.city, contact.state, contact.country].filter(Boolean).join(', ')}</div>}
+            {displayLocation && <div>{displayLocation}</div>}
             {contact.linkedin && <div>{contact.linkedin}</div>}
             {(contact.portfolio || contact.website) && <div>{contact.portfolio || contact.website}</div>}
           </>
@@ -138,20 +142,15 @@ export const ExecutivePremiumResumeTemplate: React.FC<{ data: DocumentData }> = 
         </div>
       )}
 
-      {(certifications.length > 0 || achievements.length > 0) && (
+      {validCertifications.length > 0 && (
         <div className="mb-3 avoid-break">
           <h2 className="text-xs font-bold uppercase tracking-widest text-stone-900 font-cinzel border-b border-stone-300 pb-1 mb-1">
             Certifications & Honors
           </h2>
           <div className="text-xs text-stone-800 space-y-0.5" style={BULLET_LIST_STYLE}>
-            {certifications.map((c) => (
+            {validCertifications.map((c) => (
               <ResumeBulletItem key={c.id} markerClassName="text-stone-400">
-                {c.name} ({c.issuer})
-              </ResumeBulletItem>
-            ))}
-            {achievements.map((a) => (
-              <ResumeBulletItem key={a.id} markerClassName="text-stone-400">
-                {a.title}: {a.description}
+                {c.name}{c.issuer ? ` (${c.issuer})` : ''}{c.issueDate ? ` • ${c.issueDate}` : ''}
               </ResumeBulletItem>
             ))}
           </div>

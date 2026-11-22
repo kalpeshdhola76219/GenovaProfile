@@ -4,6 +4,8 @@ import { Mail, Phone, MapPin, Globe, Linkedin, Github } from 'lucide-react';
 import { FONT_FAMILY_CSS_MAP } from '../../utils/fontClassMap';
 import {
   CONTACT_ROW_STYLE,
+  formatResumeLocation,
+  getValidCertifications,
   ResumeDescriptionBlock,
   ResumeSplitRow,
   sanitizeDocumentTextFields,
@@ -23,6 +25,7 @@ export const ResumeATSTemplate: React.FC<{ data: DocumentData }> = ({ data }) =>
     customSections = [],
     customization,
   } = safeData;
+  const validCertifications = getValidCertifications(certifications);
   const primary = customization?.primaryColor || '#0f172a';
   const paperColor = customization?.paperColor || '#ffffff';
 
@@ -57,14 +60,10 @@ export const ResumeATSTemplate: React.FC<{ data: DocumentData }> = ({ data }) =>
               <span>{contact.phone}</span>
             </span>
           )}
-          {contact?.city && (
+          {formatResumeLocation(contact) && (
             <span className="flex items-center gap-1" style={{ display: 'inline-flex', alignItems: 'center', columnGap: '4px' }}>
               <MapPin className="w-3.5 h-3.5 text-slate-500" />
-              <span>
-                {contact.city}
-                {contact.state ? `, ${contact.state}` : ''}
-                {contact.country ? `, ${contact.country}` : ''}
-              </span>
+              <span>{formatResumeLocation(contact)}</span>
             </span>
           )}
           {contact?.linkedin && (
@@ -241,7 +240,7 @@ export const ResumeATSTemplate: React.FC<{ data: DocumentData }> = ({ data }) =>
       )}
 
       {/* Certifications */}
-      {certifications && certifications.length > 0 && (
+      {validCertifications.length > 0 && (
         <section className="mb-4 avoid-break">
           <h2
             className="text-xs font-bold uppercase tracking-wider border-b pb-1 mb-2"
@@ -250,7 +249,7 @@ export const ResumeATSTemplate: React.FC<{ data: DocumentData }> = ({ data }) =>
             Certifications
           </h2>
           <div className="space-y-1 text-xs">
-            {certifications.map((cert, idx) => (
+            {validCertifications.map((cert, idx) => (
               <div key={cert.id || idx}>
                 <ResumeSplitRow
                   leftClassName="font-semibold text-slate-800"

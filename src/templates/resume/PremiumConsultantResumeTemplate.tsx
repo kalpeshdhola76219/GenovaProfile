@@ -3,13 +3,17 @@ import { DocumentData } from '../../types/document';
 import { getStaticFontClass, getFontFamilyCss, FONT_FAMILY_CSS_MAP } from '../../utils/fontClassMap';
 import {
   CONTACT_CENTER_ROW_STYLE,
+  formatResumeLocation,
+  getValidCertifications,
   ResumeDescriptionBlock,
   ResumeSplitRow,
   sanitizeDocumentTextFields,
 } from './resumeTemplateUtils';
 
 export const PremiumConsultantResumeTemplate: React.FC<{ data: DocumentData }> = ({ data }) => {
-  const { personal, contact, summary, experience = [], education = [], skills = [], projects = [], certifications = [], achievements = [], customSections = [], customization } = sanitizeDocumentTextFields(data);
+  const { personal, contact, summary, experience = [], education = [], skills = [], projects = [], certifications = [], customSections = [], customization } = sanitizeDocumentTextFields(data);
+  const displayLocation = formatResumeLocation(contact);
+  const validCertifications = getValidCertifications(certifications);
   const navy = customization.primaryColor || '#172554'; // Deep Oxford Navy
   const fontClass = getStaticFontClass(customization.fontFamily, 'cormorant');
   const fontFamilyCss = getFontFamilyCss(customization.fontFamily, 'cormorant');
@@ -30,7 +34,7 @@ export const PremiumConsultantResumeTemplate: React.FC<{ data: DocumentData }> =
         <div className="flex flex-wrap items-center justify-center gap-3 mt-2 text-xs text-slate-600 font-sans no-justify" style={CONTACT_CENTER_ROW_STYLE}>
           {contact.email && <span>{contact.email}</span>}
           {contact.phone && <span>• {contact.phone}</span>}
-          {(contact.city || contact.state || contact.country) && <span>• {[contact.city, contact.state, contact.country].filter(Boolean).join(', ')}</span>}
+          {displayLocation && <span>• {displayLocation}</span>}
           {contact.linkedin && <span>• {contact.linkedin}</span>}
           {(contact.portfolio || contact.website) && <span>• {contact.portfolio || contact.website}</span>}
         </div>
@@ -138,38 +142,39 @@ export const PremiumConsultantResumeTemplate: React.FC<{ data: DocumentData }> =
         </div>
       )}
 
-      <div className="grid grid-cols-2 gap-6 font-sans no-justify">
-        {skills && skills.length > 0 && (
-          <div className="avoid-break">
-            <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-300 pb-1 mb-2">
-              Functional Competencies
-            </h2>
-            <div className="flex flex-wrap gap-1.5 text-xs no-justify">
-              {skills.map((s) => (
-                <span key={s.id} className="px-2 py-0.5 bg-slate-100 text-slate-800 rounded text-[11px] font-medium">
-                  {s.name}
-                </span>
-              ))}
+      {(skills.length > 0 || validCertifications.length > 0) && (
+        <div className="grid grid-cols-2 gap-6 font-sans no-justify">
+          {skills && skills.length > 0 && (
+            <div className="avoid-break">
+              <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-300 pb-1 mb-2">
+                Functional Competencies
+              </h2>
+              <div className="flex flex-wrap gap-1.5 text-xs no-justify">
+                {skills.map((s) => (
+                  <span key={s.id} className="px-2 py-0.5 bg-slate-100 text-slate-800 rounded text-[11px] font-medium">
+                    {s.name}
+                  </span>
+                ))}
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {((certifications && certifications.length > 0) || (achievements && achievements.length > 0)) && (
-          <div className="avoid-break">
-            <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-300 pb-1 mb-2">
-              Certifications & Affiliations
-            </h2>
-            <div className="space-y-1 text-xs text-slate-700">
-              {certifications.map((c) => (
-                <div key={c.id}><strong>{c.name}</strong> ({c.issuer})</div>
-              ))}
-              {achievements.map((a) => (
-                <div key={a.id}><strong>{a.title}</strong>{a.description ? `: ${a.description}` : ''}</div>
-              ))}
+          {validCertifications.length > 0 && (
+            <div className="avoid-break">
+              <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 border-b border-slate-300 pb-1 mb-2">
+                Certifications & Affiliations
+              </h2>
+              <div className="space-y-1 text-xs text-slate-700">
+                {validCertifications.map((c) => (
+                  <div key={c.id}>
+                    <strong>{c.name}</strong>{c.issuer ? ` (${c.issuer})` : ''}{c.issueDate ? ` • ${c.issueDate}` : ''}
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
-        )}
-      </div>
+          )}
+        </div>
+      )}
 
       {customSections && customSections.length > 0 && (
         <div className="mt-5 space-y-4 font-sans">

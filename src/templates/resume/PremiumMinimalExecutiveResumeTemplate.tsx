@@ -2,6 +2,8 @@ import React from 'react';
 import { DocumentData } from '../../types/document';
 import { getStaticFontClass, getFontFamilyCss, FONT_FAMILY_CSS_MAP } from '../../utils/fontClassMap';
 import {
+  formatResumeLocation,
+  getValidCertifications,
   ResumeDescriptionBlock,
   ResumeHeaderTable,
   ResumeSplitRow,
@@ -9,7 +11,8 @@ import {
 } from './resumeTemplateUtils';
 
 export const PremiumMinimalExecutiveResumeTemplate: React.FC<{ data: DocumentData }> = ({ data }) => {
-  const { personal, contact, summary, experience, education, skills, projects, certifications, achievements, customSections, customization } = sanitizeDocumentTextFields(data);
+  const { personal, contact, summary, experience, education, skills, projects, certifications, customSections, customization } = sanitizeDocumentTextFields(data);
+  const validCertifications = getValidCertifications(certifications);
   const primary = customization.primaryColor || '#0f172a'; // Deep Executive Slate
   const fontClass = getStaticFontClass(customization.fontFamily, 'cormorant');
   const fontFamilyCss = getFontFamilyCss(customization.fontFamily, 'cormorant');
@@ -20,7 +23,7 @@ export const PremiumMinimalExecutiveResumeTemplate: React.FC<{ data: DocumentDat
   const displayTitle = personal.professionalTitle || '';
   const displayEmail = contact.email || '';
   const displayPhone = contact.phone || '';
-  const displayLocation = [contact.city, contact.state, contact.country].filter(Boolean).join(', ');
+  const displayLocation = formatResumeLocation(contact);
   const displayLinkedin = contact.linkedin || '';
 
   const displaySummary = summary || '';
@@ -151,43 +154,40 @@ export const PremiumMinimalExecutiveResumeTemplate: React.FC<{ data: DocumentDat
         </div>
       )}
 
-      <div className="grid grid-cols-2 gap-6 mb-6 font-sans no-justify">
-        {displayEducation.length > 0 && (
-          <div className="avoid-break">
-            <h2 className="text-xs font-bold uppercase tracking-widest text-slate-900 border-b border-slate-200 pb-1 mb-2.5">
-              Education & Degrees
-            </h2>
-            <div className="space-y-2 text-xs">
-              {displayEducation.map((e) => (
-                <div key={e.id}>
-                  <div className="font-bold text-slate-900">{e.degree}</div>
-                  <div className="text-slate-600">{e.institute} {e.endYear ? `(${e.endYear})` : ''}{e.score ? ` • ${/^[0-9./\s]+$/.test(e.score.trim()) ? `GPA: ${e.score.trim()}` : e.score.trim()}` : ''}</div>
-                </div>
-              ))}
+      {(displayEducation.length > 0 || validCertifications.length > 0) && (
+        <div className="grid grid-cols-2 gap-6 mb-6 font-sans no-justify">
+          {displayEducation.length > 0 && (
+            <div className="avoid-break">
+              <h2 className="text-xs font-bold uppercase tracking-widest text-slate-900 border-b border-slate-200 pb-1 mb-2.5">
+                Education & Degrees
+              </h2>
+              <div className="space-y-2 text-xs">
+                {displayEducation.map((e) => (
+                  <div key={e.id}>
+                    <div className="font-bold text-slate-900">{e.degree}</div>
+                    <div className="text-slate-600">{e.institute} {e.endYear ? `(${e.endYear})` : ''}{e.score ? ` • ${/^[0-9./\s]+$/.test(e.score.trim()) ? `GPA: ${e.score.trim()}` : e.score.trim()}` : ''}</div>
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {((certifications && certifications.length > 0) || (achievements && achievements.length > 0)) && (
-          <div className="avoid-break">
-            <h2 className="text-xs font-bold uppercase tracking-widest text-slate-900 border-b border-slate-200 pb-1 mb-2.5">
-              Certifications & Board Honors
-            </h2>
-            <div className="space-y-1.5 text-xs text-slate-700">
-              {certifications && certifications.map((c) => (
-                <div key={c.id}>
-                  <strong className="text-slate-900">{c.name}</strong> • {c.issuer} {c.issueDate ? `(${c.issueDate})` : ''}
-                </div>
-              ))}
-              {achievements && achievements.map((a) => (
-                <div key={a.id}>
-                  <strong className="text-slate-900">{a.title}</strong>: {a.description}
-                </div>
-              ))}
+          {validCertifications.length > 0 && (
+            <div className="avoid-break">
+              <h2 className="text-xs font-bold uppercase tracking-widest text-slate-900 border-b border-slate-200 pb-1 mb-2.5">
+                Certifications & Board Honors
+              </h2>
+              <div className="space-y-1.5 text-xs text-slate-700">
+                {validCertifications.map((c) => (
+                  <div key={c.id}>
+                    <strong className="text-slate-900">{c.name}</strong>{c.issuer ? ` • ${c.issuer}` : ''}{c.issueDate ? ` (${c.issueDate})` : ''}
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
-        )}
-      </div>
+          )}
+        </div>
+      )}
 
       {customSections && customSections.map((sec) => (
         <div key={sec.id} className="mb-4 avoid-break font-sans">

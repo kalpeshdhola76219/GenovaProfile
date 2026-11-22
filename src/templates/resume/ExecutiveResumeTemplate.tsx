@@ -4,6 +4,8 @@ import { FONT_FAMILY_CSS_MAP } from '../../utils/fontClassMap';
 import {
   BULLET_LIST_STYLE,
   CONTACT_CENTER_ROW_STYLE,
+  formatResumeLocation,
+  getValidCertifications,
   ResumeBulletItem,
   ResumeDescriptionBlock,
   ResumeSplitRow,
@@ -11,7 +13,9 @@ import {
 } from './resumeTemplateUtils';
 
 export const ExecutiveResumeTemplate: React.FC<{ data: DocumentData }> = ({ data }) => {
-  const { personal, contact, summary, experience, education, skills, projects, certifications, achievements, customSections, customization } = sanitizeDocumentTextFields(data);
+  const { personal, contact, summary, experience, education, skills, projects, certifications, customSections, customization } = sanitizeDocumentTextFields(data);
+  const displayLocation = formatResumeLocation(contact);
+  const validCertifications = getValidCertifications(certifications);
 
   return (
     <div
@@ -32,7 +36,7 @@ export const ExecutiveResumeTemplate: React.FC<{ data: DocumentData }> = ({ data
         <div className="text-xs font-sans text-stone-600 mt-2 flex flex-wrap justify-center gap-4 no-justify" style={CONTACT_CENTER_ROW_STYLE}>
           {contact.email && <span>{contact.email}</span>}
           {contact.phone && <span>&bull; {contact.phone}</span>}
-          {(contact.city || contact.state || contact.country) && <span>&bull; {[contact.city, contact.state, contact.country].filter(Boolean).join(', ')}</span>}
+          {displayLocation && <span>&bull; {displayLocation}</span>}
           {contact.linkedin && <span>&bull; {contact.linkedin}</span>}
           {(contact.portfolio || contact.website) && <span>&bull; {contact.portfolio || contact.website}</span>}
         </div>
@@ -131,20 +135,15 @@ export const ExecutiveResumeTemplate: React.FC<{ data: DocumentData }> = ({ data
         </div>
       )}
 
-      {(certifications.length > 0 || achievements.length > 0) && (
+      {validCertifications.length > 0 && (
         <div className="mb-4 avoid-break">
           <h2 className="text-xs font-bold uppercase tracking-widest text-stone-900 font-cinzel border-b border-stone-300 pb-1 mb-2">
-            Board Positions, Honors & Patents
+            Certifications & Honors
           </h2>
           <div className="text-xs space-y-1 text-stone-800" style={BULLET_LIST_STYLE}>
-            {certifications.map((c) => (
+            {validCertifications.map((c) => (
               <ResumeBulletItem key={c.id} markerClassName="text-stone-400">
-                {c.name} &bull; {c.issuer}
-              </ResumeBulletItem>
-            ))}
-            {achievements.map((a) => (
-              <ResumeBulletItem key={a.id} markerClassName="text-stone-400">
-                {a.title}: {a.description}
+                {c.name}{c.issuer ? <> &bull; {c.issuer}</> : ''}{c.issueDate ? ` (${c.issueDate})` : ''}
               </ResumeBulletItem>
             ))}
           </div>

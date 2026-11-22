@@ -2,6 +2,8 @@ import React from 'react';
 import { DocumentData } from '../../types/document';
 import { getStaticFontClass, getFontFamilyCss, FONT_FAMILY_CSS_MAP } from '../../utils/fontClassMap';
 import {
+  formatResumeLocation,
+  getValidCertifications,
   ResumeDescriptionBlock,
   ResumeHeaderTable,
   ResumeSplitRow,
@@ -18,10 +20,10 @@ export const PremiumTechLeadResumeTemplate: React.FC<{ data: DocumentData }> = (
     skills = [],
     projects = [],
     certifications = [],
-    achievements = [],
     customSections = [],
     customization,
   } = sanitizeDocumentTextFields(data);
+  const validCertifications = getValidCertifications(certifications);
 
   const fontClass = getStaticFontClass(customization.fontFamily, 'jakarta');
   const fontFamilyCss = getFontFamilyCss(customization.fontFamily, 'jakarta');
@@ -55,8 +57,8 @@ export const PremiumTechLeadResumeTemplate: React.FC<{ data: DocumentData }> = (
               <div className="text-indigo-600 font-semibold">{contact.portfolio || contact.website || contact.github}</div>
             )}
             {contact.linkedin && <div>{contact.linkedin}</div>}
-            {(contact.city || contact.state || contact.country) && (
-              <div>{[contact.city, contact.state, contact.country].filter(Boolean).join(', ')}</div>
+            {formatResumeLocation(contact) && (
+              <div>{formatResumeLocation(contact)}</div>
             )}
           </>
         }
@@ -156,7 +158,7 @@ export const PremiumTechLeadResumeTemplate: React.FC<{ data: DocumentData }> = (
       )}
 
       {/* Education & Certifications */}
-      {(education.length > 0 || certifications.length > 0) && (
+      {(education.length > 0 || validCertifications.length > 0) && (
         <div className="pt-2 border-t border-slate-200 grid grid-cols-2 gap-6 mb-5 no-justify">
           {education.length > 0 && (
             <div className="avoid-break">
@@ -176,46 +178,25 @@ export const PremiumTechLeadResumeTemplate: React.FC<{ data: DocumentData }> = (
               </div>
             </div>
           )}
-          {certifications.length > 0 && (
+          {validCertifications.length > 0 && (
             <div className="avoid-break">
               <h2 className="text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-2 font-mono">
                 // Cloud & Security Accreditations
               </h2>
               <div className="space-y-1.5 text-xs">
-                {certifications.map((c) => (
+                {validCertifications.map((c) => (
                   <div key={c.id}>
                     <strong className="text-slate-900">{c.name}</strong>
-                    <div className="text-slate-500 text-[11px]">{c.issuer}</div>
+                    {(c.issuer || c.issueDate) && (
+                      <div className="text-slate-500 text-[11px]">
+                        {c.issuer}{c.issuer && c.issueDate ? ' • ' : ''}{c.issueDate}
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
             </div>
           )}
-        </div>
-      )}
-
-      {/* Standalone Achievements / Accolades */}
-      {achievements && achievements.length > 0 && (
-        <div className="mb-5">
-          <h2 className="text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-2 pb-1 border-b border-slate-200 font-mono">
-            // Key Accolades & Milestones
-          </h2>
-          <div className="space-y-1.5 text-xs">
-            {achievements.map((a) => (
-              <div key={a.id} data-entry="true" className="avoid-break">
-                <ResumeSplitRow
-                  left={
-                    <>
-                      <span className="font-semibold text-slate-900">{a.title}</span>
-                      {a.description && <span className="text-slate-600 ml-1.5">— {a.description}</span>}
-                    </>
-                  }
-                  rightClassName="text-xs font-mono text-slate-500"
-                  right={a.date}
-                />
-              </div>
-            ))}
-          </div>
         </div>
       )}
 

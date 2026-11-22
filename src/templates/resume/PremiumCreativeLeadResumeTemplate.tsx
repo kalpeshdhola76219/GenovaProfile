@@ -2,6 +2,8 @@ import React from 'react';
 import { DocumentData } from '../../types/document';
 import { getStaticFontClass, getFontFamilyCss, FONT_FAMILY_CSS_MAP } from '../../utils/fontClassMap';
 import {
+  formatResumeLocation,
+  getValidCertifications,
   ResumeDescriptionBlock,
   ResumeHeaderTable,
   ResumeSplitRow,
@@ -9,7 +11,9 @@ import {
 } from './resumeTemplateUtils';
 
 export const PremiumCreativeLeadResumeTemplate: React.FC<{ data: DocumentData }> = ({ data }) => {
-  const { personal, contact, summary, experience = [], education = [], skills = [], projects = [], certifications = [], achievements = [], customSections = [], customization } = sanitizeDocumentTextFields(data);
+  const { personal, contact, summary, experience = [], education = [], skills = [], projects = [], certifications = [], customSections = [], customization } = sanitizeDocumentTextFields(data);
+  const displayLocation = formatResumeLocation(contact);
+  const validCertifications = getValidCertifications(certifications);
   const terracotta = customization.primaryColor || '#c2410c'; // Burnt Terracotta
   const fontClass = getStaticFontClass(customization.fontFamily, 'playfair');
   const fontFamilyCss = getFontFamilyCss(customization.fontFamily, 'playfair');
@@ -42,7 +46,7 @@ export const PremiumCreativeLeadResumeTemplate: React.FC<{ data: DocumentData }>
             <>
               {contact.email && <div>✉ {contact.email}</div>}
               {contact.phone && <div>✆ {contact.phone}</div>}
-              {(contact.city || contact.state || contact.country) && <div>📍 {[contact.city, contact.state, contact.country].filter(Boolean).join(', ')}</div>}
+              {displayLocation && <div>📍 {displayLocation}</div>}
               {contact.linkedin && <div>🔗 {contact.linkedin}</div>}
               {(contact.portfolio || contact.website) && <div>🌐 {contact.portfolio || contact.website}</div>}
             </>
@@ -154,39 +158,25 @@ export const PremiumCreativeLeadResumeTemplate: React.FC<{ data: DocumentData }>
             </section>
           )}
 
-          {certifications && certifications.length > 0 && (
+          {validCertifications.length > 0 && (
             <section className="avoid-break">
               <h2 className="text-xs font-bold uppercase tracking-widest text-stone-900 mb-2.5 pb-1 border-b border-stone-200">
                 Certifications
               </h2>
               <div className="space-y-2 text-xs">
-                {certifications.map((c) => (
+                {validCertifications.map((c) => (
                   <div key={c.id}>
                     <div className="font-semibold text-stone-900">{c.name}</div>
-                    <ResumeSplitRow
-                      className="text-stone-500 text-[11.5px]"
-                      wrapRight
-                      left={c.issuer}
-                      rightClassName="text-stone-400 font-mono text-[10.5px]"
-                      right={c.issueDate}
-                    />
+                    {(c.issuer || c.issueDate) && (
+                      <ResumeSplitRow
+                        className="text-stone-500 text-[11.5px]"
+                        wrapRight
+                        left={c.issuer}
+                        rightClassName="text-stone-400 font-mono text-[10.5px]"
+                        right={c.issueDate}
+                      />
+                    )}
                     {c.credentialId && <div className="text-[10px] text-stone-400 font-mono">ID: {c.credentialId}</div>}
-                  </div>
-                ))}
-              </div>
-            </section>
-          )}
-
-          {achievements && achievements.length > 0 && (
-            <section className="avoid-break">
-              <h2 className="text-xs font-bold uppercase tracking-widest text-stone-900 mb-2.5 pb-1 border-b border-stone-200">
-                Awards & Recognition
-              </h2>
-              <div className="space-y-2 text-xs text-stone-700">
-                {achievements.map((a) => (
-                  <div key={a.id}>
-                    <div className="font-semibold text-stone-900">{a.title}</div>
-                    {a.description && <div className="text-stone-500 text-[11px]">{a.description}</div>}
                   </div>
                 ))}
               </div>
