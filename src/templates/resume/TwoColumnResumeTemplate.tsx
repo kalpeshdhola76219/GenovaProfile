@@ -2,8 +2,11 @@ import React from 'react';
 import { DocumentData } from '../../types/document';
 import { FONT_FAMILY_CSS_MAP } from '../../utils/fontClassMap';
 import {
+  formatDateRange,
+  formatEducationScore,
   formatResumeLocation,
   getValidCertifications,
+  joinNonEmpty,
   ResumeBulletItem,
   ResumeDescriptionBlock,
   ResumeSplitRow,
@@ -67,15 +70,15 @@ export const TwoColumnResumeTemplate: React.FC<{ data: DocumentData }> = ({ data
                   Education
                 </h2>
                 <div className="space-y-2">
-                  {education.map((e) => (
-                    <div key={e.id}>
-                      <div className="font-semibold text-white">{e.degree}</div>
-                      <div className="text-slate-400 text-[11px]">
-                        {e.institute} • {e.endYear}
-                        {e.score ? ` • ${/^[0-9./\s]+$/.test(e.score.trim()) ? `GPA: ${e.score.trim()}` : e.score.trim()}` : ''}
+                  {education.map((e) => {
+                    const subline = joinNonEmpty([e.institute, e.endYear, formatEducationScore(e.score)], ' • ');
+                    return (
+                      <div key={e.id} data-entry="true">
+                        <div className="font-semibold text-white">{e.degree}</div>
+                        {subline && <div className="text-slate-400 text-[11px]">{subline}</div>}
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             )}
@@ -107,13 +110,11 @@ export const TwoColumnResumeTemplate: React.FC<{ data: DocumentData }> = ({ data
                     left={exp.jobTitle}
                     rightClassName="text-slate-500 font-normal text-[11px]"
                     rightWidth="145px"
-                    right={
-                      <>
-                        {exp.startDate} - {(exp.currentlyWorking && (!exp.endDate || exp.endDate.trim().toLowerCase() === 'present')) ? 'Present' : (exp.endDate || 'Present')}
-                      </>
-                    }
+                    right={formatDateRange(exp.startDate, exp.endDate, exp.currentlyWorking, ' - ')}
                   />
-                  <div className="text-xs font-medium text-sky-800">{exp.company} {exp.location ? `• ${exp.location}` : ''}</div>
+                  {joinNonEmpty([exp.company, exp.location], ' • ') && (
+                    <div className="text-xs font-medium text-sky-800">{joinNonEmpty([exp.company, exp.location], ' • ')}</div>
+                  )}
                   <ResumeDescriptionBlock
                     text={exp.description}
                     wrapperClassName="mt-1 space-y-1 text-xs text-slate-700"
@@ -165,7 +166,9 @@ export const TwoColumnResumeTemplate: React.FC<{ data: DocumentData }> = ({ data
             <div className="space-y-1 text-xs text-slate-700">
               {validCertifications.map((c) => (
                 <ResumeBulletItem key={c.id} markerClassName="text-slate-400">
-                  <strong>{c.name}</strong>{c.issuer ? ` (${c.issuer})` : ''}{c.issueDate ? ` • ${c.issueDate}` : ''}
+                  {c.name && <strong>{c.name}</strong>}
+                  {c.issuer ? `${c.name ? ' ' : ''}(${c.issuer})` : ''}
+                  {c.issueDate ? `${c.name || c.issuer ? ' • ' : ''}${c.issueDate}` : ''}
                 </ResumeBulletItem>
               ))}
             </div>

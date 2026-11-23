@@ -3,8 +3,10 @@ import { DocumentData } from '../../types/document';
 import { FONT_FAMILY_CSS_MAP } from '../../utils/fontClassMap';
 import {
   CONTACT_ROW_STYLE,
+  formatDateRange,
   formatResumeLocation,
   getValidCertifications,
+  joinNonEmpty,
   ResumeBulletItem,
   ResumeDescriptionBlock,
   ResumeHeaderTable,
@@ -90,9 +92,9 @@ export const ATSProfessionalResumeTemplate: React.FC<{ data: DocumentData }> = (
                 <ResumeSplitRow
                   className="text-xs"
                   leftClassName="font-bold text-slate-900"
-                  left={<>{exp.jobTitle} &bull; <span className="font-medium text-slate-700">{exp.company}</span></>}
+                  left={<>{exp.jobTitle}{exp.jobTitle && exp.company ? <> &bull; </> : ''}{exp.company && <span className="font-medium text-slate-700">{exp.company}</span>}</>}
                   rightClassName="text-slate-500 font-mono text-[11px]"
-                  right={<>{exp.startDate} &ndash; {(exp.currentlyWorking && (!exp.endDate || exp.endDate.trim().toLowerCase() === 'present')) ? 'Present' : (exp.endDate || 'Present')}</>}
+                  right={formatDateRange(exp.startDate, exp.endDate, exp.currentlyWorking, ' – ')}
                 />
                 {exp.location && <div className="text-[11px] text-slate-500">{exp.location}</div>}
                 <ResumeDescriptionBlock
@@ -119,7 +121,7 @@ export const ATSProfessionalResumeTemplate: React.FC<{ data: DocumentData }> = (
           </h2>
           <div className="text-xs text-slate-800 leading-relaxed no-justify">
             <span className="font-semibold">Technical & Domain Skills: </span>
-            {skills.map((s) => s.name).join(' • ')}
+            {joinNonEmpty(skills.map((s) => s.name), ' • ')}
           </div>
         </div>
       )}
@@ -221,7 +223,10 @@ export const ATSProfessionalResumeTemplate: React.FC<{ data: DocumentData }> = (
           <div className="text-xs space-y-1 text-slate-700">
             {validCertifications.map((c) => (
               <ResumeBulletItem key={c.id} markerClassName="text-slate-500">
-                <strong className="text-slate-900">{c.name}</strong>{c.issuer ? <> &bull; {c.issuer}</> : ''}{c.issueDate ? ` (${c.issueDate})` : ''}
+                {c.name && <strong className="text-slate-900">{c.name}</strong>}
+                {c.name && c.issuer ? <> &bull; </> : ''}
+                {c.issuer}
+                {c.issueDate ? ` (${c.issueDate})` : ''}
               </ResumeBulletItem>
             ))}
           </div>

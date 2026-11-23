@@ -2,8 +2,11 @@ import React from 'react';
 import { DocumentData } from '../../types/document';
 import { getStaticFontClass, getFontFamilyCss, FONT_FAMILY_CSS_MAP } from '../../utils/fontClassMap';
 import {
+  formatDateRange,
+  formatEducationScore,
   formatResumeLocation,
   getValidCertifications,
+  joinNonEmpty,
   ResumeDescriptionBlock,
   ResumeHeaderTable,
   ResumeSplitRow,
@@ -74,15 +77,13 @@ export const PremiumCreativeLeadResumeTemplate: React.FC<{ data: DocumentData }>
                       leftClassName="font-bold text-sm text-stone-900"
                       left={exp.jobTitle}
                       rightClassName="text-xs text-stone-500"
-                      right={
-                        <>
-                          {exp.startDate} – {(exp.currentlyWorking && (!exp.endDate || exp.endDate.trim().toLowerCase() === 'present')) ? 'Present' : (exp.endDate || 'Present')}
-                        </>
-                      }
+                      right={formatDateRange(exp.startDate, exp.endDate, exp.currentlyWorking, ' – ')}
                     />
-                    <div className="text-xs font-semibold text-orange-800">
-                      {exp.company} {exp.location ? `• ${exp.location}` : ''}
-                    </div>
+                    {joinNonEmpty([exp.company, exp.location], ' • ') && (
+                      <div className="text-xs font-semibold text-orange-800">
+                        {joinNonEmpty([exp.company, exp.location], ' • ')}
+                      </div>
+                    )}
                     <ResumeDescriptionBlock
                       text={exp.description}
                       wrapperClassName="mt-1 space-y-1 text-xs text-stone-700"
@@ -145,15 +146,18 @@ export const PremiumCreativeLeadResumeTemplate: React.FC<{ data: DocumentData }>
                 Education
               </h2>
               <div className="space-y-2 text-xs">
-                {education.map((e) => (
-                  <div key={e.id}>
-                    <div className="font-semibold text-stone-900">{e.degree}</div>
-                    <div className="text-stone-500 text-[11.5px]">
-                      {e.institute} {e.endYear ? `(${e.endYear})` : ''}
-                      {e.score ? ` • ${/^[0-9./\s]+$/.test(e.score.trim()) ? `GPA: ${e.score.trim()}` : e.score.trim()}` : ''}
+                {education.map((e) => {
+                  const instYear = e.institute
+                    ? `${e.institute}${e.endYear ? ` (${e.endYear})` : ''}`
+                    : e.endYear || '';
+                  const subline = joinNonEmpty([instYear, formatEducationScore(e.score)], ' • ');
+                  return (
+                    <div key={e.id} data-entry="true">
+                      <div className="font-semibold text-stone-900">{e.degree}</div>
+                      {subline && <div className="text-stone-500 text-[11.5px]">{subline}</div>}
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </section>
           )}
@@ -165,7 +169,7 @@ export const PremiumCreativeLeadResumeTemplate: React.FC<{ data: DocumentData }>
               </h2>
               <div className="space-y-2 text-xs">
                 {validCertifications.map((c) => (
-                  <div key={c.id}>
+                  <div key={c.id} data-entry="true">
                     <div className="font-semibold text-stone-900">{c.name}</div>
                     {(c.issuer || c.issueDate) && (
                       <ResumeSplitRow

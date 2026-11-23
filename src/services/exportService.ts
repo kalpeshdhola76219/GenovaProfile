@@ -1,3 +1,4 @@
+// LOCKED EXPORT & PAGINATION ENGINE — DO NOT MODIFY UNLESS EXPLICITLY REQUESTED
 import html2canvas from 'html2canvas-pro';
 import jsPDF from 'jspdf';
 import { formatRgb } from 'culori';
@@ -29,7 +30,7 @@ export const EXPORT_CONFIG = {
   desktopScale: 2,
   mobileScale: 2,
   maxCanvasPixelsDesktop: 25000000,
-  maxCanvasPixelsMobile: 12000000,
+  maxCanvasPixelsMobile: 16000000,
   jpegQuality: 1.0,
 } as const;
 
@@ -346,21 +347,59 @@ export function sanitizeClonedDocumentForExport(
           }
         }
         if (computed.wordBreak === 'break-all') {
-          clonedEl.style.wordBreak = 'normal';
+          clonedEl.style.wordBreak = 'break-word';
         }
         if ((computed as any).hyphens === 'auto' || (computed as any).webkitHyphens === 'auto') {
           (clonedEl.style as any).hyphens = 'none';
           (clonedEl.style as any).webkitHyphens = 'none';
         }
-        // Preserve nowrap on date/metadata table cells so inherited overflow-wrap: break-word
-        // never causes html2canvas-pro to wrap dates onto multiple lines
+        // Override overflow: hidden on text rows/containers so Chrome never clips trailing glyphs
+        // (e.g. "Proficiency" cut off as "Proficien"), while preserving pure image/avatar frames
+        const isPureMediaFrame =
+          clonedEl.tagName === 'IMG' ||
+          clonedEl.tagName === 'SVG' ||
+          (clonedEl.querySelector('img, svg') !== null && (clonedEl.textContent || '').trim().length === 0);
+        const isNowrapMetadataCell =
+          ((clonedEl.tagName === 'TD' || clonedEl.tagName === 'TH') &&
+            (computed.whiteSpace === 'nowrap' || clonedEl.style.whiteSpace === 'nowrap')) ||
+          clonedEl.hasAttribute('data-right-col') ||
+          clonedEl.hasAttribute('data-date-col') ||
+          clonedEl.hasAttribute('data-link-col');
+
         if (
-          (clonedEl.tagName === 'TD' || clonedEl.tagName === 'TH') &&
-          (computed.whiteSpace === 'nowrap' || clonedEl.style.whiteSpace === 'nowrap')
+          clonedEl !== clonedTarget &&
+          !isPureMediaFrame &&
+          (clonedEl.textContent || '').trim().length > 0
         ) {
-          clonedEl.style.whiteSpace = 'nowrap';
-          clonedEl.style.wordBreak = 'normal';
-          clonedEl.style.overflowWrap = 'normal';
+          if (
+            computed.overflow === 'hidden' ||
+            computed.overflowX === 'hidden' ||
+            computed.overflowY === 'hidden' ||
+            clonedEl.style.overflow === 'hidden'
+          ) {
+            clonedEl.style.overflow = 'visible';
+            clonedEl.style.overflowX = 'visible';
+            clonedEl.style.overflowY = 'visible';
+            clonedEl.style.textOverflow = 'clip';
+          }
+          if (!isNowrapMetadataCell) {
+            clonedEl.style.wordBreak = 'break-word';
+            clonedEl.style.overflowWrap = 'break-word';
+          }
+        }
+        // Preserve nowrap and flex-shrink: 0 on date/link metadata columns
+        if (isNowrapMetadataCell) {
+          clonedEl.style.flexShrink = '0';
+          clonedEl.style.overflow = 'visible';
+          if (computed.whiteSpace === 'nowrap' || clonedEl.style.whiteSpace === 'nowrap') {
+            clonedEl.style.whiteSpace = 'nowrap';
+            clonedEl.style.wordBreak = 'normal';
+            clonedEl.style.overflowWrap = 'normal';
+          }
+        }
+        if (clonedEl.hasAttribute('data-entry')) {
+          clonedEl.style.breakInside = 'avoid';
+          (clonedEl.style as any).pageBreakInside = 'avoid';
         }
         if (
           clonedEl.style.cssText &&
@@ -383,6 +422,8 @@ export function sanitizeClonedDocumentForExport(
     clonedDoc.documentElement.style.margin = '0';
     clonedDoc.documentElement.style.padding = '0';
     clonedDoc.documentElement.style.width = `${EXPORT_A4_WIDTH_PX}px`;
+    clonedDoc.documentElement.style.minWidth = `${EXPORT_A4_WIDTH_PX}px`;
+    clonedDoc.documentElement.style.maxWidth = `${EXPORT_A4_WIDTH_PX}px`;
     clonedDoc.documentElement.style.overflow = 'visible';
 
     clonedDoc.body.style.zoom = '1';
@@ -430,12 +471,27 @@ export function sanitizeClonedDocumentForExport(
     clonedTarget.style.minWidth = `${EXPORT_A4_WIDTH_PX}px`;
     clonedTarget.style.height = liveTarget.style.height || `${liveTarget.offsetHeight || EXPORT_A4_HEIGHT_PX}px`;
     clonedTarget.style.boxSizing = 'border-box';
-    clonedTarget.style.wordBreak = 'normal';
+    clonedTarget.style.wordBreak = 'break-word';
     clonedTarget.style.overflowWrap = 'break-word';
     (clonedTarget.style as any).hyphens = 'none';
     (clonedTarget.style as any).webkitHyphens = 'none';
     clonedTarget.style.textRendering = liveComputedTarget.textRendering || 'auto';
   } catch {}
+}
+
+/**
+ * Waits for web fonts to finish loading plus two requestAnimationFrame ticks
+ * so Chrome font metrics match Firefox before measuring or capturing any page.
+ */
+export async function waitForFontsAndTwoFrames(): Promise<void> {
+  if (typeof document !== 'undefined' && document.fonts) {
+    await document.fonts.ready;
+  }
+  await new Promise<void>((resolve) => {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => resolve());
+    });
+  });
 }
 
 /**
@@ -976,8 +1032,10 @@ function layoutClonedMultiPageSheet(
       if (rect.bottom <= pageEnd) continue;
 
       // Element crosses pageEnd
+      // Treat individual entries (experience, education, project, certification) as atomic
+      // break-inside: avoid units unless a single entry exceeds 580px with multiple bullets.
       const bullets = Array.from(el.querySelectorAll('[data-bullet], li')) as HTMLElement[];
-      const isSplittableLargeEntry = el.hasAttribute('data-entry') && rect.height > 150 && bullets.length >= 2;
+      const isSplittableLargeEntry = el.hasAttribute('data-entry') && rect.height > 580 && bullets.length >= 2;
 
       if (isSplittableLargeEntry) {
         // Keep header + first bullet together; if even first bullet doesn't fit, push whole entry
@@ -1127,9 +1185,7 @@ export async function generatePdfBlob(
       // Single-page OnePageFit export path (Biodata & Cover Letter)
       const sheet = firstSheet;
       await waitForDocumentReadyForExport(sheet);
-      if (typeof document !== 'undefined' && document.fonts) {
-        await document.fonts.ready;
-      }
+      await waitForFontsAndTwoFrames();
 
       const computedSheetBg = sanitizeModernColorString(
         sheet.style.backgroundColor || window.getComputedStyle(sheet).backgroundColor || '#ffffff'
@@ -1204,9 +1260,7 @@ export async function generatePdfBlob(
     // Multi-page Resume export: measure and space unclipped flow in onclone at exact 794px,
     // then slice the 2x high-resolution canvas into clean 794×1123 A4 pages.
     await waitForDocumentReadyForExport(firstSheet);
-    if (typeof document !== 'undefined' && document.fonts) {
-      await document.fonts.ready;
-    }
+    await waitForFontsAndTwoFrames();
 
     const computedSheetBg = sanitizeModernColorString(
       firstSheet.style.backgroundColor || window.getComputedStyle(firstSheet).backgroundColor || '#ffffff'
@@ -1337,9 +1391,7 @@ export async function generatePngBlob(
     }
 
     await waitForDocumentReadyForExport(targetElement);
-    if (typeof document !== 'undefined' && document.fonts) {
-      await document.fonts.ready;
-    }
+    await waitForFontsAndTwoFrames();
 
     const isBiodata =
       targetElement.getAttribute('data-document-type') === 'biodata' ||

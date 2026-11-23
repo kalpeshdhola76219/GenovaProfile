@@ -74,6 +74,12 @@ export const DocumentBuilder: React.FC<DocumentBuilderProps> = ({
       : rawCerts;
     return {
       ...sanitized,
+      contact: {
+        ...sanitized.contact,
+        city: typeof sanitized.contact?.city === 'string' ? sanitized.contact.city : '',
+        state: typeof sanitized.contact?.state === 'string' ? sanitized.contact.state : '',
+        country: typeof sanitized.contact?.country === 'string' ? sanitized.contact.country : '',
+      },
       certifications,
       achievements: [],
     };

@@ -3,6 +3,7 @@ import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { TEMPLATE_REGISTRY, getTemplateById } from '../src/templates/registry';
 import { calculateDocumentPagination, A4_DIMENSIONS } from '../src/services/paginationEngine';
+import { createEmptyDocument } from '../src/data/sampleData';
 import { DocumentData } from '../src/types/document';
 
 console.log('================================================================');
@@ -254,7 +255,51 @@ resumeTemplates.forEach((template, index) => {
   assert.ok(htmlEdge.includes('Kumar-O&#x27;Connor') || htmlEdge.includes('Kumar-O\'Connor'), `Test G failed for ${tplId}`);
   assert.ok(!htmlEdge.includes('undefined'), `Test G failed for ${tplId}: string "undefined" leaked into output`);
 
-  console.log(`  ✓ Tests A, B, C, D, E, F, G passed for [${tplId}]\n`);
+  // Test H: Zero hardcoded location ('NY'/'CA'/'New York'/'San Francisco') or certification fallbacks & blank init
+  const freshBlank = createEmptyDocument('resume', tplId);
+  assert.strictEqual(freshBlank.contact.city, '', `Test H failed for ${tplId}: fresh resume city must be empty`);
+  assert.strictEqual(freshBlank.contact.state, '', `Test H failed for ${tplId}: fresh resume state must be empty`);
+  assert.strictEqual(freshBlank.contact.country, '', `Test H failed for ${tplId}: fresh resume country must be empty`);
+  assert.strictEqual(freshBlank.certifications.length, 0, `Test H failed for ${tplId}: fresh resume certifications must be empty`);
+
+  const cleanNoFallbackDoc = createMockDocument(tplId, {
+    experienceCount: 1,
+    educationCount: 1,
+    skillsCount: 2,
+    projectsCount: 0,
+    certificationsCount: 0,
+  });
+  cleanNoFallbackDoc.contact.city = '';
+  cleanNoFallbackDoc.contact.state = '';
+  cleanNoFallbackDoc.contact.country = '';
+  cleanNoFallbackDoc.certifications = [];
+  cleanNoFallbackDoc.achievements = [
+    {
+      id: 'legacy-ach',
+      title: 'Top 50 Global Business Leaders',
+      description: 'Recognized for executive leadership in enterprise value creation.',
+    },
+  ];
+  const htmlClean = renderToStaticMarkup(React.createElement(TemplateComp, { data: cleanNoFallbackDoc }));
+  const cleanText = htmlClean.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ');
+  assert.ok(!/\bNY\b/.test(cleanText), `Test H failed for ${tplId}: hardcoded 'NY' fallback detected`);
+  assert.ok(!/\bCA\b/.test(cleanText), `Test H failed for ${tplId}: hardcoded 'CA' fallback detected`);
+  assert.ok(!cleanText.includes('New York'), `Test H failed for ${tplId}: hardcoded 'New York' fallback detected`);
+  assert.ok(!cleanText.includes('San Francisco'), `Test H failed for ${tplId}: hardcoded 'San Francisco' fallback detected`);
+  assert.ok(
+    !cleanText.includes('Top 50 Global Business Leaders'),
+    `Test H failed for ${tplId}: hardcoded 'Top 50 Global Business Leaders' fallback detected`
+  );
+  assert.ok(
+    !cleanText.includes('Recognized for executive leadership in enterprise value creation'),
+    `Test H failed for ${tplId}: hardcoded honor description detected`
+  );
+  assert.ok(
+    !/(Certifications & Board Honors|Certifications & Honors|Certifications & Recognition|Certifications & Accreditations|Certifications & Affiliations|Cloud & Security Accreditations|Accreditations)/i.test(cleanText),
+    `Test H failed for ${tplId}: Certifications section must stay hidden when certifications array is empty`
+  );
+
+  console.log(`  ✓ Tests A, B, C, D, E, F, G, H passed for [${tplId}]\n`);
   passCount++;
 });
 

@@ -3,8 +3,11 @@ import { DocumentData } from '../../types/document';
 import { getStaticFontClass, getFontFamilyCss, FONT_FAMILY_CSS_MAP } from '../../utils/fontClassMap';
 import {
   CONTACT_CENTER_ROW_STYLE,
+  formatDateRange,
+  formatEducationScore,
   formatResumeLocation,
   getValidCertifications,
+  joinNonEmpty,
   ResumeDescriptionBlock,
   ResumeSplitRow,
   sanitizeDocumentTextFields,
@@ -14,6 +17,7 @@ export const PremiumConsultantResumeTemplate: React.FC<{ data: DocumentData }> =
   const { personal, contact, summary, experience = [], education = [], skills = [], projects = [], certifications = [], customSections = [], customization } = sanitizeDocumentTextFields(data);
   const displayLocation = formatResumeLocation(contact);
   const validCertifications = getValidCertifications(certifications);
+  const contactItems = [contact.email, contact.phone, displayLocation, contact.linkedin, contact.portfolio || contact.website].filter(Boolean) as string[];
   const navy = customization.primaryColor || '#172554'; // Deep Oxford Navy
   const fontClass = getStaticFontClass(customization.fontFamily, 'cormorant');
   const fontFamilyCss = getFontFamilyCss(customization.fontFamily, 'cormorant');
@@ -28,16 +32,18 @@ export const PremiumConsultantResumeTemplate: React.FC<{ data: DocumentData }> =
         <h1 className={`text-3xl font-extrabold uppercase tracking-widest text-slate-900 ${fontClass}`} style={{ fontFamily: fontFamilyCss }}>
           {personal.fullName || 'STRATEGY CONSULTANT'}
         </h1>
-        <p className="text-xs font-semibold uppercase tracking-widest text-slate-600 mt-1 font-sans">
-          {personal.professionalTitle || 'Engagement Manager | Management & Strategy Consulting'}
-        </p>
-        <div className="flex flex-wrap items-center justify-center gap-3 mt-2 text-xs text-slate-600 font-sans no-justify" style={CONTACT_CENTER_ROW_STYLE}>
-          {contact.email && <span>{contact.email}</span>}
-          {contact.phone && <span>• {contact.phone}</span>}
-          {displayLocation && <span>• {displayLocation}</span>}
-          {contact.linkedin && <span>• {contact.linkedin}</span>}
-          {(contact.portfolio || contact.website) && <span>• {contact.portfolio || contact.website}</span>}
-        </div>
+        {personal.professionalTitle && (
+          <p className="text-xs font-semibold uppercase tracking-widest text-slate-600 mt-1 font-sans">
+            {personal.professionalTitle}
+          </p>
+        )}
+        {contactItems.length > 0 && (
+          <div className="flex flex-wrap items-center justify-center gap-3 mt-2 text-xs text-slate-600 font-sans no-justify" style={CONTACT_CENTER_ROW_STYLE}>
+            {contactItems.map((item, idx) => (
+              <span key={idx}>{idx > 0 ? `• ${item}` : item}</span>
+            ))}
+          </div>
+        )}
       </div>
 
       {summary && (
@@ -60,14 +66,9 @@ export const PremiumConsultantResumeTemplate: React.FC<{ data: DocumentData }> =
                 <ResumeSplitRow
                   wrapRight
                   leftClassName="font-bold text-sm text-slate-900"
-                  left={<>{exp.company} • <span className="font-semibold text-slate-700">{exp.jobTitle}</span></>}
+                  left={<>{exp.company}{exp.company && exp.jobTitle ? ' • ' : ''}{exp.jobTitle && <span className="font-semibold text-slate-700">{exp.jobTitle}</span>}</>}
                   rightClassName="text-xs text-slate-500 font-medium"
-                  right={
-                    <>
-                      {exp.location ? `${exp.location} | ` : ''}
-                      {exp.startDate} – {(exp.currentlyWorking && (!exp.endDate || exp.endDate.trim().toLowerCase() === 'present')) ? 'Present' : (exp.endDate || 'Present')}
-                    </>
-                  }
+                  right={joinNonEmpty([exp.location, formatDateRange(exp.startDate, exp.endDate, exp.currentlyWorking, ' – ')], ' | ')}
                 />
                 <ResumeDescriptionBlock
                   text={exp.description}
@@ -98,21 +99,17 @@ export const PremiumConsultantResumeTemplate: React.FC<{ data: DocumentData }> =
           </h2>
           <div className="space-y-2 text-xs">
             {education.map((e) => (
-              <div key={e.id}>
+              <div key={e.id} data-entry="true">
                 <ResumeSplitRow
                   left={
                     <>
-                      <span className="font-bold text-slate-900">{e.institute}</span>
-                      <span className="text-slate-600"> — {e.degree}</span>
+                      {e.institute && <span className="font-bold text-slate-900">{e.institute}</span>}
+                      {e.institute && e.degree ? <span className="text-slate-600"> — </span> : ''}
+                      {e.degree && <span className="text-slate-600">{e.degree}</span>}
                     </>
                   }
                   rightClassName="text-slate-500"
-                  right={
-                    <>
-                      {e.endYear}
-                      {e.score ? ` • ${/^[0-9./\s]+$/.test(e.score.trim()) ? `GPA: ${e.score.trim()}` : e.score.trim()}` : ''}
-                    </>
-                  }
+                  right={joinNonEmpty([e.endYear, formatEducationScore(e.score)], ' • ')}
                 />
               </div>
             ))}
@@ -127,7 +124,7 @@ export const PremiumConsultantResumeTemplate: React.FC<{ data: DocumentData }> =
           </h2>
           <div className="space-y-3 text-xs">
             {projects.map((p) => (
-              <div key={p.id}>
+              <div key={p.id} data-entry="true">
                 <ResumeSplitRow
                   className="font-bold text-slate-900"
                   wrapRight
@@ -166,8 +163,10 @@ export const PremiumConsultantResumeTemplate: React.FC<{ data: DocumentData }> =
               </h2>
               <div className="space-y-1 text-xs text-slate-700">
                 {validCertifications.map((c) => (
-                  <div key={c.id}>
-                    <strong>{c.name}</strong>{c.issuer ? ` (${c.issuer})` : ''}{c.issueDate ? ` • ${c.issueDate}` : ''}
+                  <div key={c.id} data-entry="true">
+                    {c.name && <strong>{c.name}</strong>}
+                    {c.issuer ? `${c.name ? ' ' : ''}(${c.issuer})` : ''}
+                    {c.issueDate ? `${c.name || c.issuer ? ' • ' : ''}${c.issueDate}` : ''}
                   </div>
                 ))}
               </div>

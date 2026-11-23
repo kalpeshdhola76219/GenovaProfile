@@ -2,8 +2,11 @@ import React from 'react';
 import { DocumentData } from '../../types/document';
 import { FONT_FAMILY_CSS_MAP } from '../../utils/fontClassMap';
 import {
+  formatDateRange,
+  formatEducationScore,
   formatResumeLocation,
   getValidCertifications,
+  joinNonEmpty,
   ResumeBulletItem,
   ResumeDescriptionBlock,
   ResumeHeaderTable,
@@ -74,15 +77,13 @@ export const ProfessionalResumeTemplate: React.FC<{ data: DocumentData }> = ({ d
                   leftClassName="text-slate-900"
                   left={
                     <>
-                      {exp.jobTitle} • <span className="font-medium text-slate-600">{exp.company}</span>
+                      {exp.jobTitle}
+                      {exp.jobTitle && exp.company ? ' • ' : ''}
+                      {exp.company && <span className="font-medium text-slate-600">{exp.company}</span>}
                     </>
                   }
                   rightClassName="text-slate-500 font-normal text-[11px]"
-                  right={
-                    <>
-                      {exp.startDate} - {(exp.currentlyWorking && (!exp.endDate || exp.endDate.trim().toLowerCase() === 'present')) ? 'Present' : (exp.endDate || 'Present')}
-                    </>
-                  }
+                  right={formatDateRange(exp.startDate, exp.endDate, exp.currentlyWorking, ' - ')}
                 />
                 <ResumeDescriptionBlock
                   text={exp.description}
@@ -115,8 +116,7 @@ export const ProfessionalResumeTemplate: React.FC<{ data: DocumentData }> = ({ d
               </h2>
               <div className="space-y-2 text-xs">
                 {education.map((edu) => {
-                  const scoreLabel = edu.score ? (/^[0-9./\s]+$/.test(edu.score.trim()) ? `GPA: ${edu.score.trim()}` : edu.score.trim()) : '';
-                  const subline = [edu.institute, edu.endYear, scoreLabel].filter(Boolean).join(' • ');
+                  const subline = joinNonEmpty([edu.institute, edu.endYear, formatEducationScore(edu.score)], ' • ');
                   return (
                     <div key={edu.id} data-entry="true">
                       <div className="font-bold text-slate-900">{edu.degree}</div>
@@ -134,7 +134,7 @@ export const ProfessionalResumeTemplate: React.FC<{ data: DocumentData }> = ({ d
                 Skills
               </h2>
               <p className="text-xs text-slate-700 leading-relaxed no-justify">
-                {skills.map((s) => s.name).join(' • ')}
+                {joinNonEmpty(skills.map((s) => s.name), ' • ')}
               </p>
             </div>
           )}
@@ -171,7 +171,7 @@ export const ProfessionalResumeTemplate: React.FC<{ data: DocumentData }> = ({ d
           <div className="text-xs space-y-1 text-slate-700">
             {validCertifications.map((c) => (
               <ResumeBulletItem key={c.id} markerClassName="text-slate-400">
-                {c.name}{c.issuer ? ` (${c.issuer})` : ''}{c.issueDate ? ` • ${c.issueDate}` : ''}
+                {joinNonEmpty([c.name ? `${c.name}${c.issuer ? ` (${c.issuer})` : ''}` : c.issuer, c.issueDate], ' • ')}
               </ResumeBulletItem>
             ))}
           </div>

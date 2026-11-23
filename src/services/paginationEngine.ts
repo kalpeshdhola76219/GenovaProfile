@@ -1,3 +1,4 @@
+// LOCKED EXPORT & PAGINATION ENGINE — DO NOT MODIFY UNLESS EXPLICITLY REQUESTED
 /**
  * Universal Multi-Page Pagination Engine for Genova Profile
  * 
@@ -180,6 +181,25 @@ export function calculateDocumentPagination(
     if (r.height < 15) continue; // Skip zero/tiny elements
     seenEntries.add(el);
 
+    // Enforce atomic break-inside: avoid on every individual entry (experience, education, project, certification)
+    if (el.style) {
+      el.style.breakInside = 'avoid';
+      (el.style as unknown as { pageBreakInside?: string }).pageBreakInside = 'avoid';
+    }
+
+    // Apply flex-shrink: 0 to date/link right columns inside entries so dates & URLs never clip or detach
+    if (typeof el.querySelectorAll === 'function') {
+      const rightCols = Array.from(
+        el.querySelectorAll('[data-right-col], [data-date-col], [data-link-col], td:last-child, .whitespace-nowrap')
+      ) as HTMLElement[];
+      for (const col of rightCols) {
+        if (col && col.style) {
+          col.style.flexShrink = '0';
+          col.style.overflow = 'visible';
+        }
+      }
+    }
+
     // Find the immediately preceding section heading (if within 80px)
     let closestHeading: HeadingNode | null = null;
     for (let hIdx = headings.length - 1; hIdx >= 0; hIdx--) {
@@ -248,8 +268,9 @@ export function calculateDocumentPagination(
       }
     }
 
-    // Keep compact entries (e.g. projects, education) or single-paragraph entries atomic so titles & descriptions stay together
-    const hasSplittableBullets = bullets.length >= 2 && r.height > 150;
+    // Treat every individual entry (experience, education, project, certification) as an atomic
+    // break-inside: avoid unit unless a single giant entry exceeds 580px with multiple bullets
+    const hasSplittableBullets = bullets.length >= 2 && r.height > 580;
     const entryBullets = hasSplittableBullets ? bullets : [];
 
     entries.push({

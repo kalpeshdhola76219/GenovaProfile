@@ -270,14 +270,126 @@ resumeTemplates.forEach((t, index) => {
     `Template ${t.id} rendered target bullet ${occurrences} times in single render (expected exactly 1)`
   );
 
+  // Verify single occurrence of 'Present' (1 active role must never duplicate 'Present')
+  const presentMatches = html.match(/\bPresent\b/g) || [];
+  assert.strictEqual(
+    presentMatches.length,
+    1,
+    `Template ${t.id} rendered 'Present' ${presentMatches.length} times (expected exactly 1)`
+  );
+
   // Verify personal name and experience entries
   assert.ok(html.includes('Rahul Deshmukh'), `Template ${t.id} missing personal name`);
   assert.ok(html.includes('Apex Global Financial Services'), `Template ${t.id} missing experience 1`);
   assert.ok(html.includes('Tata Consultancy Services'), `Template ${t.id} missing experience 2`);
   assert.ok(html.includes('Jamnalal Bajaj Institute'), `Template ${t.id} missing education`);
 
-  console.log(`  [${index + 1}/22] Template '${t.id}' passed single-occurrence content audit.`);
+  console.log(`  [${index + 1}/22] Template '${t.id}' passed single-occurrence content & Present audit.`);
 });
+
+// 4. Test Atomic Entry Handling & flex-shrink-0 Protection at Page Boundary
+console.log('\nTest 4: Atomic Entry (break-inside: avoid) & Right-Column flex-shrink-0 Lock');
+{
+  const entryStyle: Record<string, string> = {};
+  const rightColStyle: Record<string, string> = {};
+  const mockRightCol = {
+    tagName: 'TD',
+    style: rightColStyle,
+    getBoundingClientRect: () => ({ top: 960, bottom: 980, left: 650, right: 794, width: 144, height: 20 }),
+  };
+  const mockAtomicEntry = {
+    tagName: 'DIV',
+    style: entryStyle,
+    getBoundingClientRect: () => ({ top: 960, bottom: 1200, left: 0, right: 794, width: 794, height: 240 }),
+    querySelector: () => null,
+    querySelectorAll: (selector: string) => (selector.includes('data-right-col') ? [mockRightCol] : []),
+  };
+  const mockContainer = {
+    scrollHeight: 1600,
+    offsetHeight: 1600,
+    getBoundingClientRect: () => ({ top: 0, bottom: 1600, left: 0, right: 794, width: 794, height: 1600 }),
+    querySelectorAll: (selector: string) => {
+      if (selector.includes('data-entry')) return [mockAtomicEntry];
+      return [];
+    },
+  } as unknown as HTMLElement;
+
+  const result = calculateDocumentPagination(mockContainer);
+  assert.strictEqual(entryStyle.breakInside, 'avoid', 'Atomic entry must have breakInside = avoid');
+  assert.strictEqual(rightColStyle.flexShrink, '0', 'Right date/link column must enforce flexShrink = 0');
+  assert.ok(result.pageCount >= 2, 'Expected 2 pages for 1600px container');
+  assert.ok(
+    result.pageBreaks[0].endY <= 960,
+    `Atomic entry (top=960) crossing page boundary must move wholly to Page 2 (got page1.endY=${result.pageBreaks[0].endY})`
+  );
+  assert.ok(
+    result.pageBreaks[1].startY >= result.pageBreaks[0].endY,
+    'Page 2 startY must never overlap Page 1 endY'
+  );
+  console.log('✓ Passed: Atomic entry moved cleanly to Page 2 with break-inside: avoid and flex-shrink: 0.');
+}
+
+// 5. Test Zero Stray Separators (' | ', ' • ', ' - Present') When Optional Fields Are Empty
+console.log('\nTest 5: Zero Stray Separators Audit Across All 22 Resume Templates');
+resumeTemplates.forEach((t) => {
+  const sparseDoc = createMockResumeWithTargetBullet(t.id);
+  sparseDoc.personal.professionalTitle = '';
+  sparseDoc.contact = {
+    email: '',
+    phone: '+91 98200 12345',
+    city: '',
+    state: '',
+    country: '',
+    linkedin: '',
+    portfolio: '',
+    website: '',
+  };
+  sparseDoc.experience = [
+    {
+      id: 'exp-sparse-1',
+      company: '',
+      jobTitle: 'Financial Analyst',
+      location: '',
+      startDate: '',
+      endDate: '',
+      currentlyWorking: false,
+      description: 'Prepared quarterly variance analysis.',
+      achievements: '',
+    },
+    {
+      id: 'exp-sparse-2',
+      company: 'Apex Corp',
+      jobTitle: '',
+      location: 'Surat',
+      startDate: '',
+      endDate: '',
+      currentlyWorking: false,
+      description: 'Supported reporting.',
+      achievements: '',
+    },
+  ];
+  sparseDoc.education = [
+    {
+      id: 'edu-sparse-1',
+      degree: 'B.Com',
+      institute: '',
+      location: '',
+      startYear: '',
+      endYear: '',
+      score: '',
+    },
+  ];
+  sparseDoc.certifications = [];
+
+  const html = renderToStaticMarkup(React.createElement(t.component, { data: sparseDoc }));
+  const text = html.replace(/<[^>]+>/g, ' ').replace(/&bull;/g, '•').replace(/&ndash;/g, '–').replace(/\s+/g, ' ');
+
+  assert.ok(!/\|\s*$/.test(text) && !text.includes(' | '), `[${t.id}] Found stray ' | ' separator in sparse resume: ${text}`);
+  assert.ok(!/\s•\s*\+91/.test(text), `[${t.id}] Found leading stray bullet before phone when email is empty`);
+  assert.ok(!/Financial Analyst\s*[,•@|]\s*Prepared/.test(text), `[${t.id}] Found trailing separator after jobTitle when company is empty`);
+  assert.ok(!/\bPresent\b/.test(text), `[${t.id}] Rendered 'Present' even though dates and currentlyWorking were empty`);
+});
+console.log('✓ Passed: Zero stray separators or phantom Present strings across all 22 templates.');
 
 console.log('\n================================================================');
 console.log('ALL VERIFICATION CHECKS PASSED: ZERO DUPLICATION CONFIRMED');

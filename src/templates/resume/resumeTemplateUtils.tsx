@@ -1,17 +1,47 @@
+// LOCKED EXPORT & PAGINATION ENGINE — DO NOT MODIFY UNLESS EXPLICITLY REQUESTED
 import React from 'react';
 import { sanitizeDocumentTextFields, sanitizeText } from '../../utils/textSanitizer';
 
 export { sanitizeDocumentTextFields, sanitizeText };
+
+export const joinNonEmpty = (
+  parts: Array<string | undefined | null>,
+  separator = ' • '
+): string =>
+  parts
+    .map((part) => (typeof part === 'string' ? sanitizeText(part).trim() : ''))
+    .filter(Boolean)
+    .join(separator);
+
+export const formatEducationScore = (score?: string): string => {
+  if (!score || typeof score !== 'string') return '';
+  const trimmed = sanitizeText(score).trim();
+  if (!trimmed) return '';
+  return /^[0-9./\s]+$/.test(trimmed) ? `GPA: ${trimmed}` : trimmed;
+};
+
+export const formatDateRange = (
+  startDate?: string,
+  endDate?: string,
+  currentlyWorking?: boolean,
+  separator = ' – '
+): string => {
+  const start = typeof startDate === 'string' ? sanitizeText(startDate).trim() : '';
+  const rawEnd = typeof endDate === 'string' ? sanitizeText(endDate).trim() : '';
+  const end =
+    currentlyWorking && (!rawEnd || rawEnd.toLowerCase() === 'present')
+      ? 'Present'
+      : rawEnd;
+  if (start && end) return `${start}${separator}${end}`;
+  return start || end || '';
+};
 
 export const formatResumeLocation = (
   contact?: { city?: string; state?: string; country?: string },
   separator = ', '
 ): string => {
   if (!contact) return '';
-  return [contact.city, contact.state, contact.country]
-    .map((part) => (typeof part === 'string' ? sanitizeText(part).trim() : ''))
-    .filter(Boolean)
-    .join(separator);
+  return joinNonEmpty([contact.city, contact.state, contact.country], separator);
 };
 
 export const getValidCertifications = <
@@ -219,7 +249,8 @@ export const ResumeSplitRow: React.FC<{
               paddingRight: hasRight ? '12px' : 0,
               border: 'none',
               background: 'transparent',
-              wordBreak: 'normal',
+              overflow: 'visible',
+              wordBreak: 'break-word',
               overflowWrap: 'break-word',
               ...leftStyle,
             }}
@@ -228,16 +259,19 @@ export const ResumeSplitRow: React.FC<{
           </td>
           {hasRight && (
             <td
-              className={rightClassName}
+              data-right-col="true"
+              className={`shrink-0 ${rightClassName || ''}`.trim()}
               style={{
                 verticalAlign,
                 textAlign: 'right',
                 padding: 0,
                 border: 'none',
                 background: 'transparent',
+                flexShrink: 0,
+                overflow: 'visible',
                 width: rightWidth ?? (wrapRight ? '40%' : '145px'),
                 whiteSpace: wrapRight ? 'normal' : 'nowrap',
-                wordBreak: 'normal',
+                wordBreak: wrapRight ? 'break-word' : 'normal',
                 overflowWrap: wrapRight ? 'anywhere' : 'normal',
                 ...rightStyle,
               }}
@@ -300,6 +334,9 @@ export const ResumeHeaderTable: React.FC<{
               paddingRight: hasRight ? '16px' : 0,
               border: 'none',
               background: 'transparent',
+              overflow: 'visible',
+              wordBreak: 'break-word',
+              overflowWrap: 'break-word',
               ...leftStyle,
             }}
           >
@@ -307,13 +344,16 @@ export const ResumeHeaderTable: React.FC<{
           </td>
           {hasRight && (
             <td
-              className={rightClassName}
+              data-right-col="true"
+              className={`shrink-0 ${rightClassName || ''}`.trim()}
               style={{
                 verticalAlign,
                 textAlign: 'right',
                 padding: 0,
                 border: 'none',
                 background: 'transparent',
+                flexShrink: 0,
+                overflow: 'visible',
                 width: rightWidth ?? (nowrapRight ? '1%' : '44%'),
                 whiteSpace: nowrapRight ? 'nowrap' : 'normal',
                 ...rightStyle,

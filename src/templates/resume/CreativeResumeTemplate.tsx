@@ -3,8 +3,11 @@ import { DocumentData } from '../../types/document';
 import { FONT_FAMILY_CSS_MAP } from '../../utils/fontClassMap';
 import {
   CONTACT_ROW_STYLE,
+  formatDateRange,
+  formatEducationScore,
   formatResumeLocation,
   getValidCertifications,
+  joinNonEmpty,
   ResumeDescriptionBlock,
   ResumeSplitRow,
   sanitizeDocumentTextFields,
@@ -15,6 +18,13 @@ export const CreativeResumeTemplate: React.FC<{ data: DocumentData }> = ({ data 
   const displayLocation = formatResumeLocation(contact);
   const validCertifications = getValidCertifications(certifications);
   const accent = customization.accentColor || '#ea580c'; // Vibrant Terracotta / Orange
+  const contactItems = [
+    contact.email ? { text: contact.email, highlight: false } : null,
+    contact.phone ? { text: contact.phone, highlight: false } : null,
+    displayLocation ? { text: displayLocation, highlight: false } : null,
+    contact.linkedin ? { text: contact.linkedin, highlight: false } : null,
+    (contact.portfolio || contact.website) ? { text: (contact.portfolio || contact.website) as string, highlight: true } : null,
+  ].filter(Boolean) as Array<{ text: string; highlight: boolean }>;
 
   return (
     <div
@@ -33,13 +43,15 @@ export const CreativeResumeTemplate: React.FC<{ data: DocumentData }> = ({ data 
           <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">
             {personal.fullName || 'Full Name'}
           </h1>
-          <div className="text-xs text-slate-600 mt-1 flex flex-wrap gap-x-4 no-justify" style={CONTACT_ROW_STYLE}>
-            {contact.email && <span>{contact.email}</span>}
-            {contact.phone && <span>&bull; {contact.phone}</span>}
-            {displayLocation && <span>&bull; {displayLocation}</span>}
-            {contact.linkedin && <span>&bull; {contact.linkedin}</span>}
-            {(contact.portfolio || contact.website) && <span className="font-semibold text-orange-600">&bull; {contact.portfolio || contact.website}</span>}
-          </div>
+          {contactItems.length > 0 && (
+            <div className="text-xs text-slate-600 mt-1 flex flex-wrap gap-x-4 no-justify" style={CONTACT_ROW_STYLE}>
+              {contactItems.map((item, idx) => (
+                <span key={idx} className={item.highlight ? 'font-semibold text-orange-600' : undefined}>
+                  {idx > 0 ? <>&bull; {item.text}</> : item.text}
+                </span>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
@@ -61,9 +73,9 @@ export const CreativeResumeTemplate: React.FC<{ data: DocumentData }> = ({ data 
                 <ResumeSplitRow
                   className="text-xs font-bold"
                   leftClassName="text-slate-900"
-                  left={<>{exp.jobTitle} &bull; <span className="text-orange-600">{exp.company}</span></>}
+                  left={<>{exp.jobTitle}{exp.jobTitle && exp.company ? <> &bull; </> : ''}{exp.company && <span className="text-orange-600">{exp.company}</span>}</>}
                   rightClassName="text-slate-400 text-[11px]"
-                  right={<>{exp.startDate} - {(exp.currentlyWorking && (!exp.endDate || exp.endDate.trim().toLowerCase() === 'present')) ? 'Present' : (exp.endDate || 'Present')}</>}
+                  right={formatDateRange(exp.startDate, exp.endDate, exp.currentlyWorking, ' - ')}
                 />
                 <ResumeDescriptionBlock
                   text={exp.description}
@@ -89,7 +101,7 @@ export const CreativeResumeTemplate: React.FC<{ data: DocumentData }> = ({ data 
           </h2>
           <div className="grid grid-cols-2 gap-3 text-xs">
             {projects.map((p) => (
-              <div key={p.id} className="p-2.5 rounded-lg border border-slate-200 bg-slate-50/40 avoid-break">
+              <div key={p.id} data-entry="true" className="p-2.5 rounded-lg border border-slate-200 bg-slate-50/40 avoid-break">
                 <div className="font-bold text-slate-900">{p.name}</div>
                 {p.technologies && <div className="text-[11px] text-orange-600">{p.technologies}</div>}
                 <p className="text-slate-600 mt-1">{p.description}</p>
@@ -105,15 +117,15 @@ export const CreativeResumeTemplate: React.FC<{ data: DocumentData }> = ({ data 
             <div className="avoid-break">
               <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 mb-2">Education</h2>
               <div className="space-y-1.5 text-xs">
-                {education.map((e) => (
-                  <div key={e.id}>
-                    <div className="font-bold">{e.degree}</div>
-                    <div className="text-slate-500">
-                      {e.institute} &bull; {e.endYear}
-                      {e.score ? ` • ${/^[0-9./\s]+$/.test(e.score.trim()) ? `GPA: ${e.score.trim()}` : e.score.trim()}` : ''}
+                {education.map((e) => {
+                  const subline = joinNonEmpty([e.institute, e.endYear, formatEducationScore(e.score)], ' • ');
+                  return (
+                    <div key={e.id} data-entry="true">
+                      <div className="font-bold">{e.degree}</div>
+                      {subline && <div className="text-slate-500">{subline}</div>}
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           )}
@@ -139,7 +151,7 @@ export const CreativeResumeTemplate: React.FC<{ data: DocumentData }> = ({ data 
           </h2>
           <div className="grid grid-cols-2 gap-3 text-xs">
             {validCertifications.map((c) => (
-              <div key={c.id} className="p-2 rounded-lg border border-slate-200 bg-slate-50/40 avoid-break">
+              <div key={c.id} data-entry="true" className="p-2 rounded-lg border border-slate-200 bg-slate-50/40 avoid-break">
                 <div className="font-bold text-slate-900">{c.name}</div>
                 {(c.issuer || c.issueDate) && (
                   <ResumeSplitRow

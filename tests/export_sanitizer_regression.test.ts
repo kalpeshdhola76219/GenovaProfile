@@ -71,14 +71,52 @@ for (const tmpl of resumeTemplates) {
 }
 console.log(`✓ Test 2: All ${resumeTemplates.length} resume templates verified for <table> date layout and clean $120M+ output.`);
 
-// 3. Verify exportService.ts scaling & clone isolation guarantees
+// 3. Verify exportService.ts scaling, font-readiness, overflow & clone isolation guarantees
 const exportSrc = fs.readFileSync(path.join(process.cwd(), 'src/services/exportService.ts'), 'utf8');
+const paginationSrc = fs.readFileSync(path.join(process.cwd(), 'src/services/paginationEngine.ts'), 'utf8');
+const utilsSrc = fs.readFileSync(path.join(process.cwd(), 'src/templates/resume/resumeTemplateUtils.tsx'), 'utf8');
+const formSrc = fs.readFileSync(path.join(process.cwd(), 'src/components/forms/ResumeForm.tsx'), 'utf8');
+
+const LOCK_BANNER = '// LOCKED EXPORT & PAGINATION ENGINE — DO NOT MODIFY UNLESS EXPLICITLY REQUESTED';
+assert.ok(exportSrc.startsWith(LOCK_BANNER), 'src/services/exportService.ts must start with the permanent lock banner');
+assert.ok(paginationSrc.startsWith(LOCK_BANNER), 'src/services/paginationEngine.ts must start with the permanent lock banner');
+assert.ok(utilsSrc.startsWith(LOCK_BANNER), 'src/templates/resume/resumeTemplateUtils.tsx must start with the permanent lock banner');
+
+assert.ok(exportSrc.includes('waitForFontsAndTwoFrames'), 'Must await document.fonts.ready + 2 rAF ticks before measuring/capturing');
+assert.ok(exportSrc.includes('document.fonts.ready'), 'Must await document.fonts.ready');
 assert.ok(exportSrc.includes('normalizeWindowDevicePixelRatio(clonedDoc.defaultView)'), 'Must normalize cloned iframe DPR');
 assert.ok(exportSrc.includes("clonedDoc.documentElement.style.zoom = '1'"), 'Must lock cloned documentElement zoom to 1');
 assert.ok(exportSrc.includes("clonedDoc.body.style.zoom = '1'"), 'Must lock cloned body zoom to 1');
 assert.ok(exportSrc.includes("clonedDoc.body.style.transform = 'none'"), 'Must reset cloned body transform');
+assert.ok(exportSrc.includes('windowWidth: EXPORT_A4_WIDTH_PX'), 'Must lock html2canvas windowWidth to 794px desktop A4');
 assert.ok(exportSrc.includes('windowHeight: EXPORT_A4_HEIGHT_PX'), 'Must pass explicit windowHeight to html2canvas');
 assert.ok(exportSrc.includes("flowRoot.style.minHeight = '0px'"), 'Must clear flowRoot minHeight before measuring totalPages');
-console.log('✓ Test 3: exportService.ts DPR normalization, clone isolation, and 1-page measurement guards verified.');
+assert.ok(exportSrc.includes("clonedEl.style.overflow = 'visible'"), 'Must override overflow: hidden on text rows in export clone');
+assert.ok(exportSrc.includes("clonedEl.style.wordBreak = 'break-word'"), 'Must enforce wordBreak: break-word on text rows in export clone');
+assert.ok(formSrc.includes('autoComplete="off"'), 'ResumeForm location inputs must disable browser autofill');
+console.log('✓ Test 3: Lock banners, font readiness, DPR normalization, desktop 794px A4 lock, and overflow guards verified.');
+
+// 4. Verify vercel.json Cache-Control headers and PROJECT_GUARDRAILS.md documentation lock
+const vercelConfigPath = path.join(process.cwd(), 'vercel.json');
+const vercelConfig = JSON.parse(fs.readFileSync(vercelConfigPath, 'utf8'));
+assert.ok(Array.isArray(vercelConfig.headers), 'vercel.json must define headers array');
+const findCacheControl = (source: string) => {
+  const entry = vercelConfig.headers.find((h: any) => h.source === source);
+  const header = entry?.headers?.find((hh: any) => hh.key.toLowerCase() === 'cache-control');
+  return header?.value || '';
+};
+assert.strictEqual(findCacheControl('/'), 'no-cache, no-store, must-revalidate', 'Root / must send no-cache, no-store, must-revalidate');
+assert.strictEqual(findCacheControl('/index.html'), 'no-cache, no-store, must-revalidate', '/index.html must send no-cache, no-store, must-revalidate');
+assert.strictEqual(findCacheControl('/assets/(.*)'), 'public, max-age=31536000, immutable', '/assets/(.*) must send immutable 1-year cache');
+
+const guardrailsPath = path.join(process.cwd(), 'PROJECT_GUARDRAILS.md');
+const readmePath = path.join(process.cwd(), 'README.md');
+assert.ok(fs.existsSync(guardrailsPath), 'PROJECT_GUARDRAILS.md must exist at project root');
+assert.ok(fs.existsSync(readmePath), 'README.md must exist at project root');
+assert.ok(
+  fs.readFileSync(readmePath, 'utf8').includes('PROJECT_GUARDRAILS.md'),
+  'README.md must reference PROJECT_GUARDRAILS.md'
+);
+console.log('✓ Test 4: vercel.json Cache-Control headers and PROJECT_GUARDRAILS.md lock verified.');
 
 console.log('\n🎉 ALL EXPORT & SANITIZER REGRESSION TESTS PASSED!');

@@ -4,8 +4,11 @@ import { FONT_FAMILY_CSS_MAP } from '../../utils/fontClassMap';
 import {
   BULLET_LIST_STYLE,
   CONTACT_CENTER_ROW_STYLE,
+  formatDateRange,
+  formatEducationScore,
   formatResumeLocation,
   getValidCertifications,
+  joinNonEmpty,
   ResumeBulletItem,
   ResumeDescriptionBlock,
   ResumeSplitRow,
@@ -63,8 +66,8 @@ export const ATSBasicResumeTemplate: React.FC<{ data: DocumentData }> = ({ data 
               <div key={exp.id} data-entry="true">
                 <ResumeSplitRow
                   className="text-xs font-bold"
-                  left={<>{exp.jobTitle}, {exp.company}</>}
-                  right={<>{exp.startDate} - {(exp.currentlyWorking && (!exp.endDate || exp.endDate.trim().toLowerCase() === 'present')) ? 'Present' : (exp.endDate || 'Present')}</>}
+                  left={joinNonEmpty([exp.jobTitle, exp.company], ', ')}
+                  right={formatDateRange(exp.startDate, exp.endDate, exp.currentlyWorking, ' - ')}
                 />
                 {exp.location && <div className="text-[11px] italic text-neutral-800">{exp.location}</div>}
                 <ResumeDescriptionBlock
@@ -92,10 +95,10 @@ export const ATSBasicResumeTemplate: React.FC<{ data: DocumentData }> = ({ data 
           </h2>
           <div className="space-y-2">
             {education.map((edu) => (
-              <div key={edu.id}>
+              <div key={edu.id} data-entry="true">
                 <ResumeSplitRow
                   className="text-xs font-bold"
-                  left={<>{edu.degree} - {edu.institute}{edu.score ? ` • ${/^[0-9./\s]+$/.test(edu.score.trim()) ? `GPA: ${edu.score.trim()}` : edu.score.trim()}` : ''}</>}
+                  left={joinNonEmpty([joinNonEmpty([edu.degree, edu.institute], ' - '), formatEducationScore(edu.score)], ' • ')}
                   right={edu.endYear}
                 />
                 {edu.description && <div className="text-[11px]">{edu.description}</div>}
@@ -112,7 +115,7 @@ export const ATSBasicResumeTemplate: React.FC<{ data: DocumentData }> = ({ data 
             SKILLS & COMPETENCIES
           </h2>
           <p className="text-xs leading-relaxed no-justify">
-            {skills.map((s) => s.name).join(' • ')}
+            {joinNonEmpty(skills.map((s) => s.name), ' • ')}
           </p>
         </div>
       )}
@@ -125,11 +128,11 @@ export const ATSBasicResumeTemplate: React.FC<{ data: DocumentData }> = ({ data 
           </h2>
           <div className="space-y-2">
             {projects.map((proj) => (
-              <div key={proj.id}>
+              <div key={proj.id} data-entry="true">
                 <ResumeSplitRow
                   className="text-xs font-bold"
                   wrapRight
-                  left={<>{proj.name} {proj.role ? `(${proj.role})` : ''}</>}
+                  left={<>{proj.name}{proj.role ? ` (${proj.role})` : ''}</>}
                   right={proj.link}
                   rightClassName="font-normal text-neutral-700"
                 />
@@ -150,7 +153,10 @@ export const ATSBasicResumeTemplate: React.FC<{ data: DocumentData }> = ({ data 
           <div className="text-xs space-y-1 text-black" style={BULLET_LIST_STYLE}>
             {validCertifications.map((c) => (
               <ResumeBulletItem key={c.id} markerClassName="text-black">
-                <strong>{c.name}</strong>{c.issuer ? ` - ${c.issuer}` : ''}{c.issueDate ? ` (${c.issueDate})` : ''}
+                {c.name && <strong>{c.name}</strong>}
+                {c.name && c.issuer ? ' - ' : ''}
+                {c.issuer}
+                {c.issueDate ? ` (${c.issueDate})` : ''}
               </ResumeBulletItem>
             ))}
           </div>

@@ -2,8 +2,11 @@ import React from 'react';
 import { DocumentData } from '../../types/document';
 import { getStaticFontClass, getFontFamilyCss, FONT_FAMILY_CSS_MAP } from '../../utils/fontClassMap';
 import {
+  formatDateRange,
+  formatEducationScore,
   formatResumeLocation,
   getValidCertifications,
+  joinNonEmpty,
   ResumeDescriptionBlock,
   ResumeHeaderTable,
   ResumeSplitRow,
@@ -99,15 +102,13 @@ export const PremiumMinimalExecutiveResumeTemplate: React.FC<{ data: DocumentDat
                   leftClassName="font-bold text-sm text-slate-950"
                   left={
                     <>
-                      {exp.jobTitle} {exp.company ? <><span className="font-normal text-slate-500">|</span> <span className="font-semibold text-slate-700">{exp.company}</span></> : ''}
+                      {exp.jobTitle}
+                      {exp.jobTitle && exp.company ? <> <span className="font-normal text-slate-500">|</span> </> : ''}
+                      {exp.company && <span className="font-semibold text-slate-700">{exp.company}</span>}
                     </>
                   }
                   rightClassName="text-xs text-slate-500 font-medium"
-                  right={
-                    <>
-                      {exp.startDate} – {(exp.currentlyWorking && (!exp.endDate || exp.endDate.trim().toLowerCase() === 'present')) ? 'Present' : (exp.endDate || 'Present')}
-                    </>
-                  }
+                  right={formatDateRange(exp.startDate, exp.endDate, exp.currentlyWorking, ' – ')}
                 />
                 <ResumeDescriptionBlock
                   text={exp.description}
@@ -138,11 +139,11 @@ export const PremiumMinimalExecutiveResumeTemplate: React.FC<{ data: DocumentDat
           </h2>
           <div className="space-y-3">
             {projects.map((p) => (
-              <div key={p.id} className="text-xs">
+              <div key={p.id} data-entry="true" className="text-xs">
                 <ResumeSplitRow
                   wrapRight
                   leftClassName="font-bold text-slate-900"
-                  left={<>{p.name} {p.role ? `(${p.role})` : ''}</>}
+                  left={<>{p.name}{p.role ? ` (${p.role})` : ''}</>}
                   rightClassName="text-slate-500 font-normal text-[11px]"
                   right={p.link}
                 />
@@ -162,12 +163,18 @@ export const PremiumMinimalExecutiveResumeTemplate: React.FC<{ data: DocumentDat
                 Education & Degrees
               </h2>
               <div className="space-y-2 text-xs">
-                {displayEducation.map((e) => (
-                  <div key={e.id}>
-                    <div className="font-bold text-slate-900">{e.degree}</div>
-                    <div className="text-slate-600">{e.institute} {e.endYear ? `(${e.endYear})` : ''}{e.score ? ` • ${/^[0-9./\s]+$/.test(e.score.trim()) ? `GPA: ${e.score.trim()}` : e.score.trim()}` : ''}</div>
-                  </div>
-                ))}
+                {displayEducation.map((e) => {
+                  const instYear = e.institute
+                    ? `${e.institute}${e.endYear ? ` (${e.endYear})` : ''}`
+                    : e.endYear || '';
+                  const subline = joinNonEmpty([instYear, formatEducationScore(e.score)], ' • ');
+                  return (
+                    <div key={e.id} data-entry="true">
+                      <div className="font-bold text-slate-900">{e.degree}</div>
+                      {subline && <div className="text-slate-600">{subline}</div>}
+                    </div>
+                  );
+                })}
               </div>
             </div>
           )}
@@ -179,8 +186,11 @@ export const PremiumMinimalExecutiveResumeTemplate: React.FC<{ data: DocumentDat
               </h2>
               <div className="space-y-1.5 text-xs text-slate-700">
                 {validCertifications.map((c) => (
-                  <div key={c.id}>
-                    <strong className="text-slate-900">{c.name}</strong>{c.issuer ? ` • ${c.issuer}` : ''}{c.issueDate ? ` (${c.issueDate})` : ''}
+                  <div key={c.id} data-entry="true">
+                    {c.name && <strong className="text-slate-900">{c.name}</strong>}
+                    {c.name && c.issuer ? ' • ' : ''}
+                    {c.issuer}
+                    {c.issueDate ? ` (${c.issueDate})` : ''}
                   </div>
                 ))}
               </div>

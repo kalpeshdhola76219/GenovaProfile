@@ -3,8 +3,11 @@ import { DocumentData } from '../../types/document';
 import { FONT_FAMILY_CSS_MAP } from '../../utils/fontClassMap';
 import {
   BULLET_LIST_STYLE,
+  formatDateRange,
+  formatEducationScore,
   formatResumeLocation,
   getValidCertifications,
+  joinNonEmpty,
   ResumeBulletItem,
   ResumeDescriptionBlock,
   ResumeHeaderTable,
@@ -66,9 +69,9 @@ export const FinanceProfessionalResumeTemplate: React.FC<{ data: DocumentData }>
               <div key={exp.id} data-entry="true">
                 <ResumeSplitRow
                   className="text-xs font-bold"
-                  left={<>{exp.jobTitle}, <span className="font-semibold text-emerald-900">{exp.company}</span></>}
+                  left={<>{exp.jobTitle}{exp.jobTitle && exp.company ? ', ' : ''}{exp.company && <span className="font-semibold text-emerald-900">{exp.company}</span>}</>}
                   rightClassName="font-mono text-[11px] text-slate-600"
-                  right={<>{exp.startDate} - {(exp.currentlyWorking && (!exp.endDate || exp.endDate.trim().toLowerCase() === 'present')) ? 'Present' : (exp.endDate || 'Present')}</>}
+                  right={formatDateRange(exp.startDate, exp.endDate, exp.currentlyWorking, ' - ')}
                 />
                 {exp.location && <div className="text-[11px] text-slate-500 italic">{exp.location}</div>}
                 <ResumeDescriptionBlock
@@ -117,12 +120,16 @@ export const FinanceProfessionalResumeTemplate: React.FC<{ data: DocumentData }>
                 Education & Honors
               </h2>
               <div className="space-y-1.5 text-xs">
-                {education.map((e) => (
-                  <div key={e.id}>
-                    <div className="font-bold">{e.degree} &bull; {e.institute}</div>
-                    <div className="text-slate-500 font-mono text-[11px]">{e.endYear}{e.score ? ` • ${/^[0-9./\s]+$/.test(e.score.trim()) ? `GPA: ${e.score.trim()}` : e.score.trim()}` : ''}</div>
-                  </div>
-                ))}
+                {education.map((e) => {
+                  const titleLine = joinNonEmpty([e.degree, e.institute], ' • ');
+                  const metaLine = joinNonEmpty([e.endYear, formatEducationScore(e.score)], ' • ');
+                  return (
+                    <div key={e.id} data-entry="true">
+                      {titleLine && <div className="font-bold">{titleLine}</div>}
+                      {metaLine && <div className="text-slate-500 font-mono text-[11px]">{metaLine}</div>}
+                    </div>
+                  );
+                })}
               </div>
             </div>
           )}
@@ -132,7 +139,7 @@ export const FinanceProfessionalResumeTemplate: React.FC<{ data: DocumentData }>
                 Financial Modeling & Skills
               </h2>
               <p className="text-xs text-slate-800 leading-relaxed no-justify">
-                {skills.map((s) => s.name).join(' • ')}
+                {joinNonEmpty(skills.map((s) => s.name), ' • ')}
               </p>
             </div>
           )}
@@ -147,7 +154,10 @@ export const FinanceProfessionalResumeTemplate: React.FC<{ data: DocumentData }>
           <div className="text-xs space-y-1 text-slate-800" style={BULLET_LIST_STYLE}>
             {validCertifications.map((c) => (
               <ResumeBulletItem key={c.id} markerClassName="text-emerald-700">
-                <strong>{c.name}</strong>{c.issuer ? <> &bull; {c.issuer}</> : ''}{c.issueDate ? ` (${c.issueDate})` : ''}
+                {c.name && <strong>{c.name}</strong>}
+                {c.name && c.issuer ? <> &bull; </> : ''}
+                {c.issuer}
+                {c.issueDate ? ` (${c.issueDate})` : ''}
               </ResumeBulletItem>
             ))}
           </div>

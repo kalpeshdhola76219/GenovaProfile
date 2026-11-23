@@ -2,8 +2,11 @@ import React from 'react';
 import { DocumentData } from '../../types/document';
 import { FONT_FAMILY_CSS_MAP } from '../../utils/fontClassMap';
 import {
+  formatDateRange,
+  formatEducationScore,
   formatResumeLocation,
   getValidCertifications,
+  joinNonEmpty,
   ResumeDescriptionBlock,
   ResumeHeaderTable,
   ResumeSplitRow,
@@ -50,9 +53,11 @@ export const MonacoSovereignTemplate: React.FC<{ data: DocumentData }> = ({ data
             <h1 className="text-3xl font-black tracking-tight uppercase font-cinzel" style={{ color: primary, fontFamily: FONT_FAMILY_CSS_MAP.cinzel }}>
               {personal.fullName || 'ALEXANDER STERLING'}
             </h1>
-            <p className="text-xs font-semibold text-slate-600 mt-1 tracking-wide font-playfair italic text-sm no-justify" style={{ fontFamily: FONT_FAMILY_CSS_MAP.playfair }}>
-              {personal.professionalTitle || 'Chief Strategy Officer • Cross-Border Enterprise Architect'}
-            </p>
+            {personal.professionalTitle && (
+              <p className="text-xs font-semibold text-slate-600 mt-1 tracking-wide font-playfair italic text-sm no-justify" style={{ fontFamily: FONT_FAMILY_CSS_MAP.playfair }}>
+                {personal.professionalTitle}
+              </p>
+            )}
           </>
         }
         rightClassName="text-right text-xs text-slate-500 space-y-1 font-sans no-justify"
@@ -123,18 +128,13 @@ export const MonacoSovereignTemplate: React.FC<{ data: DocumentData }> = ({ data
                       leftClassName="font-extrabold text-slate-900 text-xs"
                       left={exp.jobTitle}
                       rightClassName="text-[10px] font-semibold text-slate-400 font-mono"
-                      right={
-                        <>
-                          {exp.startDate} &ndash;{' '}
-                          {exp.currentlyWorking && (!exp.endDate || exp.endDate.trim().toLowerCase() === 'present')
-                            ? 'Present'
-                            : exp.endDate || 'Present'}
-                        </>
-                      }
+                      right={formatDateRange(exp.startDate, exp.endDate, exp.currentlyWorking, ' – ')}
                     />
-                    <div className="text-xs font-semibold mb-1" style={{ color: gold }}>
-                      {exp.company} {exp.location ? `• ${exp.location}` : ''}
-                    </div>
+                    {joinNonEmpty([exp.company, exp.location], ' • ') && (
+                      <div className="text-xs font-semibold mb-1" style={{ color: gold }}>
+                        {joinNonEmpty([exp.company, exp.location], ' • ')}
+                      </div>
+                    )}
                     <ResumeDescriptionBlock
                       text={exp.description}
                       wrapperClassName="mt-1 space-y-1 text-xs text-slate-700"
@@ -214,16 +214,16 @@ export const MonacoSovereignTemplate: React.FC<{ data: DocumentData }> = ({ data
                 Academic Pedigree
               </h2>
               <div className="space-y-2.5 text-xs">
-                {education.map((e) => (
-                  <div key={e.id} className="bg-slate-50 p-2.5 rounded-lg border border-slate-100">
-                    <div className="font-bold text-slate-900">{e.degree}</div>
-                    <div className="text-slate-600 text-[11px]">{e.institute}</div>
-                    <div className="text-slate-400 text-[10px] font-mono mt-0.5">
-                      {e.endYear}
-                      {e.score ? ` • ${/^[0-9./\s]+$/.test(e.score.trim()) ? `GPA: ${e.score.trim()}` : e.score.trim()}` : ''}
+                {education.map((e) => {
+                  const metaLine = joinNonEmpty([e.endYear, formatEducationScore(e.score)], ' • ');
+                  return (
+                    <div key={e.id} data-entry="true" className="bg-slate-50 p-2.5 rounded-lg border border-slate-100">
+                      <div className="font-bold text-slate-900">{e.degree}</div>
+                      {e.institute && <div className="text-slate-600 text-[11px]">{e.institute}</div>}
+                      {metaLine && <div className="text-slate-400 text-[10px] font-mono mt-0.5">{metaLine}</div>}
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           )}
@@ -235,7 +235,7 @@ export const MonacoSovereignTemplate: React.FC<{ data: DocumentData }> = ({ data
               </h2>
               <div className="space-y-1.5 text-xs text-slate-700">
                 {validCertifications.map((c) => (
-                  <div key={c.id} className="text-[11px]">
+                  <div key={c.id} data-entry="true" className="text-[11px]">
                     <span className="font-bold text-slate-900">{c.name}</span>
                     {(c.issuer || c.issueDate) && (
                       <span className="text-slate-500 block text-[10px]">

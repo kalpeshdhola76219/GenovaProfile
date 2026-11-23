@@ -4,8 +4,11 @@ import { FONT_FAMILY_CSS_MAP } from '../../utils/fontClassMap';
 import {
   BULLET_LIST_STYLE,
   CONTACT_CENTER_ROW_STYLE,
+  formatDateRange,
+  formatEducationScore,
   formatResumeLocation,
   getValidCertifications,
+  joinNonEmpty,
   ResumeBulletItem,
   ResumeDescriptionBlock,
   ResumeSplitRow,
@@ -16,6 +19,7 @@ export const ClassicResumeTemplate: React.FC<{ data: DocumentData }> = ({ data }
   const { personal, contact, summary, experience, education, skills, projects, certifications, customSections, customization } = sanitizeDocumentTextFields(data);
   const displayLocation = formatResumeLocation(contact);
   const validCertifications = getValidCertifications(certifications);
+  const contactItems = [contact.email, contact.phone, displayLocation, contact.linkedin, contact.portfolio || contact.website].filter(Boolean) as string[];
 
   return (
     <div
@@ -32,13 +36,13 @@ export const ClassicResumeTemplate: React.FC<{ data: DocumentData }> = ({ data }
         {personal.professionalTitle && (
           <p className="text-sm font-semibold tracking-wider text-stone-700 italic mt-0.5">{personal.professionalTitle}</p>
         )}
-        <div className="text-xs font-sans text-stone-600 mt-1 flex flex-wrap justify-center gap-3 no-justify" style={CONTACT_CENTER_ROW_STYLE}>
-          {contact.email && <span>{contact.email}</span>}
-          {contact.phone && <span>• {contact.phone}</span>}
-          {displayLocation && <span>• {displayLocation}</span>}
-          {contact.linkedin && <span>• {contact.linkedin}</span>}
-          {(contact.portfolio || contact.website) && <span>• {contact.portfolio || contact.website}</span>}
-        </div>
+        {contactItems.length > 0 && (
+          <div className="text-xs font-sans text-stone-600 mt-1 flex flex-wrap justify-center gap-3 no-justify" style={CONTACT_CENTER_ROW_STYLE}>
+            {contactItems.map((item, idx) => (
+              <span key={idx}>{idx > 0 ? `• ${item}` : item}</span>
+            ))}
+          </div>
+        )}
       </div>
 
       {summary && (
@@ -60,9 +64,9 @@ export const ClassicResumeTemplate: React.FC<{ data: DocumentData }> = ({ data }
               <div key={exp.id} data-entry="true">
                 <ResumeSplitRow
                   className="text-xs font-bold"
-                  left={<>{exp.jobTitle}, <em>{exp.company}</em></>}
+                  left={<>{exp.jobTitle}{exp.jobTitle && exp.company ? ', ' : ''}{exp.company && <em>{exp.company}</em>}</>}
                   rightClassName="font-sans font-normal text-stone-500 text-[11px]"
-                  right={<>{exp.startDate} – {(exp.currentlyWorking && (!exp.endDate || exp.endDate.trim().toLowerCase() === 'present')) ? 'Present' : (exp.endDate || 'Present')}</>}
+                  right={formatDateRange(exp.startDate, exp.endDate, exp.currentlyWorking, ' – ')}
                 />
                 <ResumeDescriptionBlock
                   text={exp.description}
@@ -90,15 +94,15 @@ export const ClassicResumeTemplate: React.FC<{ data: DocumentData }> = ({ data }
                 Education
               </h2>
               <div className="space-y-1 text-xs">
-                {education.map((e) => (
-                  <div key={e.id}>
-                    <div className="font-bold">{e.degree}</div>
-                    <div className="text-stone-600 font-sans">
-                      {e.institute} • {e.endYear}
-                      {e.score ? ` • ${/^[0-9./\s]+$/.test(e.score.trim()) ? `GPA: ${e.score.trim()}` : e.score.trim()}` : ''}
+                {education.map((e) => {
+                  const subline = joinNonEmpty([e.institute, e.endYear, formatEducationScore(e.score)], ' • ');
+                  return (
+                    <div key={e.id} data-entry="true">
+                      <div className="font-bold">{e.degree}</div>
+                      {subline && <div className="text-stone-600 font-sans">{subline}</div>}
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           )}
@@ -108,7 +112,7 @@ export const ClassicResumeTemplate: React.FC<{ data: DocumentData }> = ({ data }
                 Skills
               </h2>
               <p className="text-xs text-stone-800 leading-relaxed no-justify">
-                {skills.map((s) => s.name).join(' • ')}
+                {joinNonEmpty(skills.map((s) => s.name), ' • ')}
               </p>
             </div>
           )}
@@ -145,7 +149,7 @@ export const ClassicResumeTemplate: React.FC<{ data: DocumentData }> = ({ data }
           <div className="text-xs text-stone-700 space-y-0.5" style={BULLET_LIST_STYLE}>
             {validCertifications.map((c) => (
               <ResumeBulletItem key={c.id} markerClassName="text-stone-400">
-                {c.name}{c.issuer ? ` (${c.issuer})` : ''}{c.issueDate ? ` • ${c.issueDate}` : ''}
+                {joinNonEmpty([c.name ? `${c.name}${c.issuer ? ` (${c.issuer})` : ''}` : c.issuer, c.issueDate], ' • ')}
               </ResumeBulletItem>
             ))}
           </div>

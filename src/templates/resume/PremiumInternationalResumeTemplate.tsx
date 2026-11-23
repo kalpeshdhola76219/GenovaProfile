@@ -2,8 +2,11 @@ import React from 'react';
 import { DocumentData } from '../../types/document';
 import { getStaticFontClass, getFontFamilyCss, FONT_FAMILY_CSS_MAP } from '../../utils/fontClassMap';
 import {
+  formatDateRange,
+  formatEducationScore,
   formatResumeLocation,
   getValidCertifications,
+  joinNonEmpty,
   ResumeDescriptionBlock,
   ResumeHeaderTable,
   ResumeSplitRow,
@@ -91,16 +94,16 @@ export const PremiumInternationalResumeTemplate: React.FC<{ data: DocumentData }
                 Education & Degrees
               </h2>
               <div className="space-y-3 text-xs">
-                {education.map((e) => (
-                  <div key={e.id}>
-                    <div className="font-bold text-slate-900">{e.degree}</div>
-                    <div className="text-slate-600">{e.institute}</div>
-                    <div className="text-[11px] text-slate-400">
-                      {e.endYear}
-                      {e.score ? ` • ${/^[0-9./\s]+$/.test(e.score.trim()) ? `GPA: ${e.score.trim()}` : e.score.trim()}` : ''}
+                {education.map((e) => {
+                  const metaLine = joinNonEmpty([e.endYear, formatEducationScore(e.score)], ' • ');
+                  return (
+                    <div key={e.id} data-entry="true">
+                      <div className="font-bold text-slate-900">{e.degree}</div>
+                      {e.institute && <div className="text-slate-600">{e.institute}</div>}
+                      {metaLine && <div className="text-[11px] text-slate-400">{metaLine}</div>}
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           )}
@@ -112,11 +115,11 @@ export const PremiumInternationalResumeTemplate: React.FC<{ data: DocumentData }
               </h2>
               <div className="space-y-2 text-xs">
                 {validCertifications.map((c) => (
-                  <div key={c.id}>
+                  <div key={c.id} data-entry="true">
                     <div className="font-semibold text-slate-900">{c.name}</div>
-                    {(c.issuer || c.issueDate) && (
+                    {joinNonEmpty([c.issuer, c.issueDate], ' • ') && (
                       <div className="text-slate-500 text-[11px]">
-                        {c.issuer}{c.issuer && c.issueDate ? ' • ' : ''}{c.issueDate}
+                        {joinNonEmpty([c.issuer, c.issueDate], ' • ')}
                       </div>
                     )}
                   </div>
@@ -149,15 +152,13 @@ export const PremiumInternationalResumeTemplate: React.FC<{ data: DocumentData }
                       leftClassName="font-bold text-sm text-slate-900"
                       left={exp.jobTitle}
                       rightClassName="text-xs text-slate-500 font-medium"
-                      right={
-                        <>
-                          {exp.startDate} – {(exp.currentlyWorking && (!exp.endDate || exp.endDate.trim().toLowerCase() === 'present')) ? 'Present' : (exp.endDate || 'Present')}
-                        </>
-                      }
+                      right={formatDateRange(exp.startDate, exp.endDate, exp.currentlyWorking, ' – ')}
                     />
-                    <div className="text-xs font-semibold text-slate-600 mb-1">
-                      {exp.company} {exp.location ? `• ${exp.location}` : ''}
-                    </div>
+                    {joinNonEmpty([exp.company, exp.location], ' • ') && (
+                      <div className="text-xs font-semibold text-slate-600 mb-1">
+                        {joinNonEmpty([exp.company, exp.location], ' • ')}
+                      </div>
+                    )}
                     <ResumeDescriptionBlock
                       text={exp.description}
                       wrapperClassName="mt-1 space-y-1 text-xs text-slate-700"

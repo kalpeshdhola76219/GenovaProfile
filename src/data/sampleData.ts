@@ -7,46 +7,6 @@ export const DEFAULT_FEMALE_AVATAR = "data:image/svg+xml,%3Csvg xmlns='http://ww
 export const createEmptyDocument = (type: DocumentType, templateId: string): DocumentData => {
   const timestamp = new Date().toISOString();
 
-  // Targeted autofill for International Global Lead and Modern Corporate templates
-  if (type === 'resume') {
-    if (templateId === 'resume-prem-international') {
-      return {
-        ...JSON.parse(JSON.stringify(sampleInternationalResumeDocument)),
-        id: `doc_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
-        templateId,
-        createdAt: timestamp,
-        updatedAt: timestamp,
-      };
-    }
-    if (templateId === 'resume-modern-corporate') {
-      return {
-        ...JSON.parse(JSON.stringify(sampleModernCorporateResumeDocument)),
-        id: `doc_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
-        templateId,
-        createdAt: timestamp,
-        updatedAt: timestamp,
-      };
-    }
-    if (templateId === 'resume-prem-minimal-executive') {
-      return {
-        ...JSON.parse(JSON.stringify(sampleMinimalExecutiveResumeDocument)),
-        id: `doc_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
-        templateId,
-        createdAt: timestamp,
-        updatedAt: timestamp,
-      };
-    }
-    if (templateId === 'resume-monaco-sovereign') {
-      return {
-        ...JSON.parse(JSON.stringify(sampleMonacoSovereignResumeDocument)),
-        id: `doc_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
-        templateId,
-        createdAt: timestamp,
-        updatedAt: timestamp,
-      };
-    }
-  }
-
   return {
     id: `doc_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
     type,

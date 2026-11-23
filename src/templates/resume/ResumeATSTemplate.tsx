@@ -4,8 +4,11 @@ import { Mail, Phone, MapPin, Globe, Linkedin, Github } from 'lucide-react';
 import { FONT_FAMILY_CSS_MAP } from '../../utils/fontClassMap';
 import {
   CONTACT_ROW_STYLE,
+  formatDateRange,
+  formatEducationScore,
   formatResumeLocation,
   getValidCertifications,
+  joinNonEmpty,
   ResumeDescriptionBlock,
   ResumeSplitRow,
   sanitizeDocumentTextFields,
@@ -117,18 +120,13 @@ export const ResumeATSTemplate: React.FC<{ data: DocumentData }> = ({ data }) =>
                   leftClassName="font-bold text-slate-900"
                   left={exp.jobTitle || 'Role'}
                   rightClassName="text-slate-500 font-medium"
-                  right={
-                    <>
-                      {exp.startDate || ''} –{' '}
-                      {exp.currentlyWorking && (!exp.endDate || exp.endDate.trim().toLowerCase() === 'present')
-                        ? 'Present'
-                        : exp.endDate || 'Present'}
-                    </>
-                  }
+                  right={formatDateRange(exp.startDate, exp.endDate, exp.currentlyWorking, ' – ')}
                 />
-                <div className="text-xs text-slate-600 italic">
-                  {exp.company}{exp.location ? ` • ${exp.location}` : ''}
-                </div>
+                {joinNonEmpty([exp.company, exp.location], ' • ') && (
+                  <div className="text-xs text-slate-600 italic">
+                    {joinNonEmpty([exp.company, exp.location], ' • ')}
+                  </div>
+                )}
                 <ResumeDescriptionBlock
                   text={exp.description}
                   wrapperClassName="mt-1 space-y-1 text-xs text-slate-700"
@@ -156,24 +154,20 @@ export const ResumeATSTemplate: React.FC<{ data: DocumentData }> = ({ data }) =>
             Education
           </h2>
           <div className="space-y-2">
-            {education.map((edu, idx) => (
-              <div key={edu.id || idx} className="text-xs">
-                <ResumeSplitRow
-                  className="font-bold text-slate-900"
-                  left={edu.degree}
-                  rightClassName="text-slate-500 font-normal"
-                  right={
-                    <>
-                      {edu.startYear || ''}{edu.startYear && edu.endYear ? ' – ' : ''}{edu.endYear || ''}
-                    </>
-                  }
-                />
-                <div className="text-slate-600">
-                  {[edu.institute, edu.location].filter(Boolean).join(', ')}
-                  {edu.score ? ` • ${/^[0-9./\s]+$/.test(edu.score.trim()) ? `GPA: ${edu.score.trim()}` : edu.score.trim()}` : ''}
+            {education.map((edu, idx) => {
+              const subline = joinNonEmpty([joinNonEmpty([edu.institute, edu.location], ', '), formatEducationScore(edu.score)], ' • ');
+              return (
+                <div key={edu.id || idx} data-entry="true" className="text-xs">
+                  <ResumeSplitRow
+                    className="font-bold text-slate-900"
+                    left={edu.degree}
+                    rightClassName="text-slate-500 font-normal"
+                    right={joinNonEmpty([edu.startYear, edu.endYear], ' – ')}
+                  />
+                  {subline && <div className="text-slate-600">{subline}</div>}
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </section>
       )}
@@ -211,7 +205,7 @@ export const ResumeATSTemplate: React.FC<{ data: DocumentData }> = ({ data }) =>
           </h2>
           <div className="space-y-2">
             {projects.map((proj, idx) => (
-              <div key={proj.id || idx} className="text-xs">
+              <div key={proj.id || idx} data-entry="true" className="text-xs">
                 <ResumeSplitRow
                   className="font-bold text-slate-900"
                   wrapRight
@@ -250,10 +244,10 @@ export const ResumeATSTemplate: React.FC<{ data: DocumentData }> = ({ data }) =>
           </h2>
           <div className="space-y-1 text-xs">
             {validCertifications.map((cert, idx) => (
-              <div key={cert.id || idx}>
+              <div key={cert.id || idx} data-entry="true">
                 <ResumeSplitRow
                   leftClassName="font-semibold text-slate-800"
-                  left={`${cert.name}${cert.issuer ? ` — ${cert.issuer}` : ''}`}
+                  left={joinNonEmpty([cert.name, cert.issuer], ' — ')}
                   rightClassName="text-slate-500"
                   right={cert.issueDate}
                 />
