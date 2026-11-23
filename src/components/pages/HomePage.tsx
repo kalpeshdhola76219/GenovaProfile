@@ -16,6 +16,7 @@ import {
   Sliders,
   Check,
   Lock,
+  Info,
 } from 'lucide-react';
 import { BUSINESS } from '../../config/business';
 
@@ -765,6 +766,23 @@ export const HomePage: React.FC<HomePageProps> = ({
                   Privacy Policy
                 </button>
                 .
+              </p>
+            </div>
+          </div>
+
+          {/* SaaS Business Model & Non-Matchmaking Compliance Disclaimer */}
+          <div className="max-w-4xl mx-auto mt-8 bg-slate-50 border border-slate-200/90 rounded-2xl p-4 sm:p-5 flex items-start gap-3.5 shadow-2xs">
+            <div className="w-8 h-8 rounded-lg bg-blue-50 border border-blue-200/80 flex items-center justify-center shrink-0 mt-0.5">
+              <Info className="w-4 h-4 text-[#0066FF]" />
+            </div>
+            <div className="space-y-1 text-left">
+              <h3 className="text-xs sm:text-sm font-bold text-slate-900">
+                Important Disclaimer: Self-Service PDF Formatting Software Only
+              </h3>
+              <p className="text-[11px] sm:text-xs text-slate-600 leading-relaxed">
+                <strong>Genova Profile (genovaprofile.com)</strong> is strictly a self-service{' '}
+                <strong>PDF Document &amp; Bio-Profile Formatting Software Tool (SaaS)</strong>. We are{' '}
+                <strong>NOT a matchmaking, dating, marriage bureau, or matrimonial agency</strong>. We do not host public profile directories, broker introductions, connect users, or offer partner-search services. Users simply format their own details into templates and download PDF/PNG files for personal use.
               </p>
             </div>
           </div>

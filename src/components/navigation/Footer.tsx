@@ -1,6 +1,6 @@
 import React from 'react';
 import { GenovaDocLogo } from '../common/GenovaDocLogo';
-import { ShieldCheck, Heart, FileText, Mail, Phone, MapPin, RefreshCw } from 'lucide-react';
+import { ShieldCheck, Heart, FileText, Mail, Phone, MapPin, RefreshCw, Info } from 'lucide-react';
 import { BUSINESS } from '../../config/business';
 
 interface FooterProps {
@@ -216,8 +216,18 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
           </div>
         </div>
 
+        {/* Software-Only Compliance Disclaimer */}
+        <div className="mt-8 rounded-xl border border-slate-800 bg-slate-950/60 px-4 py-3 flex items-start gap-2.5 text-[11px] text-slate-400 leading-relaxed">
+          <Info className="w-4 h-4 text-indigo-400 shrink-0 mt-0.5" />
+          <p>
+            <strong className="text-slate-200 font-semibold">Disclaimer:</strong> Genova Profile is strictly a self-service{' '}
+            <span className="text-slate-200 font-medium">PDF Document &amp; Bio-Profile Formatting Software Tool (SaaS)</span>. We are{' '}
+            <span className="text-slate-200 font-medium">NOT a matchmaking, dating, marriage bureau, or matrimonial agency</span>, and we do not host public profile directories, connect users, or provide partner-finding services.
+          </p>
+        </div>
+
         {/* Bottom Bar */}
-        <div className="pt-8 mt-8 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4 text-slate-500 text-[11px]">
+        <div className="pt-6 mt-6 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4 text-slate-500 text-[11px]">
           <div>
             &copy; {new Date().getFullYear()} GenovaProfile. All rights reserved. &bull; Payments secured by Cashfree
           </div>

@@ -1,6 +1,6 @@
 import React from 'react';
 import { GenovaDocLogo } from '../common/GenovaDocLogo';
-import { FileText, ShieldCheck, Download, ArrowRight, Mail } from 'lucide-react';
+import { FileText, ShieldCheck, Download, ArrowRight, Mail, Info } from 'lucide-react';
 import { BUSINESS } from '../../config/business';
 
 interface AboutPageProps {
@@ -36,6 +36,22 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigate }) => {
           <li><strong>Resumes:</strong> Clean, single-column and multi-column formats focused on readability and structure.</li>
           <li><strong>Cover Letters:</strong> Coordinated executive layouts matching our resume styles.</li>
         </ul>
+
+        <div className="p-4 sm:p-5 bg-slate-50 rounded-2xl border border-slate-200/90 flex items-start gap-3">
+          <div className="w-8 h-8 rounded-lg bg-blue-50 border border-blue-200/80 flex items-center justify-center shrink-0 mt-0.5">
+            <Info className="w-4 h-4 text-[#0066FF]" />
+          </div>
+          <div className="space-y-1">
+            <h3 className="text-xs sm:text-sm font-extrabold text-slate-900">
+              Software-Only Tool Disclaimer &mdash; Not a Matchmaking or Matrimonial Agency
+            </h3>
+            <p className="text-xs text-slate-600 leading-relaxed">
+              <strong>Genova Profile</strong> is strictly a self-service{' '}
+              <strong>PDF Document &amp; Bio-Profile Formatting Software Tool (SaaS)</strong>. We are{' '}
+              <strong>NOT a matchmaking, dating, marriage bureau, or matrimonial agency</strong>, and we do not operate any partner-search platform, public profile directory, user messaging network, or matrimonial brokerage service. Our software solely enables users to format their own personal and career information into downloadable PDF and PNG documents.
+            </p>
+          </div>
+        </div>
 
         <h2 className="text-base font-extrabold text-slate-900 pt-4 border-t border-slate-100">
           Pricing & Digital Delivery
