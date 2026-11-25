@@ -126,14 +126,14 @@ export const ContactPage: React.FC<ContactPageProps> = ({ onNavigate }) => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-12">
+    <div className="site-shell max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 pb-24 lg:pb-16 space-y-12">
       {/* Header */}
       <div className="text-center max-w-3xl mx-auto space-y-3">
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-50 border border-indigo-200 text-[#5B4BDB] text-xs font-bold uppercase tracking-wider">
+        <p className="text-xs font-semibold text-brand inline-flex items-center justify-center gap-1.5">
           <Mail className="w-3.5 h-3.5" />
-          <span>Customer Support & Inquiries</span>
-        </div>
-        <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-slate-900">
+          <span>Customer Support &amp; Inquiries</span>
+        </p>
+        <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-navy text-balance">
           Contact {BUSINESS.name} Support
         </h1>
         <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
@@ -144,24 +144,24 @@ export const ContactPage: React.FC<ContactPageProps> = ({ onNavigate }) => {
       {/* Main Grid: Form (Left) & Verified Business Details (Right) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         {/* Left Column: Real Submission Form (7 cols) */}
-        <div className="lg:col-span-7 bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-xs">
+        <div className="lg:col-span-7 site-card p-6 sm:p-8 rounded-3xl">
           {ticketRef ? (
             <div className="text-center py-6 space-y-5">
-              <div className="w-16 h-16 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mx-auto border border-emerald-100">
+              <div className="w-16 h-16 bg-cover-letter/10 text-cover-letter rounded-full flex items-center justify-center mx-auto border border-cover-letter/20">
                 <CheckCircle2 className="w-8 h-8" />
               </div>
               <div className="space-y-1">
-                <h3 className="text-xl font-extrabold text-slate-900">Support Ticket Created</h3>
-                <p className="text-xs text-slate-500 max-w-md mx-auto">
+                <h3 className="text-xl font-extrabold text-navy">Support Ticket Created</h3>
+                <p className="text-xs text-slate-600 max-w-md mx-auto">
                   {successMessage}
                 </p>
               </div>
 
-              <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 max-w-sm mx-auto space-y-2">
-                <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block">
+              <div className="bg-surface border border-slate-200 rounded-2xl p-4 max-w-sm mx-auto space-y-2">
+                <span className="text-[11px] font-semibold text-slate-500 block">
                   Your Ticket Reference
                 </span>
-                <span className="font-mono text-lg font-black text-indigo-600 bg-white px-3 py-1 rounded-lg border border-indigo-100 inline-block shadow-2xs">
+                <span className="font-mono text-lg font-extrabold text-brand bg-white px-3.5 py-1.5 rounded-xl border border-brand/20 inline-block shadow-2xs tabular-nums">
                   {ticketRef}
                 </span>
                 <p className="text-[11px] text-slate-500">
@@ -173,14 +173,14 @@ export const ContactPage: React.FC<ContactPageProps> = ({ onNavigate }) => {
                 <button
                   type="button"
                   onClick={resetForm}
-                  className="px-5 py-2.5 text-xs font-bold bg-slate-900 text-white rounded-xl hover:bg-slate-800 transition-colors shadow-xs cursor-pointer"
+                  className="px-5 py-2.5 text-xs font-semibold bg-brand text-white rounded-2xl hover:bg-brand-hover transition-colors shadow-xs cursor-pointer"
                 >
                   Send Another Message
                 </button>
                 <button
                   type="button"
                   onClick={() => handleNavigate('home')}
-                  className="px-5 py-2.5 text-xs font-semibold bg-slate-100 text-slate-700 rounded-xl hover:bg-slate-200 transition-colors cursor-pointer"
+                  className="px-5 py-2.5 text-xs font-semibold bg-slate-100 text-navy rounded-2xl hover:bg-slate-200 transition-colors cursor-pointer"
                 >
                   Return to Home
                 </button>
@@ -189,9 +189,9 @@ export const ContactPage: React.FC<ContactPageProps> = ({ onNavigate }) => {
           ) : (
             <form onSubmit={handleSubmit} className="space-y-5 text-xs" noValidate>
               <div>
-                <h2 className="text-base font-extrabold text-slate-900">Send Us a Message</h2>
-                <p className="text-slate-500 text-[11px] mt-0.5">
-                  Expected reply time: <strong className="text-slate-700">{BUSINESS.replyTime}</strong>.
+                <h2 className="text-base sm:text-lg font-extrabold tracking-tight text-navy">Send Us a Message</h2>
+                <p className="text-slate-500 text-xs mt-0.5">
+                  Expected reply time: <strong className="text-navy">{BUSINESS.replyTime}</strong>.
                 </p>
               </div>
 
@@ -218,8 +218,8 @@ export const ContactPage: React.FC<ContactPageProps> = ({ onNavigate }) => {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">
-                    Your Full Name <span className="text-rose-500">*</span>
+                  <label className="block font-semibold text-navy mb-1.5">
+                    Your Full Name <span className="text-matrimonial">*</span>
                   </label>
                   <input
                     type="text"
@@ -227,8 +227,8 @@ export const ContactPage: React.FC<ContactPageProps> = ({ onNavigate }) => {
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     placeholder="e.g. Rahul Sharma"
-                    className={`w-full px-3.5 py-2.5 bg-slate-50 border rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-slate-900 ${
-                      fieldErrors.name ? 'border-rose-400 bg-rose-50/30' : 'border-slate-300'
+                    className={`w-full px-3.5 py-2.5 bg-surface border rounded-2xl text-xs text-navy focus:outline-none focus:ring-2 focus:ring-brand focus:bg-white transition-colors ${
+                      fieldErrors.name ? 'border-rose-400 bg-rose-50/30' : 'border-slate-200'
                     }`}
                   />
                   {fieldErrors.name && (
@@ -237,8 +237,8 @@ export const ContactPage: React.FC<ContactPageProps> = ({ onNavigate }) => {
                 </div>
 
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">
-                    Your Email Address <span className="text-rose-500">*</span>
+                  <label className="block font-semibold text-navy mb-1.5">
+                    Your Email Address <span className="text-matrimonial">*</span>
                   </label>
                   <input
                     type="email"
@@ -246,8 +246,8 @@ export const ContactPage: React.FC<ContactPageProps> = ({ onNavigate }) => {
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                     placeholder="e.g. rahul.sharma@example.com"
-                    className={`w-full px-3.5 py-2.5 bg-slate-50 border rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-slate-900 ${
-                      fieldErrors.email ? 'border-rose-400 bg-rose-50/30' : 'border-slate-300'
+                    className={`w-full px-3.5 py-2.5 bg-surface border rounded-2xl text-xs text-navy focus:outline-none focus:ring-2 focus:ring-brand focus:bg-white transition-colors ${
+                      fieldErrors.email ? 'border-rose-400 bg-rose-50/30' : 'border-slate-200'
                     }`}
                   />
                   {fieldErrors.email && (
@@ -257,7 +257,7 @@ export const ContactPage: React.FC<ContactPageProps> = ({ onNavigate }) => {
               </div>
 
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">
+                <label className="block font-semibold text-navy mb-1.5">
                   Order / Receipt ID <span className="text-slate-400 font-normal">(Optional, if regarding a payment)</span>
                 </label>
                 <input
@@ -265,18 +265,18 @@ export const ContactPage: React.FC<ContactPageProps> = ({ onNavigate }) => {
                   value={formData.orderRef}
                   onChange={(e) => setFormData({ ...formData, orderRef: e.target.value })}
                   placeholder="e.g. GP-XXXX-XXXX-XXXX or order_..."
-                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-slate-900 font-mono text-[11px]"
+                  className="w-full px-3.5 py-2.5 bg-surface border border-slate-200 rounded-2xl text-xs text-navy focus:outline-none focus:ring-2 focus:ring-brand focus:bg-white transition-colors font-mono text-[11px]"
                 />
               </div>
 
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">
-                  Topic / Subject <span className="text-rose-500">*</span>
+                <label className="block font-semibold text-navy mb-1.5">
+                  Topic / Subject <span className="text-matrimonial">*</span>
                 </label>
                 <select
                   value={formData.subject}
                   onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
-                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-slate-900 cursor-pointer"
+                  className="w-full px-3.5 py-2.5 bg-surface border border-slate-200 rounded-2xl text-xs font-medium text-navy focus:outline-none focus:ring-2 focus:ring-brand focus:bg-white transition-colors cursor-pointer"
                 >
                   <option value="Payment issue">Payment issue (Cashfree, UPI, debit / credit card)</option>
                   <option value="Download problem">Download problem (PDF generation or download issue)</option>
@@ -288,8 +288,8 @@ export const ContactPage: React.FC<ContactPageProps> = ({ onNavigate }) => {
               </div>
 
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">
-                  Your Message <span className="text-rose-500">*</span>
+                <label className="block font-semibold text-navy mb-1.5">
+                  Your Message <span className="text-matrimonial">*</span>
                 </label>
                 <textarea
                   rows={5}
@@ -297,11 +297,11 @@ export const ContactPage: React.FC<ContactPageProps> = ({ onNavigate }) => {
                   value={formData.message}
                   onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                   placeholder="Describe your inquiry in detail. Include any payment transaction ID or error description if applicable..."
-                  className={`w-full px-3.5 py-2.5 bg-slate-50 border rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-slate-900 leading-relaxed ${
-                    fieldErrors.message ? 'border-rose-400 bg-rose-50/30' : 'border-slate-300'
+                  className={`w-full px-3.5 py-2.5 bg-surface border rounded-2xl text-xs text-navy focus:outline-none focus:ring-2 focus:ring-brand focus:bg-white transition-colors leading-relaxed ${
+                    fieldErrors.message ? 'border-rose-400 bg-rose-50/30' : 'border-slate-200'
                   }`}
                 />
-                <div className="flex justify-between items-center text-[10px] text-slate-400 mt-1">
+                <div className="flex justify-between items-center text-[11px] text-slate-400 mt-1 tabular-nums">
                   <span>Minimum 10 characters</span>
                   <span>{formData.message.length} / 2,000</span>
                 </div>
@@ -313,7 +313,7 @@ export const ContactPage: React.FC<ContactPageProps> = ({ onNavigate }) => {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-3 bg-slate-900 text-white rounded-xl font-bold hover:bg-slate-800 transition-all shadow-xs inline-flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full py-3.5 bg-brand text-white rounded-2xl text-xs sm:text-sm font-semibold hover:bg-brand-hover transition-all shadow-xs inline-flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? (
                   <>
@@ -338,23 +338,23 @@ export const ContactPage: React.FC<ContactPageProps> = ({ onNavigate }) => {
         {/* Right Column: Business Details & Support Information (5 cols) */}
         <div className="lg:col-span-5 space-y-6">
           {/* Business Info Card */}
-          <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-xs space-y-5 text-xs">
-            <h3 className="font-extrabold text-slate-900 text-sm uppercase tracking-wider">
+          <div className="site-card p-6 sm:p-7 rounded-3xl space-y-5 text-xs">
+            <h3 className="font-extrabold text-navy text-base tracking-tight">
               Support &amp; Business Information
             </h3>
             <div className="space-y-4 text-slate-600">
               <div>
-                <strong className="text-slate-900 block font-semibold">Brand Name:</strong>
+                <strong className="text-navy block font-semibold">Brand Name:</strong>
                 <p className="text-slate-800 font-medium">{BUSINESS.name}</p>
               </div>
 
               <div className="flex items-start gap-3">
-                <Mail className="w-4 h-4 text-indigo-600 shrink-0 mt-0.5" />
+                <Mail className="w-4 h-4 text-brand shrink-0 mt-0.5" />
                 <div>
-                  <strong className="text-slate-900 block font-semibold">Support Email:</strong>
+                  <strong className="text-navy block font-semibold">Support Email:</strong>
                   <a
                     href={`mailto:${BUSINESS.email}`}
-                    className="text-indigo-600 font-medium underline"
+                    className="text-brand font-medium underline"
                   >
                     {BUSINESS.email}
                   </a>
@@ -363,13 +363,13 @@ export const ContactPage: React.FC<ContactPageProps> = ({ onNavigate }) => {
 
               {BUSINESS.phone ? (
                 <div className="flex items-start gap-3">
-                  <Phone className="w-4 h-4 text-indigo-600 shrink-0 mt-0.5" />
+                  <Phone className="w-4 h-4 text-brand shrink-0 mt-0.5" />
                   <div className="space-y-1">
-                    <strong className="text-slate-900 block font-semibold">Support Phone / WhatsApp:</strong>
+                    <strong className="text-navy block font-semibold">Support Phone / WhatsApp:</strong>
                     <div className="flex flex-wrap items-center gap-2">
                       <a
                         href={BUSINESS.phoneHref}
-                        className="text-slate-900 font-semibold hover:text-indigo-600 transition-colors"
+                        className="text-navy font-semibold hover:text-brand transition-colors"
                       >
                         {BUSINESS.phone}
                       </a>
@@ -377,7 +377,7 @@ export const ContactPage: React.FC<ContactPageProps> = ({ onNavigate }) => {
                         href={BUSINESS.whatsappHref}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-[11px] font-semibold text-emerald-700 hover:underline inline-flex items-center gap-1"
+                        className="text-[11px] font-semibold text-cover-letter hover:underline inline-flex items-center gap-1"
                       >
                         <span>WhatsApp</span>
                         <ExternalLink className="w-3 h-3" />
@@ -385,7 +385,7 @@ export const ContactPage: React.FC<ContactPageProps> = ({ onNavigate }) => {
                     </div>
                     <p className="text-[11px] text-slate-500 leading-relaxed">
                       WhatsApp &amp; Support Calls: Mon–Sat, 10:00 AM – 6:00 PM IST. For 24/7 assistance, please email{' '}
-                      <a href={`mailto:${BUSINESS.email}`} className="text-indigo-600 underline font-medium">
+                      <a href={`mailto:${BUSINESS.email}`} className="text-brand underline font-medium">
                         {BUSINESS.email}
                       </a>
                     </p>
@@ -394,27 +394,27 @@ export const ContactPage: React.FC<ContactPageProps> = ({ onNavigate }) => {
               ) : null}
 
               <div className="flex items-start gap-3">
-                <MapPin className="w-4 h-4 text-indigo-600 shrink-0 mt-0.5" />
+                <MapPin className="w-4 h-4 text-brand shrink-0 mt-0.5" />
                 <div>
-                  <strong className="text-slate-900 block font-semibold">Location:</strong>
+                  <strong className="text-navy block font-semibold">Location:</strong>
                   <p className="text-slate-800 font-medium">{BUSINESS.location}</p>
                 </div>
               </div>
 
               <div className="flex items-start gap-3">
-                <Clock className="w-4 h-4 text-indigo-600 shrink-0 mt-0.5" />
+                <Clock className="w-4 h-4 text-brand shrink-0 mt-0.5" />
                 <div>
-                  <strong className="text-slate-900 block font-semibold">Support Hours:</strong>
+                  <strong className="text-navy block font-semibold">Support Hours:</strong>
                   <p className="text-slate-700">{BUSINESS.hours}</p>
                   <p className="text-[11px] text-slate-500 mt-0.5">Expected reply time: {BUSINESS.replyTime}</p>
                 </div>
               </div>
 
               <div className="pt-3 border-t border-slate-100 text-[11px] text-slate-600 space-y-1">
-                <strong className="text-slate-800 block font-semibold">Complaints &amp; Grievances:</strong>
+                <strong className="text-navy block font-semibold">Complaints &amp; Grievances:</strong>
                 <p>
                   For complaints write to{' '}
-                  <a href={`mailto:${BUSINESS.email}`} className="text-indigo-600 underline font-medium">
+                  <a href={`mailto:${BUSINESS.email}`} className="text-brand underline font-medium">
                     {BUSINESS.email}
                   </a>
                   ; we reply within 7 days.
@@ -424,34 +424,34 @@ export const ContactPage: React.FC<ContactPageProps> = ({ onNavigate }) => {
           </div>
 
           {/* Quick Help Links */}
-          <div className="bg-white p-5 rounded-2xl border border-slate-200 space-y-2 text-xs">
-            <h4 className="font-bold text-slate-900 flex items-center gap-1.5">
-              <HelpCircle className="w-4 h-4 text-slate-400" /> Quick Reference Links
+          <div className="site-card p-6 rounded-3xl space-y-2.5 text-xs">
+            <h4 className="font-bold text-navy flex items-center gap-1.5 text-sm">
+              <HelpCircle className="w-4 h-4 text-brand" /> Quick Reference Links
             </h4>
-            <div className="space-y-1.5 text-slate-600 text-[11px]">
+            <div className="space-y-2 text-slate-600 text-xs">
               <div>
                 <button
                   type="button"
                   onClick={() => handleNavigate('refund-policy')}
-                  className="text-indigo-600 hover:underline font-medium inline-flex items-center gap-1 cursor-pointer"
+                  className="text-brand hover:underline font-medium inline-flex items-center gap-1 cursor-pointer"
                 >
-                  Review our Refund & Cancellation Policy &rarr;
+                  Review our Refund &amp; Cancellation Policy &rarr;
                 </button>
               </div>
               <div>
                 <button
                   type="button"
                   onClick={() => handleNavigate('shipping-policy')}
-                  className="text-indigo-600 hover:underline font-medium inline-flex items-center gap-1 cursor-pointer"
+                  className="text-brand hover:underline font-medium inline-flex items-center gap-1 cursor-pointer"
                 >
-                  Digital Delivery & Instant Access Policy &rarr;
+                  Digital Delivery &amp; Instant Access Policy &rarr;
                 </button>
               </div>
               <div>
                 <button
                   type="button"
                   onClick={() => handleNavigate('restore')}
-                  className="text-indigo-600 hover:underline font-medium inline-flex items-center gap-1 cursor-pointer"
+                  className="text-brand hover:underline font-medium inline-flex items-center gap-1 cursor-pointer"
                 >
                   Restore a past purchase on a new device &rarr;
                 </button>

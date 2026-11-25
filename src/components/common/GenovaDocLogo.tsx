@@ -32,14 +32,6 @@ export const GenovaDocLogo: React.FC<GenovaDocLogoProps> = ({
     xl: 'text-3xl sm:text-4xl',
   }[size];
 
-  const badgeSize = {
-    xs: 'text-[8px] px-1 py-0.2',
-    sm: 'text-[9px] px-1.5 py-0.5',
-    md: 'text-[10px] px-2 py-0.5',
-    lg: 'text-xs px-2.5 py-1',
-    xl: 'text-sm px-3 py-1',
-  }[size];
-
   const taglineSize = {
     xs: 'text-[9px]',
     sm: 'text-[10px]',
@@ -48,7 +40,7 @@ export const GenovaDocLogo: React.FC<GenovaDocLogoProps> = ({
     xl: 'text-sm sm:text-base',
   }[size];
 
-  // Modern Electric Blue -> Cyan -> Mint G Glyph Emblem
+  // Brand G Glyph Emblem
   const BrandIcon = (
     <div
       style={{
@@ -57,8 +49,8 @@ export const GenovaDocLogo: React.FC<GenovaDocLogoProps> = ({
       }}
       className={`relative shrink-0 select-none group-hover:scale-105 transition-all duration-200 rounded-xl overflow-hidden p-0.5 ${
         theme === 'dark'
-          ? 'bg-gradient-to-br from-slate-900 via-slate-950 to-slate-900 border border-slate-700/80 shadow-md shadow-cyan-950/30'
-          : 'bg-white border border-slate-200/90 shadow-xs shadow-slate-200/50 hover:border-cyan-300'
+          ? 'bg-gradient-to-br from-slate-900 via-slate-950 to-slate-900 border border-slate-700/80 shadow-md shadow-cyan-950/30 hover:border-[#00C2CB] group-hover:border-[#00C2CB]'
+          : 'bg-white border border-slate-200/90 shadow-xs shadow-slate-200/50 hover:border-[#00C2CB] group-hover:border-[#00C2CB]'
       }`}
     >
       <img
@@ -76,35 +68,18 @@ export const GenovaDocLogo: React.FC<GenovaDocLogoProps> = ({
     return <span className={`inline-flex items-center ${className}`}>{BrandIcon}</span>;
   }
 
-  // Pure Typography Lockup with New Vibrant Azure-to-Mint Brand Palette
+  // Clean Typography Lockup matching the site palette
   return (
     <div className={`inline-flex items-center gap-3 select-none shrink-0 ${className}`}>
       {BrandIcon}
       <div className="flex flex-col justify-center">
-        <div className="flex items-center gap-1.5 leading-none">
+        <div className="flex items-center leading-none">
           <span
-            className={`font-black tracking-tight leading-none ${brandTextSize}`}
-            style={{ fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif" }}
+            className={`font-extrabold tracking-tight leading-none whitespace-nowrap ${brandTextSize}`}
+            style={{ fontFamily: "'Manrope', 'Plus Jakarta Sans', system-ui, sans-serif" }}
           >
-            <span className={theme === 'dark' ? 'text-white' : 'text-slate-900'}>Genova</span>
-            <span
-              className={`bg-gradient-to-r ${
-                theme === 'dark'
-                  ? 'from-[#38BDF8] via-[#00D2C4] to-[#34D399]'
-                  : 'from-[#0066FF] via-[#00C2CB] to-[#10B981]'
-              } bg-clip-text text-transparent`}
-            >
-              Profile
-            </span>
-          </span>
-          <span
-            className={`font-bold uppercase tracking-wider rounded-md border ${badgeSize} ${
-              theme === 'dark'
-                ? 'bg-emerald-950/70 text-emerald-300 border-emerald-700/60 shadow-xs'
-                : 'bg-emerald-50 text-emerald-700 border-emerald-200/80 shadow-2xs'
-            }`}
-          >
-            Studio
+            <span className={theme === 'dark' ? 'text-white' : 'text-[#0B1B3A]'}>Genova</span>
+            <span className={theme === 'dark' ? 'text-[#38BDF8]' : 'text-[#0066FF]'}>Profile</span>
           </span>
         </div>
 
@@ -115,7 +90,7 @@ export const GenovaDocLogo: React.FC<GenovaDocLogoProps> = ({
                 theme === 'dark' ? 'text-slate-400' : 'text-slate-500'
               }`}
             >
-              Resumes • Biodatas • Invitations
+              Resumes • Biodata • Cover Letters
             </span>
           </div>
         )}

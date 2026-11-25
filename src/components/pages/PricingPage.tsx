@@ -83,14 +83,14 @@ export const PricingPage: React.FC<PricingPageProps> = ({
   ];
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-12">
+    <div className="site-shell max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 pb-24 lg:pb-16 space-y-12">
       {/* Hero Header */}
       <div className="text-center max-w-3xl mx-auto space-y-3">
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-50 border border-indigo-200 text-[#5B4BDB] text-xs font-bold uppercase tracking-wider">
+        <p className="text-xs font-semibold text-brand inline-flex items-center justify-center gap-1.5">
           <ShieldCheck className="w-3.5 h-3.5" />
-          <span>Pay Per Template &bull; No Subscriptions &bull; No Hidden Fees</span>
-        </div>
-        <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-slate-900">
+          <span>Pay Per Template &middot; No Subscriptions &middot; No Hidden Fees</span>
+        </p>
+        <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-navy text-balance">
           Individual Template Pricing
         </h1>
         <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
@@ -103,31 +103,41 @@ export const PricingPage: React.FC<PricingPageProps> = ({
         {priceTiersSummary.map((tier) => (
           <div
             key={tier.price}
-            className={`bg-white rounded-3xl p-6 border transition-all flex flex-col justify-between space-y-5 ${
+            className={`site-card site-card-hover rounded-3xl p-6 sm:p-7 flex flex-col justify-between space-y-5 ${
               tier.price === '₹0'
-                ? 'border-emerald-200 shadow-xs'
+                ? 'border-cover-letter/35'
                 : tier.price === '₹100'
-                ? 'border-2 border-[#5B4BDB] shadow-md'
-                : 'border-slate-200 shadow-2xs hover:border-slate-300'
+                ? 'ring-2 ring-brand/90'
+                : 'hover:border-slate-300'
             }`}
           >
             <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-[11px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700">
+              <div className="flex items-center justify-between gap-2 text-xs font-semibold">
+                <span
+                  className={
+                    tier.price === '₹0'
+                      ? 'text-cover-letter'
+                      : tier.price === '₹100'
+                      ? 'text-brand'
+                      : 'text-slate-600'
+                  }
+                >
                   {tier.badge}
                 </span>
-                <span className="text-xs font-semibold text-slate-400">
+                <span className="text-slate-500 tabular-nums">
                   {tier.count} templates
                 </span>
               </div>
-              <div>
-                <span className="text-3xl font-black text-slate-900">{tier.price}</span>
-                <span className="text-xs text-slate-500 ml-1.5">/ template</span>
+              <div className="flex items-baseline gap-1.5">
+                <span className="text-3xl font-extrabold text-navy tracking-tight tabular-nums site-heading">
+                  {tier.price}
+                </span>
+                <span className="text-xs text-slate-500">/ template</span>
               </div>
-              <h3 className="font-bold text-slate-900 text-base">{tier.label}</h3>
-              <p className="text-xs text-slate-500 leading-relaxed min-h-[36px]">{tier.desc}</p>
+              <h3 className="font-bold text-navy text-base tracking-tight">{tier.label}</h3>
+              <p className="text-xs text-slate-600 leading-relaxed min-h-[36px]">{tier.desc}</p>
               <div className="pt-3 border-t border-slate-100 text-[11px] text-slate-600">
-                <strong className="text-slate-800">Designs:</strong> {tier.examples}
+                <strong className="text-navy">Designs:</strong> {tier.examples}
               </div>
             </div>
             <button
@@ -141,10 +151,12 @@ export const PricingPage: React.FC<PricingPageProps> = ({
                   onStartFree();
                 }
               }}
-              className={`w-full py-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+              className={`w-full py-3 rounded-2xl text-xs font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-xs active:scale-[0.98] ${
                 tier.price === '₹0'
-                  ? 'bg-emerald-600 text-white hover:bg-emerald-700 shadow-xs shadow-emerald-200'
-                  : 'bg-slate-900 text-white hover:bg-slate-800 shadow-xs'
+                  ? 'bg-cover-letter text-white hover:bg-teal-700'
+                  : tier.price === '₹100'
+                  ? 'bg-brand text-white hover:bg-brand-hover'
+                  : 'bg-navy text-white hover:bg-navy/90'
               }`}
             >
               <span>{tier.price === '₹0' ? 'Start Free Now' : `Browse ${tier.price} Designs`}</span>
@@ -155,21 +167,23 @@ export const PricingPage: React.FC<PricingPageProps> = ({
       </div>
 
       {/* Interactive Template Price Browser */}
-      <div className="max-w-6xl mx-auto bg-slate-50 border border-slate-200 rounded-3xl p-6 sm:p-8 space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-5">
+      <div className="max-w-6xl mx-auto site-card rounded-3xl p-6 sm:p-8 space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-5">
           <div>
-            <h3 className="text-lg font-bold text-slate-900">Explore Template Catalog & Authoritative Prices</h3>
+            <h3 className="text-lg font-extrabold tracking-tight text-navy">
+              Explore Template Catalog &amp; Authoritative Prices
+            </h3>
             <p className="text-xs text-slate-500 mt-0.5">
               Every template is an individual purchasable product. Review exact prices below.
             </p>
           </div>
-          <div className="flex flex-wrap items-center gap-2">
-            <div className="flex bg-white rounded-xl border border-slate-200 p-0.5 text-xs font-medium">
+          <div className="flex flex-wrap items-center gap-2.5">
+            <div className="flex bg-slate-100 rounded-2xl border border-slate-200/80 p-1 text-xs font-medium">
               <button
                 type="button"
                 onClick={() => setSelectedFilter('all')}
-                className={`px-3 py-1.5 rounded-lg transition-colors cursor-pointer ${
-                  selectedFilter === 'all' ? 'bg-[#5B4BDB] text-white font-bold' : 'text-slate-600 hover:text-slate-900'
+                className={`px-3 py-1.5 rounded-xl transition-all cursor-pointer whitespace-nowrap ${
+                  selectedFilter === 'all' ? 'bg-white text-navy font-semibold shadow-2xs' : 'text-slate-600 hover:text-navy'
                 }`}
               >
                 All ({templates.length})
@@ -177,8 +191,8 @@ export const PricingPage: React.FC<PricingPageProps> = ({
               <button
                 type="button"
                 onClick={() => setSelectedFilter('free')}
-                className={`px-3 py-1.5 rounded-lg transition-colors cursor-pointer ${
-                  selectedFilter === 'free' ? 'bg-emerald-600 text-white font-bold' : 'text-slate-600 hover:text-slate-900'
+                className={`px-3 py-1.5 rounded-xl transition-all cursor-pointer whitespace-nowrap ${
+                  selectedFilter === 'free' ? 'bg-cover-letter text-white font-semibold shadow-2xs' : 'text-slate-600 hover:text-navy'
                 }`}
               >
                 Free (₹0)
@@ -186,8 +200,8 @@ export const PricingPage: React.FC<PricingPageProps> = ({
               <button
                 type="button"
                 onClick={() => setSelectedFilter('paid')}
-                className={`px-3 py-1.5 rounded-lg transition-colors cursor-pointer ${
-                  selectedFilter === 'paid' ? 'bg-indigo-600 text-white font-bold' : 'text-slate-600 hover:text-slate-900'
+                className={`px-3 py-1.5 rounded-xl transition-all cursor-pointer whitespace-nowrap ${
+                  selectedFilter === 'paid' ? 'bg-brand text-white font-semibold shadow-2xs' : 'text-slate-600 hover:text-navy'
                 }`}
               >
                 Paid (₹40 - ₹100)
@@ -196,7 +210,7 @@ export const PricingPage: React.FC<PricingPageProps> = ({
             <select
               value={selectedType}
               onChange={(e) => setSelectedType(e.target.value)}
-              className="bg-white border border-slate-200 rounded-xl px-3 py-1.5 text-xs font-semibold text-slate-700 cursor-pointer focus:outline-hidden"
+              className="bg-surface border border-slate-200 rounded-2xl px-3.5 py-2 text-xs font-semibold text-navy cursor-pointer focus:outline-none focus:ring-2 focus:ring-brand"
             >
               <option value="all">All Document Types</option>
               <option value="resume">Professional Resumes</option>
@@ -211,17 +225,17 @@ export const PricingPage: React.FC<PricingPageProps> = ({
           {filteredTemplates.map((t) => (
             <div
               key={t.id}
-              className="bg-white p-3.5 rounded-2xl border border-slate-200 flex items-center justify-between hover:border-[#5B4BDB] transition-colors"
+              className="bg-surface/70 p-3.5 rounded-2xl border border-slate-200/80 flex items-center justify-between hover:border-brand/40 hover:bg-white transition-colors"
             >
               <div className="min-w-0 pr-2">
-                <h4 className="text-xs font-bold text-slate-900 truncate">{t.name}</h4>
-                <p className="text-[10px] text-slate-500 capitalize">{t.documentType.replace('-', ' ')}</p>
+                <h4 className="text-xs font-bold text-navy truncate">{t.name}</h4>
+                <p className="text-[11px] text-slate-500 capitalize">{t.documentType.replace('-', ' ')}</p>
               </div>
               <span
-                className={`text-xs font-black px-2.5 py-1 rounded-lg shrink-0 ${
+                className={`text-xs font-bold px-2.5 py-1 rounded-xl shrink-0 tabular-nums border ${
                   t.priceINR === 0
-                    ? 'text-emerald-700 bg-emerald-50 border border-emerald-200'
-                    : 'text-violet-800 bg-violet-50 border border-violet-200'
+                    ? 'text-cover-letter bg-cover-letter/10 border-cover-letter/20'
+                    : 'text-navy bg-white border-slate-200'
                 }`}
               >
                 {t.priceINR === 0 ? 'Free' : `₹${t.priceINR}`}
@@ -232,51 +246,53 @@ export const PricingPage: React.FC<PricingPageProps> = ({
       </div>
 
       {/* FAQ */}
-      <div className="max-w-3xl mx-auto space-y-4">
-        <h3 className="text-base font-extrabold text-slate-900 text-center">Frequently Asked Questions</h3>
+      <div className="max-w-3xl mx-auto space-y-5">
+        <h3 className="text-lg font-extrabold tracking-tight text-navy text-center">
+          Frequently Asked Questions
+        </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
-          <div className="p-4 bg-white rounded-2xl border border-slate-200 space-y-1">
-            <h4 className="font-bold text-slate-900">Are free templates genuinely free?</h4>
-            <p className="text-slate-600">
+          <div className="site-card p-5 rounded-2xl space-y-1.5">
+            <h4 className="font-bold text-navy">Are free templates genuinely free?</h4>
+            <p className="text-slate-600 leading-relaxed">
               Yes, 100%. If a template is ₹0, you do not need to enter a mobile number, log in, or pay anything. You can generate and download your high-resolution PDF immediately.
             </p>
           </div>
-          <div className="p-4 bg-white rounded-2xl border border-slate-200 space-y-1">
-            <h4 className="font-bold text-slate-900">How do paid templates work?</h4>
-            <p className="text-slate-600">
+          <div className="site-card p-5 rounded-2xl space-y-1.5">
+            <h4 className="font-bold text-navy">How do paid templates work?</h4>
+            <p className="text-slate-600 leading-relaxed">
               If you pick a paid design (₹40, ₹50, ₹60, ₹80, or ₹100), you fill in your details, preview the draft, enter your mobile number, and pay the exact amount via Cashfree Checkout.
             </p>
           </div>
-          <div className="p-4 bg-white rounded-2xl border border-slate-200 space-y-1">
-            <h4 className="font-bold text-slate-900">Are there recurring subscriptions or plans?</h4>
-            <p className="text-slate-600">
+          <div className="site-card p-5 rounded-2xl space-y-1.5">
+            <h4 className="font-bold text-navy">Are there recurring subscriptions or plans?</h4>
+            <p className="text-slate-600 leading-relaxed">
               No. We have completely eliminated subscriptions, monthly charges, and bundle passes. You only pay for the individual template you use.
             </p>
           </div>
-          <div className="p-4 bg-white rounded-2xl border border-slate-200 space-y-1">
-            <h4 className="font-bold text-slate-900">Which payment methods are supported?</h4>
-            <p className="text-slate-600">
-              Cashfree supports UPI (Google Pay, PhonePe, Paytm, BHIM), Indian Debit & Credit cards, NetBanking, and popular mobile wallets with instant confirmation.
+          <div className="site-card p-5 rounded-2xl space-y-1.5">
+            <h4 className="font-bold text-navy">Which payment methods are supported?</h4>
+            <p className="text-slate-600 leading-relaxed">
+              Cashfree supports UPI (Google Pay, PhonePe, Paytm, BHIM), Indian Debit &amp; Credit cards, NetBanking, and popular mobile wallets with instant confirmation.
             </p>
           </div>
         </div>
 
         {/* Merchant Trust & Policy Summary */}
-        <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-3 text-slate-600 text-xs">
-          <div className="flex items-center gap-2 text-slate-800 font-semibold">
-            <ShieldCheck className="w-4 h-4 text-[#5B4BDB]" />
-            <span>Payments secured by Cashfree &bull; Instant Digital Delivery</span>
+        <div className="p-4 sm:p-5 bg-white border border-slate-200/90 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-3 text-slate-600 text-xs shadow-2xs">
+          <div className="flex items-center gap-2 text-navy font-semibold">
+            <ShieldCheck className="w-4 h-4 text-brand shrink-0" />
+            <span>Payments secured by Cashfree &middot; Instant Digital Delivery</span>
           </div>
-          <div className="flex items-center gap-4 text-[11px]">
-            <a href="#refund-policy" className="text-indigo-600 hover:underline font-medium">
-              Refund & Cancellation Policy
+          <div className="flex flex-wrap items-center justify-center gap-3 text-[11px]">
+            <a href="#refund-policy" className="text-brand hover:underline font-medium">
+              Refund &amp; Cancellation Policy
             </a>
-            <span>&bull;</span>
-            <a href="#shipping-policy" className="text-indigo-600 hover:underline font-medium">
-              Shipping & Delivery Policy
+            <span className="text-slate-300">&middot;</span>
+            <a href="#shipping-policy" className="text-brand hover:underline font-medium">
+              Shipping &amp; Delivery Policy
             </a>
-            <span>&bull;</span>
-            <a href="#contact" className="text-indigo-600 hover:underline font-medium">
+            <span className="text-slate-300">&middot;</span>
+            <a href="#contact" className="text-brand hover:underline font-medium">
               Contact Support
             </a>
           </div>

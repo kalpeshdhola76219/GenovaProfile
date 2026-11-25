@@ -1,5 +1,56 @@
 @import "tailwindcss";
 
+@theme {
+  --color-brand: #0066FF;
+  --color-brand-hover: #0052CC;
+  --color-navy: #0B1B3A;
+  --color-accent: #00C2CB;
+  --color-surface: #F8FAFC;
+
+  --color-resume: #0066FF;
+  --color-matrimonial: #E11D48;
+  --color-matrimonial-gold: #C9A227;
+  --color-cover-letter: #0D9488;
+
+  --font-site-heading: 'Manrope', 'Noto Sans Gujarati', 'Noto Sans Devanagari', system-ui, -apple-system, sans-serif;
+  --font-site-body: 'Inter', 'Noto Sans Gujarati', 'Noto Sans Devanagari', system-ui, -apple-system, sans-serif;
+}
+
+/* Scoped Public Website Typography & Surfaces (isolated from Builder, Preview, and Document Templates) */
+.site-shell {
+  font-family: var(--font-site-body);
+}
+
+.site-shell :where(h1, h2, h3, h4, .site-heading):not(.document-page-sheet *):not([data-template-preview] *) {
+  font-family: var(--font-site-heading);
+}
+
+.site-shell :where(button, a, p, li, input, select, textarea, label):not(.document-page-sheet *):not([data-template-preview] *) {
+  font-family: var(--font-site-body);
+}
+
+.site-card {
+  background-color: #ffffff;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  box-shadow: 0 1px 2px rgba(11, 27, 58, 0.04), 0 8px 24px -12px rgba(11, 27, 58, 0.08);
+}
+
+.site-card-hover {
+  transition: transform 180ms cubic-bezier(0.16, 1, 0.3, 1), box-shadow 180ms cubic-bezier(0.16, 1, 0.3, 1), border-color 180ms ease;
+}
+
+.site-card-hover:hover {
+  box-shadow: 0 4px 12px rgba(11, 27, 58, 0.06), 0 18px 36px -14px rgba(11, 27, 58, 0.14);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .site-card-hover,
+  .site-card-hover:hover {
+    transition: none !important;
+    transform: none !important;
+  }
+}
+
 @layer components {
   :where(.doc-justify) :where(p, li) {
     text-align: justify;

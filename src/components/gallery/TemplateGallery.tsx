@@ -12,11 +12,7 @@ import {
   Eye,
   ShieldCheck,
   Mail,
-  Camera,
-  Layers,
   ArrowUpDown,
-  Check,
-  Sparkles,
 } from 'lucide-react';
 
 interface TemplateGalleryProps {
@@ -172,24 +168,43 @@ export const TemplateGallery: React.FC<TemplateGalleryProps> = ({
     }
   };
 
+  const getCardHoverBorder = (type: DocumentType) => {
+    if (type === 'biodata') return 'hover:border-matrimonial/45';
+    if (type === 'cover-letter') return 'hover:border-cover-letter/45';
+    return 'hover:border-resume/45';
+  };
+
+  const getTypePriceBadge = (template: TemplateMetadata) => {
+    if (template.priceINR === 0) {
+      return 'text-cover-letter bg-white/95 border-cover-letter/25';
+    }
+    if (template.type === 'biodata') {
+      return 'text-matrimonial bg-white/95 border-matrimonial-gold/50';
+    }
+    if (template.type === 'cover-letter') {
+      return 'text-cover-letter bg-white/95 border-cover-letter/30';
+    }
+    return 'text-navy bg-white/95 border-slate-200';
+  };
+
   return (
-    <div className="space-y-6">
+    <div className="site-shell space-y-6 pb-20 lg:pb-0">
       {/* Top Filter Bar */}
-      <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-2xs space-y-5">
+      <div className="site-card p-5 rounded-3xl space-y-5">
         {/* Document Type Selector Segmented Control with DYNAMIC COUNTS */}
         <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-100 pb-4">
-          <div className="flex items-center gap-1 p-1 bg-slate-100 rounded-xl overflow-x-auto max-w-full scrollbar-none py-1">
+          <div className="flex items-center gap-1 p-1 bg-slate-100 rounded-2xl overflow-x-auto max-w-full scrollbar-none">
             <button
               type="button"
               onClick={() => {
                 setSelectedType('resume');
                 setSelectedCategory('All');
               }}
-              className={`px-4 py-2 text-xs font-semibold rounded-lg transition-all inline-flex items-center gap-1.5 cursor-pointer whitespace-nowrap shrink-0 ${
-                selectedType === 'resume' ? 'bg-white text-[#0066FF] shadow-2xs font-bold' : 'text-slate-600 hover:text-slate-900'
+              className={`px-4 py-2 text-xs font-semibold rounded-xl transition-all inline-flex items-center gap-1.5 cursor-pointer whitespace-nowrap shrink-0 ${
+                selectedType === 'resume' ? 'bg-white text-resume shadow-2xs font-bold' : 'text-slate-600 hover:text-navy'
               }`}
             >
-              <FileText className="w-3.5 h-3.5 text-[#0066FF]" />
+              <FileText className="w-3.5 h-3.5 text-resume" />
               <span>Resume ({resumeCount})</span>
             </button>
             <button
@@ -198,11 +213,11 @@ export const TemplateGallery: React.FC<TemplateGalleryProps> = ({
                 setSelectedType('cover-letter');
                 setSelectedCategory('All');
               }}
-              className={`px-4 py-2 text-xs font-semibold rounded-lg transition-all inline-flex items-center gap-1.5 cursor-pointer whitespace-nowrap shrink-0 ${
-                selectedType === 'cover-letter' ? 'bg-white text-emerald-700 shadow-2xs font-bold' : 'text-slate-600 hover:text-slate-900'
+              className={`px-4 py-2 text-xs font-semibold rounded-xl transition-all inline-flex items-center gap-1.5 cursor-pointer whitespace-nowrap shrink-0 ${
+                selectedType === 'cover-letter' ? 'bg-white text-cover-letter shadow-2xs font-bold' : 'text-slate-600 hover:text-navy'
               }`}
             >
-              <Mail className="w-3.5 h-3.5 text-emerald-600" />
+              <Mail className="w-3.5 h-3.5 text-cover-letter" />
               <span>Cover Letter ({coverLetterCount})</span>
             </button>
             <button
@@ -211,11 +226,11 @@ export const TemplateGallery: React.FC<TemplateGalleryProps> = ({
                 setSelectedType('biodata');
                 setSelectedCategory('All');
               }}
-              className={`px-4 py-2 text-xs font-semibold rounded-lg transition-all inline-flex items-center gap-1.5 cursor-pointer whitespace-nowrap shrink-0 ${
-                selectedType === 'biodata' ? 'bg-white text-rose-700 shadow-2xs font-bold' : 'text-slate-600 hover:text-slate-900'
+              className={`px-4 py-2 text-xs font-semibold rounded-xl transition-all inline-flex items-center gap-1.5 cursor-pointer whitespace-nowrap shrink-0 ${
+                selectedType === 'biodata' ? 'bg-white text-matrimonial shadow-2xs font-bold' : 'text-slate-600 hover:text-navy'
               }`}
             >
-              <Heart className="w-3.5 h-3.5 text-rose-600" />
+              <Heart className="w-3.5 h-3.5 text-matrimonial" />
               <span>Matrimonial Profile ({biodataCount})</span>
             </button>
           </div>
@@ -223,17 +238,17 @@ export const TemplateGallery: React.FC<TemplateGalleryProps> = ({
           {/* Quick Filters */}
           <div className="flex flex-wrap items-center gap-3 text-xs">
             {/* Price Filter Segments */}
-            <div className="flex items-center bg-slate-100 p-0.5 rounded-lg border border-slate-200 text-xs">
+            <div className="flex items-center bg-slate-100 p-0.5 rounded-xl border border-slate-200/80 text-xs">
               <button
                 type="button"
                 onClick={() => {
                   setFreeOnly(false);
                   setPremiumOnly(false);
                 }}
-                className={`px-2.5 py-1 rounded-md font-semibold transition-all cursor-pointer ${
+                className={`px-3 py-1.5 rounded-lg font-semibold transition-all cursor-pointer ${
                   !freeOnly && !premiumOnly
-                    ? 'bg-white text-slate-900 shadow-2xs'
-                    : 'text-slate-600 hover:text-slate-900'
+                    ? 'bg-white text-navy shadow-2xs'
+                    : 'text-slate-600 hover:text-navy'
                 }`}
               >
                 All Prices
@@ -244,10 +259,10 @@ export const TemplateGallery: React.FC<TemplateGalleryProps> = ({
                   setFreeOnly(true);
                   setPremiumOnly(false);
                 }}
-                className={`px-2.5 py-1 rounded-md font-semibold transition-all cursor-pointer ${
+                className={`px-3 py-1.5 rounded-lg font-semibold transition-all cursor-pointer ${
                   freeOnly
-                    ? 'bg-emerald-600 text-white shadow-2xs'
-                    : 'text-slate-600 hover:text-slate-900'
+                    ? 'bg-cover-letter text-white shadow-2xs'
+                    : 'text-slate-600 hover:text-navy'
                 }`}
               >
                 Free (₹0)
@@ -258,10 +273,10 @@ export const TemplateGallery: React.FC<TemplateGalleryProps> = ({
                   setFreeOnly(false);
                   setPremiumOnly(true);
                 }}
-                className={`px-2.5 py-1 rounded-md font-semibold transition-all cursor-pointer ${
+                className={`px-3 py-1.5 rounded-lg font-semibold transition-all cursor-pointer ${
                   premiumOnly
-                    ? 'bg-[#0066FF] text-white shadow-2xs'
-                    : 'text-slate-600 hover:text-slate-900'
+                    ? 'bg-brand text-white shadow-2xs'
+                    : 'text-slate-600 hover:text-navy'
                 }`}
               >
                 Paid (₹40 - ₹100)
@@ -274,23 +289,23 @@ export const TemplateGallery: React.FC<TemplateGalleryProps> = ({
                   type="checkbox"
                   checked={atsFilterOnly}
                   onChange={(e) => setAtsFilterOnly(e.target.checked)}
-                  className="rounded border-slate-300 text-[#0066FF] focus:ring-indigo-500"
+                  className="rounded border-slate-300 text-brand focus:ring-brand"
                 />
                 <span className="inline-flex items-center gap-1">
-                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" /> ATS-Friendly
+                  <ShieldCheck className="w-3.5 h-3.5 text-cover-letter" /> ATS-Friendly
                 </span>
               </label>
             )}
 
             {selectedType === 'cover-letter' && (
-              <div className="flex items-center bg-slate-100 p-0.5 rounded-lg border border-slate-200 text-xs">
+              <div className="flex items-center bg-slate-100 p-0.5 rounded-xl border border-slate-200/80 text-xs">
                 <button
                   type="button"
                   onClick={() => setCoverLetterFormatFilter('all')}
-                  className={`px-2.5 py-1 rounded-md font-semibold transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+                  className={`px-3 py-1.5 rounded-lg font-semibold transition-all cursor-pointer whitespace-nowrap shrink-0 ${
                     coverLetterFormatFilter === 'all'
-                      ? 'bg-white text-slate-900 shadow-2xs'
-                      : 'text-slate-600 hover:text-slate-900'
+                      ? 'bg-white text-navy shadow-2xs'
+                      : 'text-slate-600 hover:text-navy'
                   }`}
                 >
                   All Formats
@@ -298,10 +313,10 @@ export const TemplateGallery: React.FC<TemplateGalleryProps> = ({
                 <button
                   type="button"
                   onClick={() => setCoverLetterFormatFilter('ats')}
-                  className={`px-2.5 py-1 rounded-md font-semibold transition-all cursor-pointer whitespace-nowrap shrink-0 inline-flex items-center gap-1 ${
+                  className={`px-3 py-1.5 rounded-lg font-semibold transition-all cursor-pointer whitespace-nowrap shrink-0 inline-flex items-center gap-1 ${
                     coverLetterFormatFilter === 'ats'
-                      ? 'bg-emerald-600 text-white shadow-2xs'
-                      : 'text-slate-600 hover:text-slate-900'
+                      ? 'bg-cover-letter text-white shadow-2xs'
+                      : 'text-slate-600 hover:text-navy'
                   }`}
                 >
                   <ShieldCheck className="w-3 h-3" />
@@ -310,10 +325,10 @@ export const TemplateGallery: React.FC<TemplateGalleryProps> = ({
                 <button
                   type="button"
                   onClick={() => setCoverLetterFormatFilter('normal')}
-                  className={`px-2.5 py-1 rounded-md font-semibold transition-all cursor-pointer whitespace-nowrap shrink-0 ${
+                  className={`px-3 py-1.5 rounded-lg font-semibold transition-all cursor-pointer whitespace-nowrap shrink-0 ${
                     coverLetterFormatFilter === 'normal'
-                      ? 'bg-[#0066FF] text-white shadow-2xs'
-                      : 'text-slate-600 hover:text-slate-900'
+                      ? 'bg-brand text-white shadow-2xs'
+                      : 'text-slate-600 hover:text-navy'
                   }`}
                 >
                   Normal ({coverLetterNormalCount})
@@ -325,7 +340,7 @@ export const TemplateGallery: React.FC<TemplateGalleryProps> = ({
               <select
                 value={photoFilter}
                 onChange={(e) => setPhotoFilter(e.target.value as any)}
-                className="px-2.5 py-1 text-xs border border-slate-200 rounded-lg bg-slate-50 text-slate-700 font-medium cursor-pointer"
+                className="px-3 py-1.5 text-xs border border-slate-200 rounded-xl bg-surface text-slate-700 font-medium cursor-pointer"
               >
                 <option value="all">Any Photo Setup</option>
                 <option value="photo">Photo Layout</option>
@@ -338,13 +353,13 @@ export const TemplateGallery: React.FC<TemplateGalleryProps> = ({
         {/* Search, Category & Sorting */}
         <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
           <div className="relative flex-1 max-w-md">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search templates by name, style, layout..."
-              className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-[#0066FF] focus:bg-white"
+              className="w-full pl-10 pr-4 py-2.5 bg-surface border border-slate-200 rounded-2xl text-xs focus:outline-none focus:ring-2 focus:ring-brand focus:bg-white"
             />
           </div>
 
@@ -355,7 +370,7 @@ export const TemplateGallery: React.FC<TemplateGalleryProps> = ({
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as any)}
-                className="px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs font-semibold text-slate-800 bg-white cursor-pointer"
+                className="px-3 py-1.5 border border-slate-200 rounded-xl text-xs font-semibold text-navy bg-white cursor-pointer"
               >
                 <option value="recommended">Recommended</option>
                 <option value="popular">Most Popular</option>
@@ -366,18 +381,18 @@ export const TemplateGallery: React.FC<TemplateGalleryProps> = ({
           </div>
         </div>
 
-        {/* Biodata Style Chips */}
+        {/* Biodata Style Filter Controls */}
         {selectedType === 'biodata' && (
-          <div className="pt-2 border-t border-slate-100 flex items-center gap-2 overflow-x-auto text-xs pb-1">
-            <span className="font-bold text-slate-400 uppercase tracking-wider text-[10px] shrink-0">Style:</span>
+          <div className="pt-3 border-t border-slate-100 flex items-center gap-2 overflow-x-auto text-xs pb-1">
+            <span className="font-semibold text-slate-500 shrink-0">Style:</span>
             {biodataStyles.map((sty) => (
               <button
                 key={sty}
                 type="button"
                 onClick={() => setBiodataStyle(sty)}
-                className={`px-3 py-1 rounded-lg transition-colors whitespace-nowrap cursor-pointer text-xs font-medium ${
+                className={`px-3 py-1.5 rounded-xl transition-colors whitespace-nowrap cursor-pointer text-xs font-medium ${
                   biodataStyle === sty
-                    ? 'bg-rose-600 text-white shadow-2xs font-semibold'
+                    ? 'bg-matrimonial text-white shadow-2xs font-semibold'
                     : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                 }`}
               >
@@ -386,7 +401,6 @@ export const TemplateGallery: React.FC<TemplateGalleryProps> = ({
             ))}
           </div>
         )}
-
       </div>
 
       {/* Templates Grid */}
@@ -396,85 +410,82 @@ export const TemplateGallery: React.FC<TemplateGalleryProps> = ({
           return (
             <div
               key={template.id}
-              className="group bg-white rounded-2xl border border-slate-200/90 overflow-hidden shadow-2xs hover:shadow-lg hover:border-slate-300 transition-all flex flex-col justify-between"
+              className={`group site-card site-card-hover rounded-3xl overflow-hidden hover:-translate-y-1 flex flex-col justify-between ${getCardHoverBorder(template.type)}`}
             >
-              {/* Template Real Miniature Rendered Preview */}
+              {/* Template Real Miniature Rendered Preview (isolated from site fonts) */}
               <div
+                data-template-preview="true"
                 style={{ aspectRatio: '210 / 297' }}
                 className="relative aspect-[210/297] bg-slate-100 overflow-hidden border-b border-slate-100"
               >
                 <TemplatePreview template={template} />
 
                 {/* Hover Overlay with Action Buttons */}
-                <div className="absolute inset-0 bg-slate-900/65 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2.5 p-4 z-10 backdrop-blur-[2px]">
+                <div className="absolute inset-0 bg-navy/65 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2.5 p-4 z-10 backdrop-blur-[2px]">
                   <button
                     type="button"
                     onClick={() => onSelectTemplate(template)}
-                    className="w-full py-2.5 bg-white text-slate-900 rounded-xl text-xs font-bold hover:bg-slate-50 transition-colors shadow-sm inline-flex items-center justify-center gap-1.5 cursor-pointer"
+                    className="w-full py-2.5 bg-white text-navy rounded-2xl text-xs font-semibold hover:bg-slate-50 transition-colors shadow-sm inline-flex items-center justify-center gap-1.5 cursor-pointer"
                   >
                     <span>Use Template</span>
-                    <ArrowRight className="w-3.5 h-3.5" />
+                    <ArrowRight className="w-3.5 h-3.5 text-brand" />
                   </button>
                   <button
                     type="button"
                     onClick={() => handleOpenPreviewModal(template)}
-                    className="w-full py-2 bg-slate-800/90 text-white rounded-xl text-xs font-semibold hover:bg-slate-800 transition-colors inline-flex items-center justify-center gap-1.5 cursor-pointer"
+                    className="w-full py-2.5 bg-white/15 text-white border border-white/25 rounded-2xl text-xs font-semibold hover:bg-white/25 transition-colors inline-flex items-center justify-center gap-1.5 cursor-pointer"
                   >
                     <Eye className="w-3.5 h-3.5" />
                     <span>Preview</span>
                   </button>
                 </div>
 
-                {/* Top Corner Quick Badges */}
-                <div className="absolute top-2.5 left-2.5 right-2.5 flex items-center justify-between pointer-events-none z-1">
+                {/* Top Corner Price & Accent Indicator */}
+                <div className="absolute top-3 left-3 right-3 flex items-center justify-between pointer-events-none z-1">
                   <span
-                    className="w-3 h-3 rounded-full border border-white shadow-2xs"
+                    className="w-3 h-3 rounded-full border border-white shadow-xs"
                     style={{ backgroundColor: template.primaryColorSample }}
                     title="Theme Accent"
                   />
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-1.5">
                     {template.isATS && (
-                      <span className="text-[10px] font-bold text-emerald-800 bg-white/95 backdrop-blur-xs px-1.5 py-0.5 rounded shadow-2xs border border-emerald-200">
+                      <span className="text-[10px] font-semibold text-cover-letter bg-white/95 backdrop-blur-xs px-2 py-0.5 rounded-lg shadow-xs border border-cover-letter/25">
                         ATS-Friendly
                       </span>
                     )}
-                    {template.priceINR > 0 ? (
-                      <span className="text-[10px] font-bold text-violet-900 bg-violet-100/95 backdrop-blur-xs px-2 py-0.5 rounded shadow-2xs border border-violet-200">
-                        ₹{template.priceINR}
-                      </span>
-                    ) : (
-                      <span className="text-[10px] font-semibold text-emerald-800 bg-emerald-50/95 backdrop-blur-xs px-2 py-0.5 rounded shadow-2xs border border-emerald-200">
-                        Free (₹0)
-                      </span>
-                    )}
+                    <span
+                      className={`text-[11px] font-bold backdrop-blur-xs px-2.5 py-0.5 rounded-lg shadow-xs border tabular-nums ${getTypePriceBadge(template)}`}
+                    >
+                      {template.priceINR > 0 ? `₹${template.priceINR}` : 'Free (₹0)'}
+                    </span>
                   </div>
                 </div>
               </div>
 
               {/* Template Info Card */}
-              <div className="p-4 space-y-2">
+              <div className="p-4 sm:p-5 space-y-2.5">
                 <div className="flex items-center justify-between">
                   <h3
                     onClick={() => onSelectTemplate(template)}
-                    className="font-bold text-slate-900 text-sm group-hover:text-[#0066FF] transition-colors truncate cursor-pointer"
+                    className="font-bold text-navy text-sm group-hover:text-brand transition-colors truncate cursor-pointer"
                   >
                     {template.name}
                   </h3>
                 </div>
-                <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed">
+                <p className="text-xs text-slate-600 line-clamp-2 leading-relaxed">
                   {getTemplateSubtitle(template)}
                 </p>
 
                 {/* Footer Attributes & Compare Toggle */}
-                <div className="flex items-center justify-between text-[11px] text-slate-500 pt-2 border-t border-slate-100">
+                <div className="flex items-center justify-between text-[11px] text-slate-500 pt-2.5 border-t border-slate-100">
                   <span className="font-medium text-slate-600 capitalize">{template.category}</span>
                   <div className="flex items-center gap-2">
                     <button
                       type="button"
                       onClick={(e) => handleToggleCompare(template, e)}
-                      className={`px-2 py-0.5 rounded text-[10px] font-semibold transition-colors cursor-pointer ${
+                      className={`px-2.5 py-1 rounded-lg text-[10px] font-semibold transition-colors cursor-pointer ${
                         isCompared
-                          ? 'bg-[#0066FF] text-white'
+                          ? 'bg-brand text-white'
                           : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                       }`}
                     >
@@ -483,7 +494,7 @@ export const TemplateGallery: React.FC<TemplateGalleryProps> = ({
                     <button
                       type="button"
                       onClick={() => handleOpenPreviewModal(template)}
-                      className="text-[#0066FF] hover:text-[#0055D6] font-semibold inline-flex items-center gap-1 cursor-pointer"
+                      className="text-brand hover:text-brand-hover font-semibold inline-flex items-center gap-1 cursor-pointer"
                     >
                       <Eye className="w-3 h-3" /> Preview
                     </button>
@@ -495,7 +506,7 @@ export const TemplateGallery: React.FC<TemplateGalleryProps> = ({
                   <button
                     type="button"
                     onClick={() => onSelectTemplate(template)}
-                    className="flex-1 py-2 bg-gradient-to-r from-[#0066FF] to-indigo-600 active:from-[#0055D6] active:to-indigo-700 text-white rounded-xl text-xs font-bold inline-flex items-center justify-center gap-1.5 cursor-pointer shadow-xs"
+                    className="flex-1 py-2.5 bg-brand hover:bg-brand-hover text-white rounded-2xl text-xs font-semibold inline-flex items-center justify-center gap-1.5 cursor-pointer shadow-xs"
                   >
                     <span>Use Template</span>
                     <ArrowRight className="w-3.5 h-3.5" />
@@ -503,7 +514,7 @@ export const TemplateGallery: React.FC<TemplateGalleryProps> = ({
                   <button
                     type="button"
                     onClick={() => handleOpenPreviewModal(template)}
-                    className="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 active:bg-slate-300 text-slate-800 rounded-xl text-xs font-semibold inline-flex items-center justify-center gap-1 cursor-pointer"
+                    className="px-3.5 py-2.5 bg-slate-100 hover:bg-slate-200 text-navy rounded-2xl text-xs font-semibold inline-flex items-center justify-center gap-1 cursor-pointer"
                   >
                     <Eye className="w-3.5 h-3.5" />
                     <span>Preview</span>
@@ -516,8 +527,8 @@ export const TemplateGallery: React.FC<TemplateGalleryProps> = ({
       </div>
 
       {filteredTemplates.length === 0 && (
-        <div className="text-center py-16 bg-white rounded-2xl border border-slate-200 p-8 space-y-3">
-          <p className="text-slate-500 text-sm">No templates found matching your filters.</p>
+        <div className="text-center py-16 site-card rounded-3xl p-8 space-y-3">
+          <p className="text-slate-600 text-sm">No templates found matching your filters.</p>
           <button
             type="button"
             onClick={() => {
@@ -531,7 +542,7 @@ export const TemplateGallery: React.FC<TemplateGalleryProps> = ({
               setPhotoFilter('all');
               setBiodataStyle('All');
             }}
-            className="px-4 py-2 bg-slate-900 text-white rounded-xl text-xs font-semibold cursor-pointer"
+            className="px-5 py-2.5 bg-navy text-white rounded-2xl text-xs font-semibold cursor-pointer hover:bg-navy/90 transition-colors"
           >
             Reset Filters
           </button>
@@ -540,30 +551,30 @@ export const TemplateGallery: React.FC<TemplateGalleryProps> = ({
 
       {/* Floating Comparison Bar & Notice */}
       {(compareList.length > 0 || compareWarning) && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 flex flex-col items-center gap-2 max-w-[95vw]">
+        <div className="fixed bottom-20 lg:bottom-6 left-1/2 -translate-x-1/2 z-40 flex flex-col items-center gap-2 max-w-[95vw]">
           {compareWarning && (
-            <div className="bg-amber-500 text-slate-950 font-bold text-xs px-4 py-1.5 rounded-full shadow-lg border border-amber-400 animate-in fade-in slide-in-from-bottom-2">
+            <div className="bg-amber-500 text-navy font-bold text-xs px-4 py-1.5 rounded-2xl shadow-lg border border-amber-400">
               {compareWarning}
             </div>
           )}
           {compareList.length > 0 && (
-            <div className="bg-slate-900 text-white px-4 sm:px-5 py-3 rounded-2xl shadow-2xl flex items-center gap-3 sm:gap-4 animate-in slide-in-from-bottom-3 duration-200 border border-slate-800">
+            <div className="bg-navy text-white px-4 sm:px-5 py-3 rounded-2xl shadow-2xl flex items-center gap-3 sm:gap-4 border border-white/10">
               <div className="flex items-center gap-2 text-xs">
-                <span className="font-bold">{compareList.length} / 3</span>
+                <span className="font-bold tabular-nums">{compareList.length} / 3</span>
                 <span className="text-slate-300 hidden sm:inline">Templates Selected</span>
               </div>
               <div className="flex items-center gap-2">
                 <button
                   type="button"
                   onClick={() => setIsCompareModalOpen(true)}
-                  className="px-3 sm:px-4 py-1.5 bg-[#0066FF] text-white rounded-xl text-xs font-bold hover:bg-[#0055D6] cursor-pointer shadow-xs"
+                  className="px-3.5 sm:px-4 py-1.5 bg-brand text-white rounded-xl text-xs font-semibold hover:bg-brand-hover cursor-pointer shadow-xs"
                 >
                   Compare Now
                 </button>
                 <button
                   type="button"
                   onClick={() => setCompareList([])}
-                  className="text-xs text-slate-400 hover:text-white cursor-pointer px-2 py-1"
+                  className="text-xs text-slate-300 hover:text-white cursor-pointer px-2 py-1"
                 >
                   Clear
                 </button>

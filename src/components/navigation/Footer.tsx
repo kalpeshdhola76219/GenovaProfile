@@ -9,9 +9,9 @@ interface FooterProps {
 
 export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
   return (
-    <footer className="bg-slate-900 text-slate-400 text-xs border-t border-slate-800 no-print">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
+    <footer className="site-shell bg-navy text-slate-300 text-xs border-t border-white/10 no-print">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-14 pb-24 lg:pb-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 lg:gap-10">
           {/* Brand Info & Merchant Address (2 cols on lg) */}
           <div className="space-y-4 lg:col-span-2">
             <a
@@ -20,48 +20,48 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
                 e.preventDefault();
                 onNavigate('home');
               }}
-              className="text-left cursor-pointer group focus:outline-none block"
+              className="text-left cursor-pointer group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand rounded-xl block w-fit"
             >
               <GenovaDocLogo size="md" theme="dark" showTagline />
             </a>
-            <p className="text-slate-400 text-xs leading-relaxed max-w-sm">
+            <p className="text-slate-300/90 text-xs leading-relaxed max-w-sm">
               Genova Profile (genovaprofile.com) is an online document builder for creating ATS-friendly resumes, matrimonial biodatas, and cover letters.
             </p>
             {/* Merchant Details Block */}
-            <div className="pt-2 border-t border-slate-800/80 space-y-1.5 text-[11px] text-slate-400">
-              <div className="text-slate-300 font-semibold">GenovaProfile</div>
+            <div className="pt-3 border-t border-white/10 space-y-2 text-[12px] text-slate-300/90">
+              <div className="text-white font-bold site-heading tracking-tight">GenovaProfile</div>
               <div className="flex items-center gap-2">
-                <Mail className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
+                <Mail className="w-3.5 h-3.5 text-accent shrink-0" />
                 <a href={`mailto:${BUSINESS.email}`} className="hover:text-white transition-colors">
                   {BUSINESS.email}
                 </a>
               </div>
               {BUSINESS.phone ? (
                 <div className="flex items-center gap-2">
-                  <Phone className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
+                  <Phone className="w-3.5 h-3.5 text-accent shrink-0" />
                   <a href={BUSINESS.phoneHref} className="hover:text-white transition-colors">
                     {BUSINESS.phone}
                   </a>
                 </div>
               ) : null}
               <div className="flex items-center gap-2">
-                <MapPin className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
+                <MapPin className="w-3.5 h-3.5 text-accent shrink-0" />
                 <span>{BUSINESS.location}</span>
               </div>
               <div className="text-slate-400">
                 Support Hours: {BUSINESS.hours}
               </div>
             </div>
-            <div className="flex items-center gap-2 text-emerald-400 font-medium text-[11px] pt-1">
-              <ShieldCheck className="w-4 h-4 text-emerald-400" />
+            <div className="flex items-center gap-2 text-emerald-300 font-medium text-[12px] pt-1">
+              <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
               <span>Payments secured by Cashfree Payments</span>
             </div>
           </div>
 
           {/* Product Links */}
-          <div className="space-y-3">
-            <h4 className="text-white font-bold text-xs uppercase tracking-wider">Product</h4>
-            <ul className="space-y-2.5">
+          <div className="space-y-3.5">
+            <h4 className="text-white font-bold text-sm tracking-tight">Product</h4>
+            <ul className="space-y-2.5 text-slate-300">
               <li>
                 <a
                   href="/resume-templates"
@@ -69,10 +69,10 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
                     e.preventDefault();
                     onNavigate('resume-templates');
                   }}
-                  className="hover:text-white transition-colors cursor-pointer inline-flex items-center gap-1.5"
+                  className="hover:text-white transition-colors cursor-pointer inline-flex items-center gap-2"
                 >
-                  <FileText className="w-3.5 h-3.5 text-indigo-400" />
-                  Resume Builder
+                  <FileText className="w-3.5 h-3.5 text-resume shrink-0" />
+                  <span>Resume Builder</span>
                 </a>
               </li>
               <li>
@@ -82,10 +82,10 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
                     e.preventDefault();
                     onNavigate('cover-letter-templates');
                   }}
-                  className="hover:text-white transition-colors cursor-pointer inline-flex items-center gap-1.5"
+                  className="hover:text-white transition-colors cursor-pointer inline-flex items-center gap-2"
                 >
-                  <Mail className="w-3.5 h-3.5 text-blue-400" />
-                  Cover Letter Generator
+                  <Mail className="w-3.5 h-3.5 text-cover-letter shrink-0" />
+                  <span>Cover Letter Generator</span>
                 </a>
               </li>
               <li>
@@ -95,10 +95,10 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
                     e.preventDefault();
                     onNavigate('biodata-templates');
                   }}
-                  className="hover:text-white transition-colors cursor-pointer inline-flex items-center gap-1.5"
+                  className="hover:text-white transition-colors cursor-pointer inline-flex items-center gap-2"
                 >
-                  <Heart className="w-3.5 h-3.5 text-rose-400" />
-                  Matrimonial Profile Builder
+                  <Heart className="w-3.5 h-3.5 text-matrimonial shrink-0" />
+                  <span>Matrimonial Profile Builder</span>
                 </a>
               </li>
               <li>
@@ -117,9 +117,9 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
           </div>
 
           {/* Quick Help & Restore */}
-          <div className="space-y-3">
-            <h4 className="text-white font-bold text-xs uppercase tracking-wider">Support & Tools</h4>
-            <ul className="space-y-2.5">
+          <div className="space-y-3.5">
+            <h4 className="text-white font-bold text-sm tracking-tight">Support &amp; Tools</h4>
+            <ul className="space-y-2.5 text-slate-300">
               <li>
                 <a
                   href="/contact"
@@ -139,10 +139,10 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
                     e.preventDefault();
                     onNavigate('restore');
                   }}
-                  className="text-indigo-400 hover:text-indigo-300 transition-colors cursor-pointer font-semibold inline-flex items-center gap-1.5"
+                  className="text-accent hover:text-white transition-colors cursor-pointer font-semibold inline-flex items-center gap-1.5"
                 >
-                  <RefreshCw className="w-3 h-3" />
-                  Restore Purchase
+                  <RefreshCw className="w-3.5 h-3.5" />
+                  <span>Restore Purchase</span>
                 </a>
               </li>
               <li>
@@ -161,9 +161,9 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
           </div>
 
           {/* Legal & Policies */}
-          <div className="space-y-3">
-            <h4 className="text-white font-bold text-xs uppercase tracking-wider">Legal & Policies</h4>
-            <ul className="space-y-2.5">
+          <div className="space-y-3.5">
+            <h4 className="text-white font-bold text-sm tracking-tight">Legal &amp; Policies</h4>
+            <ul className="space-y-2.5 text-slate-300">
               <li>
                 <a
                   href="/privacy-policy"
@@ -185,7 +185,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
                   }}
                   className="hover:text-white transition-colors cursor-pointer block"
                 >
-                  Terms & Conditions
+                  Terms &amp; Conditions
                 </a>
               </li>
               <li>
@@ -197,7 +197,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
                   }}
                   className="hover:text-white transition-colors cursor-pointer block"
                 >
-                  Refund & Cancellation Policy
+                  Refund &amp; Cancellation Policy
                 </a>
               </li>
               <li>
@@ -209,7 +209,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
                   }}
                   className="hover:text-white transition-colors cursor-pointer block"
                 >
-                  Shipping & Digital Delivery
+                  Shipping &amp; Digital Delivery
                 </a>
               </li>
             </ul>
@@ -217,17 +217,17 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
         </div>
 
         {/* Software-Only Compliance Disclaimer */}
-        <div className="mt-8 rounded-xl border border-slate-800 bg-slate-950/60 px-4 py-3 flex items-start gap-2.5 text-[11px] text-slate-400 leading-relaxed">
-          <Info className="w-4 h-4 text-indigo-400 shrink-0 mt-0.5" />
+        <div className="mt-10 rounded-2xl border border-white/10 bg-white/5 px-4 py-3.5 flex items-start gap-3 text-[12px] text-slate-300 leading-relaxed">
+          <Info className="w-4 h-4 text-accent shrink-0 mt-0.5" />
           <p>
-            <strong className="text-slate-200 font-semibold">Disclaimer:</strong> Genova Profile is strictly a self-service{' '}
-            <span className="text-slate-200 font-medium">PDF Document &amp; Bio-Profile Formatting Software Tool (SaaS)</span>. We are{' '}
-            <span className="text-slate-200 font-medium">NOT a matchmaking, dating, marriage bureau, or matrimonial agency</span>, and we do not host public profile directories, connect users, or provide partner-finding services.
+            <strong className="text-white font-semibold">Disclaimer:</strong> Genova Profile is strictly a self-service{' '}
+            <span className="text-white font-medium">PDF Document &amp; Bio-Profile Formatting Software Tool (SaaS)</span>. We are{' '}
+            <span className="text-white font-medium">NOT a matchmaking, dating, marriage bureau, or matrimonial agency</span>, and we do not host public profile directories, connect users, or provide partner-finding services.
           </p>
         </div>
 
         {/* Bottom Bar */}
-        <div className="pt-6 mt-6 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4 text-slate-500 text-[11px]">
+        <div className="pt-6 mt-6 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4 text-slate-400 text-[11px]">
           <div>
             &copy; {new Date().getFullYear()} GenovaProfile. All rights reserved. &bull; Payments secured by Cashfree
           </div>
@@ -238,7 +238,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
                 e.preventDefault();
                 onNavigate('about');
               }}
-              className="hover:text-slate-400 cursor-pointer"
+              className="hover:text-white transition-colors cursor-pointer"
             >
               About Us
             </a>
@@ -248,7 +248,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
                 e.preventDefault();
                 onNavigate('privacy-policy');
               }}
-              className="hover:text-slate-400 cursor-pointer"
+              className="hover:text-white transition-colors cursor-pointer"
             >
               Privacy Policy
             </a>
@@ -258,7 +258,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
                 e.preventDefault();
                 onNavigate('terms');
               }}
-              className="hover:text-slate-400 cursor-pointer"
+              className="hover:text-white transition-colors cursor-pointer"
             >
               Terms
             </a>
@@ -268,7 +268,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
                 e.preventDefault();
                 onNavigate('refund-policy');
               }}
-              className="hover:text-slate-400 cursor-pointer"
+              className="hover:text-white transition-colors cursor-pointer"
             >
               Refund Policy
             </a>
@@ -278,9 +278,9 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
                 e.preventDefault();
                 onNavigate('shipping-policy');
               }}
-              className="hover:text-slate-400 cursor-pointer"
+              className="hover:text-white transition-colors cursor-pointer"
             >
-              Shipping & Delivery
+              Shipping &amp; Delivery
             </a>
             <a
               href="/contact"
@@ -288,7 +288,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
                 e.preventDefault();
                 onNavigate('contact');
               }}
-              className="hover:text-slate-400 cursor-pointer"
+              className="hover:text-white transition-colors cursor-pointer"
             >
               Contact Us
             </a>
@@ -298,7 +298,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
                 e.preventDefault();
                 onNavigate('restore');
               }}
-              className="text-indigo-400 hover:text-indigo-300 cursor-pointer font-medium"
+              className="text-accent hover:text-white transition-colors cursor-pointer font-medium"
             >
               Restore
             </a>
