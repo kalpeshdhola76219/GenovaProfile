@@ -590,8 +590,8 @@ export const DocumentBuilder: React.FC<DocumentBuilderProps> = ({
         )}
 
         {/* Right Quick Template Info & Mobile Switcher */}
-        <div className="flex items-center gap-3">
-          <div className="hidden md:flex items-center gap-2 text-xs text-slate-500">
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="flex items-center gap-2 text-xs text-slate-500">
             <span>Template: <strong className="text-slate-800">{currentTemplate?.name || 'Standard'}</strong></span>
             <button
               type="button"
@@ -762,8 +762,9 @@ export const DocumentBuilder: React.FC<DocumentBuilderProps> = ({
             <div
               style={{
                 width: `${Math.round(800 * zoom)}px`,
-                minHeight: `${Math.round((pageCount * 1131 + Math.max(0, pageCount - 1) * 32) * zoom)}px`,
+                height: `${Math.round((pageCount * 1131 + Math.max(0, pageCount - 1) * 32) * zoom)}px`,
                 position: 'relative',
+                overflow: 'hidden',
               }}
               className="my-auto transition-all"
             >
@@ -773,7 +774,7 @@ export const DocumentBuilder: React.FC<DocumentBuilderProps> = ({
                   transform: `scale(${zoom})`,
                   transformOrigin: 'top left',
                   width: '800px',
-                  minHeight: `${pageCount * 1131 + Math.max(0, pageCount - 1) * 32}px`,
+                  height: `${pageCount * 1131 + Math.max(0, pageCount - 1) * 32}px`,
                   transition: 'transform 0.15s ease-out',
                 }}
                 className="print:transform-none print:shadow-none relative origin-top-left"

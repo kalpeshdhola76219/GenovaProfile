@@ -146,7 +146,7 @@ export const HomePage: React.FC<HomePageProps> = ({
               </div>
 
               {/* Main Headline H1 */}
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-slate-900 leading-[1.18] sm:leading-[1.15] text-balance">
+              <h1 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-slate-900 leading-[1.18] sm:leading-[1.15] text-balance">
                 Build Standout Resumes, Matrimonial Profiles & Cover Letters in Minutes
               </h1>
 

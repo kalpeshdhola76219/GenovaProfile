@@ -123,12 +123,15 @@ export function calculateDocumentPagination(
   }
 
   const containerRect = container.getBoundingClientRect();
+  const layoutWidth = container.offsetWidth || container.clientWidth;
+  const measuredScale = layoutWidth > 0 && containerRect.width > 0 ? containerRect.width / layoutWidth : 1;
+  const domScale = measuredScale > 0.05 && Number.isFinite(measuredScale) ? measuredScale : 1;
 
-  // Helper to get element coordinates relative to container (rounded to integer pixels)
+  // Helper to get element coordinates relative to container (normalized for CSS transform scale and rounded to integer pixels)
   const getRelativeRect = (el: HTMLElement) => {
     const rect = el.getBoundingClientRect();
-    const top = Math.round(rect.top - containerRect.top);
-    const bottom = Math.round(rect.bottom - containerRect.top);
+    const top = Math.round((rect.top - containerRect.top) / domScale);
+    const bottom = Math.round((rect.bottom - containerRect.top) / domScale);
     return { top, bottom, height: bottom - top };
   };
 
