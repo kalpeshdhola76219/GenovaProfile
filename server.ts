@@ -2,13 +2,13 @@ import express from 'express';
 import path from 'path';
 import crypto from 'crypto';
 import dotenv from 'dotenv';
-import { db, maskMobile, PAID_DOCUMENT_RETENTION_DAYS, normalizeDocumentType } from './server/db';
+import { db, maskMobile, PAID_DOCUMENT_RETENTION_DAYS, normalizeDocumentType } from './server/db.ts';
 import {
   generateRecoveryCode,
   hashRecoveryCode,
   verifyRecoveryCode,
   generateReceiptId,
-} from './server/recovery';
+} from './server/recovery.ts';
 
 dotenv.config();
 
@@ -280,7 +280,7 @@ function sanitizeCustomerId(idCandidate: string): string {
 }
 
 // Authoritative Template Registry (Single Authoritative Source of Truth)
-import templatesCatalogJson from './src/config/templatesCatalog.json';
+import templatesCatalogJson from './src/config/templatesCatalog.json' with { type: 'json' };
 
 export interface AuthoritativeTemplateItem {
   id: string;
