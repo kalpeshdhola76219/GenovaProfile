@@ -278,7 +278,7 @@ export const ContactPage: React.FC<ContactPageProps> = ({ onNavigate }) => {
                   onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
                   className="w-full px-3.5 py-2.5 bg-surface border border-slate-200 rounded-2xl text-xs font-medium text-navy focus:outline-none focus:ring-2 focus:ring-brand focus:bg-white transition-colors cursor-pointer"
                 >
-                  <option value="Payment issue">Payment issue (Cashfree, UPI, debit / credit card)</option>
+                  <option value="Payment issue">Payment issue (Razorpay, UPI, debit / credit card)</option>
                   <option value="Download problem">Download problem (PDF generation or download issue)</option>
                   <option value="Refund request">Refund request (Duplicate payment or delivery failure)</option>
                   <option value="Template question">Template question (Design or format inquiry)</option>

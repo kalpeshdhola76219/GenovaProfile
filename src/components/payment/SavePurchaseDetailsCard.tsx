@@ -1,6 +1,6 @@
 /**
  * SavePurchaseDetailsCard Component (Task 4A)
- * Displayed after a verified PAID state in both CashfreeCheckoutFlow and PaymentResultPage.
+ * Displayed after a verified PAID state in both RazorpayCheckoutFlow and PaymentResultPage.
  * Shows Receipt ID, Template name, Amount, Date, and Recovery Code (once only).
  * Includes Copy button, "Download receipt" button, and mandatory checkbox before closing.
  */

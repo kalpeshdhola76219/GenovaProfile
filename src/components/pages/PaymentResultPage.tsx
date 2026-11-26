@@ -12,7 +12,7 @@ import {
   HelpCircle,
 } from 'lucide-react';
 import { sessionService } from '../../services/sessionService';
-import { cashfreeService, VerifyOrderResponse } from '../../services/cashfreeService';
+import { razorpayService, VerifyOrderResponse } from '../../services/razorpayService';
 import { pendingOrderService, PendingOrder } from '../../services/pendingOrderService';
 import { SavePurchaseDetailsCard } from '../payment/SavePurchaseDetailsCard';
 import { BUSINESS } from '../../config/business';
@@ -107,7 +107,7 @@ export const PaymentResultPage: React.FC<PaymentResultPageProps> = ({
     if (isCancelledRef.current) return;
 
     try {
-      const res = await cashfreeService.verifyOrder(targetOrderId);
+      const res = await razorpayService.verifyOrder(targetOrderId);
       if (isCancelledRef.current) return;
 
       setOrderDetails(res);
@@ -124,7 +124,7 @@ export const PaymentResultPage: React.FC<PaymentResultPageProps> = ({
 
         if (docId) {
           try {
-            const serverDocRes = await cashfreeService.fetchDocumentData(docId);
+            const serverDocRes = await razorpayService.fetchDocumentData(docId);
             if (!isCancelledRef.current && serverDocRes?.document) {
               const fullDoc: DocumentData = {
                 ...serverDocRes.document,
@@ -234,7 +234,7 @@ export const PaymentResultPage: React.FC<PaymentResultPageProps> = ({
                   Verifying Your Payment...
                 </h1>
                 <p className="text-xs sm:text-sm text-slate-600 leading-relaxed max-w-sm mx-auto">
-                  Please wait while we confirm your payment status directly with Cashfree Payment Gateway.
+                  Please wait while we confirm your payment status directly with Razorpay Payment Gateway.
                 </p>
               </div>
 
@@ -261,7 +261,7 @@ export const PaymentResultPage: React.FC<PaymentResultPageProps> = ({
               <div className="space-y-1.5">
                 <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-semibold">
                   <ShieldCheck className="w-3.5 h-3.5" />
-                  <span>Cashfree Payment Verified</span>
+                  <span>Razorpay Payment Verified</span>
                 </div>
                 <h1 className="text-2xl font-black text-slate-900 tracking-tight">
                   Payment Successful!
@@ -336,7 +336,7 @@ export const PaymentResultPage: React.FC<PaymentResultPageProps> = ({
                   Payment Confirmation Pending
                 </h1>
                 <p className="text-xs sm:text-sm text-slate-600 leading-relaxed max-w-sm mx-auto">
-                  We have not received final confirmation from Cashfree yet. If money was deducted, please check again in a minute or restore your purchase later.
+                  We have not received final confirmation from Razorpay yet. If money was deducted, please check again in a minute or restore your purchase later.
                 </p>
               </div>
 

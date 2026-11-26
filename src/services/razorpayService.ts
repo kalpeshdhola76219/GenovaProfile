@@ -1,30 +1,31 @@
 /**
- * GenovaDoc Cashfree Payment Integration Service
- * Official Cashfree Web Checkout integration:
- * - Server creates all Cashfree orders with strict server-side pricing
+ * GenovaProfile Razorpay Payment Integration Service
+ * Official Razorpay Standard Checkout integration:
+ * - Server creates all Razorpay orders with strict server-side pricing (amount in paise)
  * - Never trusts client-side amount or flags
- * - Official Cashfree JS SDK v3 checkout
- * - Server verification via webhook and authoritative Orders API
+ * - Razorpay Checkout.js popup modal
+ * - Server verification via authoritative Razorpay Orders/Payments API and webhook
  */
 import { sessionService } from './sessionService';
 import { sanitizeDocumentDataImages } from '../utils/imageCompression';
 
 declare global {
   interface Window {
-    Cashfree?: (options: { mode: 'sandbox' | 'production' }) => any;
+    Razorpay?: new (options: any) => any;
   }
 }
 
-export interface CashfreeConfig {
+export interface RazorpayConfig {
   success: boolean;
-  gateway: 'cashfree';
+  gateway: 'razorpay';
   isConfigured: boolean;
   environment: 'sandbox' | 'production';
+  keyId?: string;
   currency: string;
   prices?: number[];
 }
 
-export interface CreateCashfreeOrderParams {
+export interface CreateRazorpayOrderParams {
   documentId: string;
   mobile?: string;
   customerMobile?: string;
@@ -39,14 +40,14 @@ export interface CreateCashfreeOrderParams {
   };
 }
 
-export interface CreateCashfreeOrderResponse {
+export interface CreateRazorpayOrderResponse {
   success: boolean;
   orderId: string;
   order_id?: string;
-  cashfreeOrderId?: string;
-  paymentSessionId: string;
-  payment_session_id?: string;
+  razorpayOrderId: string;
+  keyId: string;
   amount: number;
+  amountPaise: number;
   currency: string;
   environment: 'sandbox' | 'production';
   mobile: string;
@@ -57,9 +58,23 @@ export interface CreateCashfreeOrderResponse {
   error?: string;
 }
 
+export interface LaunchCheckoutOptions {
+  keyId: string;
+  razorpayOrderId: string;
+  amountPaise: number;
+  currency?: string;
+  name?: string;
+  description?: string;
+  prefill?: { contact?: string; email?: string; name?: string };
+  themeColor?: string;
+}
+
 export interface LaunchCheckoutResult {
-  type: 'error' | 'paid_or_pending' | 'redirect' | 'closed';
+  type: 'error' | 'paid_or_pending' | 'closed';
   message?: string;
+  orderId?: string;
+  paymentId?: string;
+  signature?: string;
 }
 
 export interface VerifyOrderResponse {
@@ -107,83 +122,79 @@ export interface RestorePurchaseResult {
   maskedMobile?: string;
 }
 
-let cashfreeSdkPromise: Promise<boolean> | null = null;
+let razorpaySdkPromise: Promise<boolean> | null = null;
 
 /**
- * Loads the official Cashfree JS SDK v3 script once when the customer initiates payment.
- * Resolves when window.Cashfree is available, rejects with an error on failure.
+ * Loads the official Razorpay Checkout.js script once when the customer initiates payment.
+ * Resolves when window.Razorpay is available, rejects with an error on failure.
  */
-export function loadCashfreeSdk(): Promise<boolean> {
-  if (typeof window !== 'undefined' && typeof window.Cashfree === 'function') {
+export function loadRazorpaySdk(): Promise<boolean> {
+  if (typeof window !== 'undefined' && typeof window.Razorpay === 'function') {
     return Promise.resolve(true);
   }
   if (typeof document === 'undefined') {
     return Promise.reject(new Error('Document environment is not available to load payment library.'));
   }
-  if (cashfreeSdkPromise) {
-    return cashfreeSdkPromise;
+  if (razorpaySdkPromise) {
+    return razorpaySdkPromise;
   }
 
-  cashfreeSdkPromise = new Promise<boolean>((resolve, reject) => {
-    const existingScript = document.getElementById('cashfree-checkout-js') as HTMLScriptElement | null;
+  razorpaySdkPromise = new Promise<boolean>((resolve, reject) => {
+    const existingScript = document.getElementById('razorpay-checkout-js') as HTMLScriptElement | null;
     if (existingScript) {
-      if (typeof window.Cashfree === 'function') {
-        cashfreeSdkPromise = null;
-        return resolve(true);
-      }
       existingScript.remove();
     }
 
     const script = document.createElement('script');
-    script.id = 'cashfree-checkout-js';
-    script.src = 'https://sdk.cashfree.com/js/v3/cashfree.js';
+    script.id = 'razorpay-checkout-js';
+    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
     script.async = true;
 
     const timeoutId = setTimeout(() => {
       script.remove();
-      cashfreeSdkPromise = null;
+      razorpaySdkPromise = null;
       reject(new Error('Payment library failed to load in time. Please check your internet connection and try again.'));
     }, 15000);
 
     script.onload = () => {
       clearTimeout(timeoutId);
-      cashfreeSdkPromise = null;
-      if (typeof window.Cashfree === 'function') {
+      razorpaySdkPromise = null;
+      if (typeof window.Razorpay === 'function') {
         resolve(true);
       } else {
-        reject(new Error('Cashfree payment SDK could not be initialized. Please try again.'));
+        reject(new Error('Razorpay payment SDK could not be initialized. Please try again.'));
       }
     };
 
     script.onerror = () => {
       clearTimeout(timeoutId);
       script.remove();
-      cashfreeSdkPromise = null;
-      reject(new Error('Unable to connect to Cashfree payment gateway. Please check your internet connection and try again.'));
+      razorpaySdkPromise = null;
+      reject(new Error('Unable to connect to Razorpay payment gateway. Please check your internet connection and try again.'));
     };
 
     document.head.appendChild(script);
   });
 
-  return cashfreeSdkPromise;
+  return razorpaySdkPromise;
 }
 
-export const cashfreeService = {
+export const razorpayService = {
   /**
    * Fetches gateway configuration from the backend.
    */
-  getConfig: async (): Promise<CashfreeConfig> => {
+  getConfig: async (): Promise<RazorpayConfig> => {
     try {
       const res = await fetch('/api/payment/config');
       if (res.ok) {
         return await res.json();
       }
     } catch (err) {
-      console.warn('[CashfreeService] Failed to fetch config:', err);
+      console.warn('[RazorpayService] Failed to fetch config:', err);
     }
     return {
       success: true,
-      gateway: 'cashfree',
+      gateway: 'razorpay',
       isConfigured: false,
       environment: 'sandbox',
       currency: 'INR',
@@ -191,15 +202,14 @@ export const cashfreeService = {
   },
 
   /**
-   * Loads the official Cashfree JS SDK v3 once.
+   * Loads the official Razorpay Checkout.js once.
    */
-  loadCashfreeSdk,
-  loadCashfreeSDK: loadCashfreeSdk,
+  loadRazorpaySdk,
 
   /**
-   * Creates a Cashfree payment order on the server.
+   * Creates a Razorpay payment order on the server.
    */
-  createOrder: async (params: CreateCashfreeOrderParams): Promise<CreateCashfreeOrderResponse> => {
+  createOrder: async (params: CreateRazorpayOrderParams): Promise<CreateRazorpayOrderResponse> => {
     const session = sessionService.getSession();
     const safeDocumentData = params.documentData
       ? await sanitizeDocumentDataImages(params.documentData)
@@ -222,7 +232,7 @@ export const cashfreeService = {
       throw new Error('Payment service returned an invalid response. Please try again.');
     }
     if (!res.ok || !data?.success) {
-      throw new Error(data?.error || data?.message || 'Failed to create Cashfree payment order.');
+      throw new Error(data?.error || data?.message || 'Failed to create Razorpay payment order.');
     }
     return data;
   },
@@ -265,93 +275,119 @@ export const cashfreeService = {
         }),
       });
       if (!res.ok) {
-        console.warn('[CashfreeService] Document sync response status:', res.status);
+        console.warn('[RazorpayService] Document sync response status:', res.status);
       }
       return await res.json().catch(() => ({ success: false }));
     } catch (err) {
-      console.warn('[CashfreeService] Document sync error:', err);
+      console.warn('[RazorpayService] Document sync error:', err);
       return { success: false };
     }
   },
 
   /**
-   * Launches official Cashfree Web Checkout compact popup modal (redirectTarget: "_modal").
-   * Handles checkout promise resolution, result.error, result.paymentDetails, and modal dismissals.
+   * Launches official Razorpay Checkout popup modal.
+   * Resolves once: 'paid_or_pending' after the customer pays (server must still verify),
+   * 'closed' if the customer dismisses the modal, or 'error' if checkout cannot start.
    */
-  launchCheckout: async (
-    paymentSessionId: string,
-    environment?: 'sandbox' | 'production'
-  ): Promise<LaunchCheckoutResult> => {
-    const cleanSessionId = String(paymentSessionId || '').trim();
-    if (!cleanSessionId) {
-      throw new Error('Payment session ID was not received from gateway. Please try again.');
+  launchCheckout: async (opts: LaunchCheckoutOptions): Promise<LaunchCheckoutResult> => {
+    if (!opts?.keyId || !opts?.razorpayOrderId) {
+      throw new Error('Payment order details were not received from gateway. Please try again.');
     }
 
-    const sdkLoaded = await cashfreeService.loadCashfreeSDK();
-    if (!sdkLoaded || typeof window.Cashfree !== 'function') {
-      throw new Error('Cashfree Checkout could not be loaded. Please check your internet connection.');
+    const sdkLoaded = await razorpayService.loadRazorpaySdk();
+    if (!sdkLoaded || typeof window.Razorpay !== 'function') {
+      throw new Error('Razorpay Checkout could not be loaded. Please check your internet connection.');
     }
 
-    let mode: 'sandbox' | 'production' =
-      environment === 'production' || environment === 'sandbox' ? environment : 'sandbox';
-    if (!environment) {
+    return new Promise<LaunchCheckoutResult>((resolve) => {
+      let settled = false;
+      let lastFailureMessage = '';
+      const finish = (result: LaunchCheckoutResult) => {
+        if (settled) return;
+        settled = true;
+        resolve(result);
+      };
+
       try {
-        const cfg = await cashfreeService.getConfig();
-        if (cfg?.environment === 'production' || cfg?.environment === 'sandbox') {
-          mode = cfg.environment;
-        }
-      } catch {
-        // Use resolved environment parameter
-      }
-    }
+        const rzp = new window.Razorpay!({
+          key: opts.keyId,
+          order_id: opts.razorpayOrderId,
+          amount: opts.amountPaise,
+          currency: opts.currency || 'INR',
+          name: opts.name || 'GenovaProfile',
+          description: opts.description || 'Document purchase',
+          prefill: {
+            contact: opts.prefill?.contact || '',
+            email: opts.prefill?.email || '',
+            name: opts.prefill?.name || '',
+          },
+          theme: { color: opts.themeColor || '#0066FF' },
+          retry: { enabled: true, max_count: 3 },
+          modal: {
+            confirm_close: true,
+            escape: false,
+            ondismiss: () => {
+              finish({
+                type: 'closed',
+                message: lastFailureMessage || 'Payment popup was closed before completion.',
+              });
+            },
+          },
+          handler: (response: any) => {
+            finish({
+              type: 'paid_or_pending',
+              orderId: response?.razorpay_order_id,
+              paymentId: response?.razorpay_payment_id,
+              signature: response?.razorpay_signature,
+            });
+          },
+        });
 
-    const cashfree = window.Cashfree({
-      mode,
+        // Failed attempts keep the popup open so the customer can retry; remember the reason.
+        rzp.on('payment.failed', (resp: any) => {
+          lastFailureMessage =
+            resp?.error?.description || resp?.error?.reason || 'Payment failed. Please try again.';
+        });
+
+        rzp.open();
+      } catch (err: any) {
+        finish({ type: 'error', message: err?.message || 'Checkout could not be completed.' });
+      }
     });
+  },
 
+  /**
+   * Sends razorpay_order_id, razorpay_payment_id and razorpay_signature to the server,
+   * which verifies the HMAC-SHA256 signature and marks the order paid only if it matches.
+   * Throws an Error with a message when the signature is invalid.
+   */
+  verifyPayment: async (params: {
+    razorpay_order_id: string;
+    razorpay_payment_id: string;
+    razorpay_signature: string;
+  }): Promise<VerifyOrderResponse> => {
+    const session = sessionService.getSession();
+    const res = await fetch('/api/verify-payment', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-session-token': session.sessionToken,
+      },
+      body: JSON.stringify(params),
+    });
+    let data: any = null;
     try {
-      const result = await cashfree.checkout({
-        paymentSessionId: cleanSessionId,
-        redirectTarget: '_modal',
-      });
-
-      if (!result) {
-        return { type: 'closed', message: 'Payment popup was closed before completion.' };
-      }
-      if (result.error) {
-        const errMsg =
-          result.error.message ||
-          result.error.description ||
-          result.error.error ||
-          'Payment was declined or cancelled.';
-        const isClosed =
-          errMsg.toLowerCase().includes('close') ||
-          errMsg.toLowerCase().includes('dismiss') ||
-          errMsg.toLowerCase().includes('drop') ||
-          errMsg.toLowerCase().includes('cancel');
-        return {
-          type: isClosed ? 'closed' : 'error',
-          message: errMsg,
-        };
-      }
-      if (result.paymentDetails) {
-        return { type: 'paid_or_pending' };
-      }
-      if (result.redirect) {
-        return { type: 'redirect' };
-      }
-      return { type: 'closed', message: 'Payment popup was closed before completion.' };
-    } catch (err: any) {
-      const msg = err?.message || '';
-      if (
-        msg.toLowerCase().includes('close') ||
-        msg.toLowerCase().includes('cancel') ||
-        msg.toLowerCase().includes('dismiss')
-      ) {
-        return { type: 'closed', message: 'Payment popup was closed before completion.' };
-      }
-      return { type: 'error', message: msg || 'Checkout could not be completed.' };
+      data = await res.json();
+    } catch {
+      throw new Error('Payment verification returned an invalid response.');
     }
+    if (res.status === 400) {
+      throw new Error(data?.error || 'Payment signature verification failed.');
+    }
+    if (data?.isPaid && data?.documentId && data?.templateId) {
+      sessionService.markDocumentPaidLocally(data.documentId, data.templateId);
+    }
+    return data;
   },
 
   /**
@@ -380,7 +416,7 @@ export const cashfreeService = {
   },
 
   /**
-   * Simulates successful payment for testing in Cashfree Sandbox mode.
+   * Simulates successful payment for testing in Razorpay test mode (never in production).
    */
   simulateSandboxPayment: async (orderId: string): Promise<VerifyOrderResponse> => {
     const session = sessionService.getSession();
@@ -491,3 +527,4 @@ export const cashfreeService = {
     return await res.json();
   },
 };
+export const cashfreeService = razorpayService;

@@ -1,6 +1,6 @@
 /**
  * GenovaProfile Pending Order Storage Service
- * Persists pending orders in localStorage across Cashfree gateway redirection.
+ * Persists pending orders in localStorage across Razorpay checkout flow.
  */
 
 export interface PendingOrder {
@@ -19,7 +19,7 @@ const LEGACY_STORAGE_KEY = 'genovadoc_pending_order_v1';
 
 export const pendingOrderService = {
   /**
-   * Saves a pending order before redirecting to Cashfree checkout.
+   * Saves a pending order before launching Razorpay checkout.
    */
   savePendingOrder: (order: PendingOrder): void => {
     if (!order || !order.orderId) return;

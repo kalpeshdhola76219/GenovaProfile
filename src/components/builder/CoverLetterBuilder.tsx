@@ -9,7 +9,7 @@ import { TemplateRenderer } from '../preview/TemplateRenderer';
 import { CoverLetterToolbar } from './CoverLetterToolbar';
 import { CoverLetterCustomizer } from './CoverLetterCustomizer';
 import { getTemplateById } from '../../templates/registry';
-import { CashfreeCheckoutFlow } from '../payment/CashfreeCheckoutFlow';
+import { RazorpayCheckoutFlow } from '../payment/RazorpayCheckoutFlow';
 import { isCoverLetterTemplateATS, validateCoverLetterFields } from '../../utils/mapCoverLetterData';
 import { CoverLetterPreviewProvider } from '../../templates/coverletter/CoverLetterTemplateHelpers';
 import {
@@ -689,7 +689,7 @@ export const CoverLetterBuilder: React.FC<CoverLetterBuilderProps> = ({
         </div>
       )}
 
-      <CashfreeCheckoutFlow
+      <RazorpayCheckoutFlow
         isOpen={isCheckoutOpen}
         onClose={() => {
           setIsCheckoutOpen(false);

@@ -57,7 +57,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigate }) => {
           Pricing &amp; Digital Delivery
         </h2>
         <p>
-          We offer both free starter templates (₹0) and paid premium designs (₹40 – ₹100 one-time per template). Creation and live watermarked preview are free without creating an account. Free templates can be downloaded immediately at no cost. Paid designs require a single, one-time payment in Indian Rupees (INR) processed securely via PCI-DSS compliant Cashfree Payments to unlock watermark-free 300 DPI A4 PDF &amp; PNG exports plus 30-day cloud recovery. We do not operate subscriptions or recurring plans.
+          We offer both free starter templates (₹0) and paid premium designs (₹40 – ₹100 one-time per template). Creation and live watermarked preview are free without creating an account. Free templates can be downloaded immediately at no cost. Paid designs require a single, one-time payment in Indian Rupees (INR) processed securely via PCI-DSS compliant Razorpay to unlock watermark-free 300 DPI A4 PDF &amp; PNG exports plus 30-day cloud recovery. We do not operate subscriptions or recurring plans.
         </p>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
@@ -82,7 +82,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigate }) => {
               <ShieldCheck className="w-4 h-4 text-accent shrink-0" /> Secure Checkout
             </h3>
             <p className="text-xs text-slate-600 leading-relaxed">
-              All transactions are handled securely by PCI-DSS compliant payment gateway partner Cashfree Payments.
+              All transactions are handled securely by PCI-DSS compliant payment gateway partner Razorpay.
             </p>
           </div>
         </div>

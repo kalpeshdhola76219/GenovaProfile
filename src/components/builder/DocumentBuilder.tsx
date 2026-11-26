@@ -10,7 +10,7 @@ import { TemplateRenderer } from '../preview/TemplateRenderer';
 import { PreviewToolbar } from '../preview/PreviewToolbar';
 import { DocumentCustomizer } from '../preview/DocumentCustomizer';
 import { getTemplateById } from '../../templates/registry';
-import { CashfreeCheckoutFlow } from '../payment/CashfreeCheckoutFlow';
+import { RazorpayCheckoutFlow } from '../payment/RazorpayCheckoutFlow';
 import {
   ArrowLeft,
   Edit3,
@@ -100,7 +100,7 @@ export const DocumentBuilder: React.FC<DocumentBuilderProps> = ({
   const [exportError, setExportError] = useState<{ message: string; action: 'pdf' | 'png' } | null>(null);
   const [exportSuccess, setExportSuccess] = useState<string | null>(null);
 
-  // Cashfree Direct Checkout Modal State & Pending Action
+  // Razorpay Direct Checkout Modal State & Pending Action
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [pendingAction, setPendingAction] = useState<'pdf' | 'png' | 'print' | null>(null);
   const [isPaidServerConfirmed, setIsPaidServerConfirmed] = useState<boolean>(false);
@@ -854,8 +854,8 @@ export const DocumentBuilder: React.FC<DocumentBuilderProps> = ({
         </div>
       )}
 
-      {/* Cashfree Direct Purchase Checkout Flow */}
-      <CashfreeCheckoutFlow
+      {/* Razorpay Direct Purchase Checkout Flow */}
+      <RazorpayCheckoutFlow
         isOpen={isCheckoutOpen}
         onClose={() => {
           setIsCheckoutOpen(false);

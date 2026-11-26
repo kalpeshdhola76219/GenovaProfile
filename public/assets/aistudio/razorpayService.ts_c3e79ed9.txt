@@ -1,0 +1,529 @@
+/**
+ * GenovaProfile Razorpay Payment Integration Service
+ * Official Razorpay Standard Checkout integration:
+ * - Server creates all Razorpay orders with strict server-side pricing (amount in paise)
+ * - Never trusts client-side amount or flags
+ * - Razorpay Checkout.js popup modal
+ * - Server verification via authoritative Razorpay Orders/Payments API and webhook
+ */
+import { sessionService } from './sessionService';
+import { sanitizeDocumentDataImages } from '../utils/imageCompression';
+
+declare global {
+  interface Window {
+    Razorpay?: new (options: any) => any;
+  }
+}
+
+export interface RazorpayConfig {
+  success: boolean;
+  gateway: 'razorpay';
+  isConfigured: boolean;
+  environment: 'sandbox' | 'production';
+  keyId?: string;
+  currency: string;
+  prices?: number[];
+}
+
+export interface CreateRazorpayOrderParams {
+  documentId: string;
+  mobile?: string;
+  customerMobile?: string;
+  email?: string;
+  templateId?: string;
+  documentTitle?: string;
+  documentData?: any;
+  consent?: {
+    accepted: boolean;
+    at: string;
+    policyVersion: string;
+  };
+}
+
+export interface CreateRazorpayOrderResponse {
+  success: boolean;
+  orderId: string;
+  order_id?: string;
+  razorpayOrderId: string;
+  keyId: string;
+  amount: number;
+  amountPaise: number;
+  currency: string;
+  environment: 'sandbox' | 'production';
+  mobile: string;
+  documentId: string;
+  documentTitle: string;
+  templateId?: string;
+  templateName?: string;
+  error?: string;
+}
+
+export interface LaunchCheckoutOptions {
+  keyId: string;
+  razorpayOrderId: string;
+  amountPaise: number;
+  currency?: string;
+  name?: string;
+  description?: string;
+  prefill?: { contact?: string; email?: string; name?: string };
+  themeColor?: string;
+}
+
+export interface LaunchCheckoutResult {
+  type: 'error' | 'paid_or_pending' | 'closed';
+  message?: string;
+  orderId?: string;
+  paymentId?: string;
+  signature?: string;
+}
+
+export interface VerifyOrderResponse {
+  success: boolean;
+  isPaid: boolean;
+  status?: string;
+  orderId?: string;
+  receiptId?: string;
+  recoveryCode?: string;
+  codeShown?: boolean;
+  documentId?: string;
+  templateId?: string;
+  templateName?: string;
+  documentStatus?: string;
+  amount?: number;
+  maskedMobile?: string;
+  paidAt?: string;
+  downloadUrl?: string;
+  error?: string;
+  retryAfter?: number;
+  canRetry?: boolean;
+  reason?: string;
+}
+
+export interface RestorePurchaseResult {
+  success: boolean;
+  restored?: boolean;
+  unlocked?: boolean;
+  option?: 'A' | 'B';
+  documentId?: string;
+  templateId?: string;
+  title?: string;
+  templateName?: string;
+  amount?: number;
+  message?: string;
+  hasEmail?: boolean;
+  error?: string;
+  expired?: boolean;
+  orderId?: string;
+  daysRemaining?: number;
+  receiptUrl?: string;
+  documentData?: any;
+  status?: string;
+  isPaid?: boolean;
+  maskedMobile?: string;
+}
+
+let razorpaySdkPromise: Promise<boolean> | null = null;
+
+/**
+ * Loads the official Razorpay Checkout.js script once when the customer initiates payment.
+ * Resolves when window.Razorpay is available, rejects with an error on failure.
+ */
+export function loadRazorpaySdk(): Promise<boolean> {
+  if (typeof window !== 'undefined' && typeof window.Razorpay === 'function') {
+    return Promise.resolve(true);
+  }
+  if (typeof document === 'undefined') {
+    return Promise.reject(new Error('Document environment is not available to load payment library.'));
+  }
+  if (razorpaySdkPromise) {
+    return razorpaySdkPromise;
+  }
+
+  razorpaySdkPromise = new Promise<boolean>((resolve, reject) => {
+    const existingScript = document.getElementById('razorpay-checkout-js') as HTMLScriptElement | null;
+    if (existingScript) {
+      existingScript.remove();
+    }
+
+    const script = document.createElement('script');
+    script.id = 'razorpay-checkout-js';
+    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+    script.async = true;
+
+    const timeoutId = setTimeout(() => {
+      script.remove();
+      razorpaySdkPromise = null;
+      reject(new Error('Payment library failed to load in time. Please check your internet connection and try again.'));
+    }, 15000);
+
+    script.onload = () => {
+      clearTimeout(timeoutId);
+      razorpaySdkPromise = null;
+      if (typeof window.Razorpay === 'function') {
+        resolve(true);
+      } else {
+        reject(new Error('Razorpay payment SDK could not be initialized. Please try again.'));
+      }
+    };
+
+    script.onerror = () => {
+      clearTimeout(timeoutId);
+      script.remove();
+      razorpaySdkPromise = null;
+      reject(new Error('Unable to connect to Razorpay payment gateway. Please check your internet connection and try again.'));
+    };
+
+    document.head.appendChild(script);
+  });
+
+  return razorpaySdkPromise;
+}
+
+export const razorpayService = {
+  /**
+   * Fetches gateway configuration from the backend.
+   */
+  getConfig: async (): Promise<RazorpayConfig> => {
+    try {
+      const res = await fetch('/api/payment/config');
+      if (res.ok) {
+        return await res.json();
+      }
+    } catch (err) {
+      console.warn('[RazorpayService] Failed to fetch config:', err);
+    }
+    return {
+      success: true,
+      gateway: 'razorpay',
+      isConfigured: false,
+      environment: 'sandbox',
+      currency: 'INR',
+    };
+  },
+
+  /**
+   * Loads the official Razorpay Checkout.js once.
+   */
+  loadRazorpaySdk,
+
+  /**
+   * Creates a Razorpay payment order on the server.
+   */
+  createOrder: async (params: CreateRazorpayOrderParams): Promise<CreateRazorpayOrderResponse> => {
+    const session = sessionService.getSession();
+    const safeDocumentData = params.documentData
+      ? await sanitizeDocumentDataImages(params.documentData)
+      : params.documentData;
+    const res = await fetch('/api/payment/create-order', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        ...params,
+        documentData: safeDocumentData,
+        mobile: params.customerMobile || (params as any).mobile,
+        customerMobile: params.customerMobile || (params as any).mobile,
+        sessionToken: session.sessionToken,
+      }),
+    });
+    let data: any = null;
+    try {
+      data = await res.json();
+    } catch {
+      throw new Error('Payment service returned an invalid response. Please try again.');
+    }
+    if (!res.ok || !data?.success) {
+      throw new Error(data?.error || data?.message || 'Failed to create Razorpay payment order.');
+    }
+    return data;
+  },
+
+  /**
+   * Syncs the customer document draft with the server before checkout.
+   */
+  syncDocument: async (params: {
+    id: string;
+    templateId: string;
+    type?: string;
+    title?: string;
+    documentData?: any;
+  }): Promise<{ success: boolean; documentId?: string }> => {
+    const session = sessionService.getSession();
+    const normalizedType = (() => {
+      const raw = String(params.type || '').toLowerCase().trim();
+      if (raw.includes('invit')) return 'invitation';
+      if (raw.includes('cover') || raw.includes('letter')) return 'cover-letter';
+      if (raw.includes('resume') || raw.includes('cv')) return 'resume';
+      return 'biodata';
+    })();
+
+    try {
+      const safeDocumentData = params.documentData
+        ? await sanitizeDocumentDataImages(params.documentData)
+        : params.documentData;
+      const res = await fetch('/api/documents/sync', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-session-token': session.sessionToken,
+        },
+        body: JSON.stringify({
+          ...params,
+          documentData: safeDocumentData,
+          type: normalizedType,
+          sessionToken: session.sessionToken,
+          guestSessionId: session.id,
+        }),
+      });
+      if (!res.ok) {
+        console.warn('[RazorpayService] Document sync response status:', res.status);
+      }
+      return await res.json().catch(() => ({ success: false }));
+    } catch (err) {
+      console.warn('[RazorpayService] Document sync error:', err);
+      return { success: false };
+    }
+  },
+
+  /**
+   * Launches official Razorpay Checkout popup modal.
+   * Resolves once: 'paid_or_pending' after the customer pays (server must still verify),
+   * 'closed' if the customer dismisses the modal, or 'error' if checkout cannot start.
+   */
+  launchCheckout: async (opts: LaunchCheckoutOptions): Promise<LaunchCheckoutResult> => {
+    if (!opts?.keyId || !opts?.razorpayOrderId) {
+      throw new Error('Payment order details were not received from gateway. Please try again.');
+    }
+
+    const sdkLoaded = await razorpayService.loadRazorpaySdk();
+    if (!sdkLoaded || typeof window.Razorpay !== 'function') {
+      throw new Error('Razorpay Checkout could not be loaded. Please check your internet connection.');
+    }
+
+    return new Promise<LaunchCheckoutResult>((resolve) => {
+      let settled = false;
+      let lastFailureMessage = '';
+      const finish = (result: LaunchCheckoutResult) => {
+        if (settled) return;
+        settled = true;
+        resolve(result);
+      };
+
+      try {
+        const rzp = new window.Razorpay!({
+          key: opts.keyId,
+          order_id: opts.razorpayOrderId,
+          amount: opts.amountPaise,
+          currency: opts.currency || 'INR',
+          name: opts.name || 'GenovaProfile',
+          description: opts.description || 'Document purchase',
+          prefill: {
+            contact: opts.prefill?.contact || '',
+            email: opts.prefill?.email || '',
+            name: opts.prefill?.name || '',
+          },
+          theme: { color: opts.themeColor || '#0066FF' },
+          retry: { enabled: true, max_count: 3 },
+          modal: {
+            confirm_close: true,
+            escape: false,
+            ondismiss: () => {
+              finish({
+                type: 'closed',
+                message: lastFailureMessage || 'Payment popup was closed before completion.',
+              });
+            },
+          },
+          handler: (response: any) => {
+            finish({
+              type: 'paid_or_pending',
+              orderId: response?.razorpay_order_id,
+              paymentId: response?.razorpay_payment_id,
+              signature: response?.razorpay_signature,
+            });
+          },
+        });
+
+        // Failed attempts keep the popup open so the customer can retry; remember the reason.
+        rzp.on('payment.failed', (resp: any) => {
+          lastFailureMessage =
+            resp?.error?.description || resp?.error?.reason || 'Payment failed. Please try again.';
+        });
+
+        rzp.open();
+      } catch (err: any) {
+        finish({ type: 'error', message: err?.message || 'Checkout could not be completed.' });
+      }
+    });
+  },
+
+  /**
+   * Sends razorpay_order_id, razorpay_payment_id and razorpay_signature to the server,
+   * which verifies the HMAC-SHA256 signature and marks the order paid only if it matches.
+   * Throws an Error with a message when the signature is invalid.
+   */
+  verifyPayment: async (params: {
+    razorpay_order_id: string;
+    razorpay_payment_id: string;
+    razorpay_signature: string;
+  }): Promise<VerifyOrderResponse> => {
+    const session = sessionService.getSession();
+    const res = await fetch('/api/verify-payment', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-session-token': session.sessionToken,
+      },
+      body: JSON.stringify(params),
+    });
+    let data: any = null;
+    try {
+      data = await res.json();
+    } catch {
+      throw new Error('Payment verification returned an invalid response.');
+    }
+    if (res.status === 400) {
+      throw new Error(data?.error || 'Payment signature verification failed.');
+    }
+    if (data?.isPaid && data?.documentId && data?.templateId) {
+      sessionService.markDocumentPaidLocally(data.documentId, data.templateId);
+    }
+    return data;
+  },
+
+  /**
+   * Queries authoritative server to verify if payment was completed.
+   */
+  verifyOrder: async (orderId: string, signal?: AbortSignal): Promise<VerifyOrderResponse> => {
+    const session = sessionService.getSession();
+    const res = await fetch(`/api/payment/verify-order/${encodeURIComponent(orderId)}`, {
+      headers: {
+        'x-session-token': session.sessionToken,
+      },
+      signal,
+    });
+    let data: any = null;
+    try {
+      data = await res.json();
+    } catch {
+      throw new Error('Payment verification returned an invalid response.');
+    }
+    const isPaid =
+      Boolean(data?.isPaid) || String(data?.status || '').toUpperCase() === 'PAID';
+    if (isPaid && data?.documentId && data?.templateId) {
+      sessionService.markDocumentPaidLocally(data.documentId, data.templateId);
+    }
+    return data;
+  },
+
+  /**
+   * Simulates successful payment for testing in Razorpay test mode (never in production).
+   */
+  simulateSandboxPayment: async (orderId: string): Promise<VerifyOrderResponse> => {
+    const session = sessionService.getSession();
+    const res = await fetch('/api/payment/sandbox-complete', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-session-token': session.sessionToken,
+      },
+      body: JSON.stringify({ orderId }),
+    });
+    let data: any = null;
+    try {
+      data = await res.json();
+    } catch {
+      throw new Error('Sandbox simulation returned an invalid response.');
+    }
+    if (!res.ok || !data?.success) {
+      throw new Error(data?.error || 'Sandbox simulation failed.');
+    }
+    if (data?.isPaid && data?.documentId && data?.templateId) {
+      sessionService.markDocumentPaidLocally(data.documentId, data.templateId);
+    }
+    return data;
+  },
+
+  /**
+   * Cross-device purchase restore
+   */
+  restorePurchase: async (params: {
+    orderId?: string;
+    mobile: string;
+    recoveryCode?: string;
+  }): Promise<RestorePurchaseResult> => {
+    const session = sessionService.getSession();
+    const res = await fetch('/api/payment/restore', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-session-token': session.sessionToken,
+      },
+      body: JSON.stringify({
+        ...params,
+        sessionToken: session.sessionToken,
+      }),
+    });
+    let data: any = null;
+    try {
+      data = await res.json();
+    } catch {
+      throw new Error('Restore service returned an invalid response. Please try again.');
+    }
+    if (!res.ok && !data?.error) {
+      throw new Error('Could not restore purchase. Please verify your details or contact support.');
+    }
+    if (data?.isPaid && data?.documentId && data?.templateId) {
+      sessionService.markDocumentPaidLocally(data.documentId, data.templateId);
+    }
+    return data;
+  },
+
+  /**
+   * Fetches full authoritative document data from server
+   */
+  fetchDocumentData: async (documentId: string): Promise<any> => {
+    const session = sessionService.getSession();
+    const res = await fetch(`/api/documents/${encodeURIComponent(documentId)}/data`, {
+      headers: {
+        'x-session-token': session.sessionToken,
+      },
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || 'Failed to retrieve document data from server.');
+    }
+    return await res.json();
+  },
+
+  /**
+   * Authorizes and initiates document PDF download using x-session-token header
+   */
+  downloadDocumentPdf: async (documentId: string): Promise<any> => {
+    const session = sessionService.getSession();
+    const res = await fetch(`/api/documents/${encodeURIComponent(documentId)}/download-pdf`, {
+      headers: {
+        'x-session-token': session.sessionToken,
+      },
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || 'Failed to authorize document PDF download.');
+    }
+    return await res.json();
+  },
+
+  /**
+   * Dispatches the final paid document via WhatsApp.
+   */
+  sendWhatsApp: async (documentId: string): Promise<{ success: boolean; configured: boolean; message: string }> => {
+    const session = sessionService.getSession();
+    const res = await fetch(`/api/documents/${encodeURIComponent(documentId)}/send-whatsapp`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-session-token': session.sessionToken,
+      },
+    });
+    return await res.json();
+  },
+};

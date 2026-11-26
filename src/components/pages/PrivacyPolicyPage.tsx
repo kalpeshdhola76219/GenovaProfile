@@ -144,7 +144,7 @@ export const PrivacyPolicyPage: React.FC<PrivacyPolicyPageProps> = ({ onNavigate
                   <td className="p-3 font-semibold text-slate-900">Mobile Number</td>
                   <td className="p-3 text-slate-600">10-digit Indian phone number entered during checkout</td>
                   <td className="p-3 text-slate-600">
-                    Entered at payment and passed directly to Cashfree to generate a payment session. <strong>Not stored in our database, not logged, and not saved in our records.</strong>
+                    Entered at payment and passed directly to Razorpay to generate a payment session. <strong>Not stored in our database, not logged, and not saved in our records.</strong>
                   </td>
                 </tr>
                 <tr>
@@ -175,9 +175,9 @@ export const PrivacyPolicyPage: React.FC<PrivacyPolicyPageProps> = ({ onNavigate
                 </tr>
                 <tr>
                   <td className="p-3 font-semibold text-slate-900">Payment Metadata</td>
-                  <td className="p-3 text-slate-600">Cashfree order ID, paid amount, currency, timestamp, payment status</td>
+                  <td className="p-3 text-slate-600">Razorpay order ID, paid amount, currency, timestamp, payment status</td>
                   <td className="p-3 text-slate-600">
-                    To unlock paid templates and maintain statutory financial records under Indian law. All payments are processed through <strong>PCI-DSS compliant Cashfree Payments</strong>. We maintain <strong>zero storage of credit/debit card numbers, CVVs, UPI PINs, or net-banking credentials</strong> on our servers.
+                    To unlock paid templates and maintain statutory financial records under Indian law. All payments are processed through <strong>PCI-DSS compliant Razorpay</strong>. We maintain <strong>zero storage of credit/debit card numbers, CVVs, UPI PINs, or net-banking credentials</strong> on our servers.
                   </td>
                 </tr>
               </tbody>
@@ -214,9 +214,9 @@ export const PrivacyPolicyPage: React.FC<PrivacyPolicyPageProps> = ({ onNavigate
           </p>
           <div className="space-y-2">
             <div className="p-3 bg-slate-50 rounded-xl border border-slate-200">
-              <span className="font-bold text-slate-900 block">Cashfree Payments India Pvt. Ltd. (PCI-DSS Compliant Payment Gateway)</span>
+              <span className="font-bold text-slate-900 block">Razorpay Software Pvt. Ltd. (PCI-DSS Compliant Payment Gateway)</span>
               <span className="text-slate-600 text-[11px]">
-                When purchasing a paid template, payment processing is handled end-to-end by PCI-DSS compliant Cashfree Payments. Your order amount and transient mobile number are passed to Cashfree to create a secure payment session for UPI, card, or net-banking checkout. Genova Profile never accesses or stores your card details, CVV, UPI PIN, or net-banking credentials, and Cashfree does not receive your resume or biodata contents.
+                When purchasing a paid template, payment processing is handled end-to-end by PCI-DSS compliant Razorpay. Your order amount and transient mobile number are passed to Razorpay to create a secure payment session for UPI, card, or net-banking checkout. Genova Profile never accesses or stores your card details, CVV, UPI PIN, or net-banking credentials, and Razorpay does not receive your resume or biodata contents.
               </span>
             </div>
             <div className="p-3 bg-slate-50 rounded-xl border border-slate-200">
@@ -286,7 +286,7 @@ export const PrivacyPolicyPage: React.FC<PrivacyPolicyPageProps> = ({ onNavigate
                 <tr>
                   <td className="p-3 font-semibold text-slate-900">Customer Mobile</td>
                   <td className="p-3 text-slate-600">0 days (Not stored)</td>
-                  <td className="p-3 text-slate-600">Passed transiently to Cashfree at checkout; not stored in our database or logs</td>
+                  <td className="p-3 text-slate-600">Passed transiently to Razorpay at checkout; not stored in our database or logs</td>
                 </tr>
                 <tr>
                   <td className="p-3 font-semibold text-slate-900">Order & Payment Records</td>
@@ -322,7 +322,7 @@ export const PrivacyPolicyPage: React.FC<PrivacyPolicyPageProps> = ({ onNavigate
             8. Security Practices &amp; Zero Payment Credential Storage
           </h2>
           <p>
-            All data in transit is encrypted using industry-standard HTTPS/TLS. Database access is restricted behind authenticated service keys. Payment transactions are processed exclusively via PCI-DSS compliant Cashfree Payments, with zero storage of credit/debit card details, UPI PINs, or net-banking credentials on Genova Profile servers. Paid documents are retained for {PAID_DOCUMENT_RETENTION_DAYS} days for re-downloads and recovery, and you retain full delete control at any time using the tools below.
+            All data in transit is encrypted using industry-standard HTTPS/TLS. Database access is restricted behind authenticated service keys. Payment transactions are processed exclusively via PCI-DSS compliant Razorpay, with zero storage of credit/debit card details, UPI PINs, or net-banking credentials on Genova Profile servers. Paid documents are retained for {PAID_DOCUMENT_RETENTION_DAYS} days for re-downloads and recovery, and you retain full delete control at any time using the tools below.
           </p>
         </section>
 

@@ -67,7 +67,7 @@ export const TermsPage: React.FC<TermsPageProps> = ({ onNavigate }) => {
 
         {/* Section 4 */}
         <section className="space-y-2 pt-3 border-t border-slate-100">
-          <h2 className="text-sm font-extrabold text-slate-900">4. Pricing &amp; Payments via Cashfree</h2>
+          <h2 className="text-sm font-extrabold text-slate-900">4. Pricing &amp; Payments via Razorpay</h2>
           <p>
             {BUSINESS.name} operates on clear per-template pricing:
           </p>
@@ -78,7 +78,7 @@ export const TermsPage: React.FC<TermsPageProps> = ({ onNavigate }) => {
             <li>There are <strong>zero recurring subscriptions</strong>, renewal fees, or hidden handling costs.</li>
           </ul>
           <p className="pt-1">
-            All online transactions are securely processed by our PCI-DSS compliant payment gateway partner, <strong>Cashfree Payments India Private Limited</strong> (&quot;Cashfree Payments&quot;), supporting UPI, Indian debit/credit cards, and net banking. We maintain zero storage of card numbers, CVVs, UPI PINs, or net-banking credentials on our servers.
+            All online transactions are securely processed by our PCI-DSS compliant payment gateway partner, <strong>Razorpay Software Private Limited</strong> (&quot;Razorpay&quot;), supporting UPI, Indian debit/credit cards, and net banking. We maintain zero storage of card numbers, CVVs, UPI PINs, or net-banking credentials on our servers.
           </p>
         </section>
 

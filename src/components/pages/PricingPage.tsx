@@ -94,7 +94,7 @@ export const PricingPage: React.FC<PricingPageProps> = ({
           Individual Template Pricing
         </h1>
         <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-          At {BUSINESS.name}, you only pay for the exact template you choose. Free templates are free with no login or payment required. Paid designs require a simple one-time payment via Cashfree when you download. All prices are in Indian Rupees (INR) and the prices shown are the final amount payable. Instant digital delivery via high-resolution PDF and PNG downloads.
+          At {BUSINESS.name}, you only pay for the exact template you choose. Free templates are free with no login or payment required. Paid designs require a simple one-time payment via Razorpay when you download. All prices are in Indian Rupees (INR) and the prices shown are the final amount payable. Instant digital delivery via high-resolution PDF and PNG downloads.
         </p>
       </div>
 
@@ -260,7 +260,7 @@ export const PricingPage: React.FC<PricingPageProps> = ({
           <div className="site-card p-5 rounded-2xl space-y-1.5">
             <h4 className="font-bold text-navy">How do paid templates work?</h4>
             <p className="text-slate-600 leading-relaxed">
-              If you pick a paid design (₹40, ₹50, ₹60, ₹80, or ₹100), you fill in your details, preview the draft, enter your mobile number, and pay the exact amount via Cashfree Checkout.
+              If you pick a paid design (₹40, ₹50, ₹60, ₹80, or ₹100), you fill in your details, preview the draft, enter your mobile number, and pay the exact amount via Razorpay Checkout.
             </p>
           </div>
           <div className="site-card p-5 rounded-2xl space-y-1.5">
@@ -272,7 +272,7 @@ export const PricingPage: React.FC<PricingPageProps> = ({
           <div className="site-card p-5 rounded-2xl space-y-1.5">
             <h4 className="font-bold text-navy">Which payment methods are supported?</h4>
             <p className="text-slate-600 leading-relaxed">
-              Cashfree supports UPI (Google Pay, PhonePe, Paytm, BHIM), Indian Debit &amp; Credit cards, NetBanking, and popular mobile wallets with instant confirmation.
+              Razorpay supports UPI (Google Pay, PhonePe, Paytm, BHIM), Indian Debit &amp; Credit cards, NetBanking, and popular mobile wallets with instant confirmation.
             </p>
           </div>
         </div>
@@ -281,7 +281,7 @@ export const PricingPage: React.FC<PricingPageProps> = ({
         <div className="p-4 sm:p-5 bg-white border border-slate-200/90 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-3 text-slate-600 text-xs shadow-2xs">
           <div className="flex items-center gap-2 text-navy font-semibold">
             <ShieldCheck className="w-4 h-4 text-brand shrink-0" />
-            <span>Payments secured by Cashfree &middot; Instant Digital Delivery</span>
+            <span>Payments secured by Razorpay &middot; Instant Digital Delivery</span>
           </div>
           <div className="flex flex-wrap items-center justify-center gap-3 text-[11px]">
             <a href="#refund-policy" className="text-brand hover:underline font-medium">

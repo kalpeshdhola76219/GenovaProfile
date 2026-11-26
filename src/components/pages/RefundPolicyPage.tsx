@@ -104,7 +104,7 @@ export const RefundPolicyPage: React.FC<RefundPolicyPageProps> = ({ onNavigate }
             Our customer support team verifies eligible refund requests within <strong>24–48 hours</strong> (1–2 business days).
           </p>
           <p>
-            Once approved, a <strong>100% refund</strong> is initiated directly back to the original payment source (UPI account, debit/credit card, or net banking) via Cashfree Payments.
+            Once approved, a <strong>100% refund</strong> is initiated directly back to the original payment source (UPI account, debit/credit card, or net banking) via Razorpay.
           </p>
           <p>
             Depending on your issuing bank&apos;s settlement cycle, the refunded amount reflects in your account within <strong>5–7 business days</strong>.
@@ -115,10 +115,10 @@ export const RefundPolicyPage: React.FC<RefundPolicyPageProps> = ({ onNavigate }
         <section className="space-y-2 pt-4 border-t border-slate-100">
           <h2 className="text-sm font-extrabold text-slate-900">6. Failed or Dropped Transactions</h2>
           <p>
-            If money was debited from your bank account but you received a failure screen or did not receive an order confirmation, the transaction was not captured by Cashfree Payments.
+            If money was debited from your bank account but you received a failure screen or did not receive an order confirmation, the transaction was not captured by Razorpay.
           </p>
           <p>
-            In such banking gateway timeout scenarios, the money is held in an interim settlement account and is normally reversed to your original bank account automatically by your bank according to RBI guidelines. If the deduction does not reverse within 5 business days, please write to us with your bank transaction UTR reference so we can verify the status with Cashfree Payments.
+            In such banking gateway timeout scenarios, the money is held in an interim settlement account and is normally reversed to your original bank account automatically by your bank according to RBI guidelines. If the deduction does not reverse within 5 business days, please write to us with your bank transaction UTR reference so we can verify the status with Razorpay.
           </p>
         </section>
 

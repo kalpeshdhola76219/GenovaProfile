@@ -23,7 +23,7 @@ import {
   Mail,
   Loader2,
 } from 'lucide-react';
-import { cashfreeService, RestorePurchaseResult } from '../../services/cashfreeService';
+import { razorpayService, RestorePurchaseResult } from '../../services/razorpayService';
 import { storageService } from '../../services/storageService';
 
 export interface RestorePurchaseModalProps {
@@ -62,7 +62,7 @@ export const RestorePurchaseModal: React.FC<RestorePurchaseModalProps> = ({
 
     setIsLoading(true);
     try {
-      const res = await cashfreeService.restorePurchase({
+      const res = await razorpayService.restorePurchase({
         orderId: cleanOrderId,
         mobile: cleanMobile,
         recoveryCode: cleanCode || undefined,
@@ -74,7 +74,7 @@ export const RestorePurchaseModal: React.FC<RestorePurchaseModalProps> = ({
       if (res.success && res.restored && res.documentId) {
         // Fetch authoritative document data from server to populate local storage
         try {
-          const docData = await cashfreeService.fetchDocumentData(res.documentId);
+          const docData = await razorpayService.fetchDocumentData(res.documentId);
           if (docData?.document?.documentData) {
             storageService.saveDocument({
               id: res.documentId,

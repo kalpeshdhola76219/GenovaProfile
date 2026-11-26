@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { cashfreeService } from '../../services/cashfreeService';
+import { razorpayService } from '../../services/razorpayService';
 import { sessionService } from '../../services/sessionService';
 import { pendingOrderService } from '../../services/pendingOrderService';
 import { getTemplatePriceInfo, getTemplatePriceINR } from '../../config/templatesCatalog';
@@ -16,7 +16,7 @@ import {
   Mail,
 } from 'lucide-react';
 
-export interface CashfreeCheckoutFlowProps {
+export interface RazorpayCheckoutFlowProps {
   isOpen: boolean;
   onClose: () => void;
   documentId: string;
@@ -34,7 +34,7 @@ type FlowStep = 'checkout_form' | 'verifying' | 'failed';
 const MAX_VERIFY_RETRIES = 4;
 const VERIFY_RETRY_DELAY_MS = 1500;
 
-export const CashfreeCheckoutFlow: React.FC<CashfreeCheckoutFlowProps> = ({
+export const RazorpayCheckoutFlow: React.FC<RazorpayCheckoutFlowProps> = ({
   isOpen,
   onClose,
   documentId,
@@ -52,8 +52,8 @@ export const CashfreeCheckoutFlow: React.FC<CashfreeCheckoutFlowProps> = ({
   const [emailError, setEmailError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
-  const [loadingText, setLoadingText] = useState('Opening Cashfree Checkout...');
-  const [verifyAttemptLabel, setVerifyAttemptLabel] = useState('Confirming payment with Cashfree...');
+  const [loadingText, setLoadingText] = useState('Opening Razorpay Checkout...');
+  const [verifyAttemptLabel, setVerifyAttemptLabel] = useState('Confirming payment with Razorpay...');
   const [generalError, setGeneralError] = useState<string | null>(null);
   const [failureReason, setFailureReason] = useState<string>('');
   const [gatewayConfigured, setGatewayConfigured] = useState<boolean | null>(null);
@@ -118,11 +118,11 @@ export const CashfreeCheckoutFlow: React.FC<CashfreeCheckoutFlowProps> = ({
     }
 
     let cancelled = false;
-    cashfreeService.getConfig().then((cfg) => {
+    razorpayService.getConfig().then((cfg) => {
       if (cancelled || !isMountedRef.current) return;
       setGatewayConfigured(cfg.isConfigured);
       if (!cfg.isConfigured) {
-        setGeneralError('Cashfree payment is not configured yet.');
+        setGeneralError('Razorpay payment is not configured yet.');
       }
     });
 
@@ -154,7 +154,7 @@ export const CashfreeCheckoutFlow: React.FC<CashfreeCheckoutFlowProps> = ({
 
       setIsVerifying(true);
       setStep('verifying');
-      setVerifyAttemptLabel('Confirming payment with Cashfree...');
+      setVerifyAttemptLabel('Confirming payment with Razorpay...');
 
       const attemptCheck = async (attemptIndex: number) => {
         if (!isMountedRef.current || verifyRunIdRef.current !== runId) return;
@@ -163,7 +163,7 @@ export const CashfreeCheckoutFlow: React.FC<CashfreeCheckoutFlowProps> = ({
         verifyAbortRef.current = controller;
 
         try {
-          const res = await cashfreeService.verifyOrder(orderId, controller.signal);
+          const res = await razorpayService.verifyOrder(orderId, controller.signal);
           if (!isMountedRef.current || verifyRunIdRef.current !== runId) return;
 
           const normalizedStatus = String(res?.status || '').toUpperCase();
@@ -286,11 +286,11 @@ export const CashfreeCheckoutFlow: React.FC<CashfreeCheckoutFlowProps> = ({
     return clean;
   };
 
-  // Single direct action: create Cashfree order on backend & immediately open _modal popup
+  // Single direct action: create Razorpay order on backend & immediately open Razorpay popup
   const handleStartPayment = async () => {
     if (inProgressRef.current || isLoading || isVerifying) return;
     if (gatewayConfigured === false) {
-      setGeneralError('Cashfree payment is not configured yet.');
+      setGeneralError('Razorpay payment is not configured yet.');
       return;
     }
 
@@ -314,14 +314,14 @@ export const CashfreeCheckoutFlow: React.FC<CashfreeCheckoutFlowProps> = ({
     setStep('checkout_form');
 
     try {
-      setLoadingText('Connecting to Cashfree...');
+      setLoadingText('Connecting to Razorpay...');
       await Promise.all([
-        cashfreeService.loadCashfreeSdk(),
+        razorpayService.loadRazorpaySdk(),
         sessionService.initBackendSession(cleanMobile),
       ]);
 
       setLoadingText('Preparing secure payment...');
-      const orderRes = await cashfreeService.createOrder({
+      const orderRes = await razorpayService.createOrder({
         documentId,
         mobile: cleanMobile,
         email: email.trim() || undefined,
@@ -336,10 +336,10 @@ export const CashfreeCheckoutFlow: React.FC<CashfreeCheckoutFlowProps> = ({
       });
 
       const resolvedOrderId = orderRes.orderId || orderRes.order_id || '';
-      const rawSessionId = orderRes.paymentSessionId || orderRes.payment_session_id || '';
-      const paymentSessionId = String(rawSessionId).trim();
-      if (!resolvedOrderId || !paymentSessionId) {
-        throw new Error('Cashfree payment session ID was not received. Please try again.');
+      const razorpayOrderId = String(orderRes.razorpayOrderId || '').trim();
+      const razorpayKeyId = String(orderRes.keyId || '').trim();
+      if (!resolvedOrderId || !razorpayOrderId || !razorpayKeyId) {
+        throw new Error('Razorpay order details were not received. Please try again.');
       }
 
       const normalizedSyncType = (() => {
@@ -350,7 +350,7 @@ export const CashfreeCheckoutFlow: React.FC<CashfreeCheckoutFlowProps> = ({
         return 'biodata';
       })();
 
-      await cashfreeService.syncDocument({
+      await razorpayService.syncDocument({
         id: documentId,
         templateId: templateId || '',
         type: normalizedSyncType,
@@ -369,53 +369,60 @@ export const CashfreeCheckoutFlow: React.FC<CashfreeCheckoutFlowProps> = ({
         pendingAction: pendingAction || 'pdf',
       });
 
-      if (typeof window.Cashfree !== 'function') {
-        throw new Error('Cashfree payment SDK could not be loaded. Please check your connection.');
-      }
-
-      const mode: 'sandbox' | 'production' =
-        orderRes.environment === 'production' ? 'production' : 'sandbox';
-
-      const cashfree = window.Cashfree({ mode });
-
-      // Release loading spinner before launching centered _modal popup
+      // Release loading spinner before launching the Razorpay popup
       setIsLoading(false);
 
-      const checkoutResult = await cashfree.checkout({
-        paymentSessionId,
-        redirectTarget: '_modal',
+      const checkoutResult = await razorpayService.launchCheckout({
+        keyId: razorpayKeyId,
+        razorpayOrderId,
+        amountPaise: orderRes.amountPaise || Math.round(orderRes.amount * 100),
+        currency: orderRes.currency || 'INR',
+        name: 'GenovaProfile',
+        description: orderRes.templateName || resolvedTemplateName,
+        prefill: { contact: cleanMobile, email: email.trim() || undefined },
       });
 
       if (!isMountedRef.current) return;
 
-      // User dropped / cancelled / SDK returned error inside modal
-      if (checkoutResult?.error) {
+      // Razorpay could not open at all
+      if (checkoutResult.type === 'error') {
         inProgressRef.current = false;
         setIsVerifying(false);
         pendingOrderService.clearPendingOrder();
-        const rawErr =
-          checkoutResult.error.message ||
-          checkoutResult.error.description ||
-          checkoutResult.error.error ||
-          '';
-        const isCancel = /close|cancel|dismiss|drop/i.test(rawErr);
-        setFailureReason(
-          isCancel
-            ? 'Payment was cancelled before completion. No money was charged.'
-            : rawErr || 'Payment could not be completed. Please try again.'
-        );
+        setFailureReason(checkoutResult.message || 'Payment could not be completed. Please try again.');
         setStep('failed');
         return;
       }
 
-      // Payment attempt finished with paymentDetails -> verify up to 4 checks (1.5s apart)
-      if (checkoutResult?.paymentDetails) {
+      // Customer completed a payment attempt -> verify up to MAX_VERIFY_RETRIES checks
+      if (checkoutResult.type === 'paid_or_pending') {
+        // Step 1: server verifies the Razorpay signature (a mismatch means NOT paid)
+        if (checkoutResult.orderId && checkoutResult.paymentId && checkoutResult.signature) {
+          setIsVerifying(true);
+          setStep('verifying');
+          try {
+            await razorpayService.verifyPayment({
+              razorpay_order_id: checkoutResult.orderId,
+              razorpay_payment_id: checkoutResult.paymentId,
+              razorpay_signature: checkoutResult.signature,
+            });
+          } catch (verifyErr: any) {
+            if (!isMountedRef.current) return;
+            inProgressRef.current = false;
+            setIsVerifying(false);
+            pendingOrderService.clearPendingOrder();
+            setFailureReason(verifyErr?.message || 'Payment could not be verified. Please contact support if money was deducted.');
+            setStep('failed');
+            return;
+          }
+        }
+        // Step 2: confirm final order status (also covers slow UPI settlement)
         await verifyOrderWithFiniteRetries(resolvedOrderId, MAX_VERIFY_RETRIES, false);
         return;
       }
 
-      // Modal closed without explicit paymentDetails or error -> run single instant verification check
-      // in case a QR payment settled, otherwise stop immediately and allow retry
+      // Popup closed without paying -> run one instant verification check
+      // (in case UPI settled just as it closed), otherwise stop and allow retry
       await verifyOrderWithFiniteRetries(resolvedOrderId, 1, true);
     } catch (err: any) {
       if (!isMountedRef.current) return;
@@ -452,7 +459,7 @@ export const CashfreeCheckoutFlow: React.FC<CashfreeCheckoutFlowProps> = ({
           <div className="flex items-center gap-2 mb-1.5 sm:mb-2">
             <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-indigo-500/30 text-indigo-200 border border-indigo-400/30 flex items-center gap-1">
               <ShieldCheck className="w-3 h-3 text-indigo-300" />
-              Cashfree Verified Checkout
+              Razorpay Secure Checkout
             </span>
             <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">
               Direct Purchase
@@ -489,7 +496,7 @@ export const CashfreeCheckoutFlow: React.FC<CashfreeCheckoutFlowProps> = ({
                 <p className="text-xs text-slate-500 leading-relaxed max-w-sm mx-auto">
                   {isVerifying || step === 'verifying'
                     ? verifyAttemptLabel
-                    : 'Please wait while we open Cashfree Checkout.'}
+                    : 'Please wait while we open Razorpay Checkout.'}
                 </p>
               </div>
               <div className="pt-2">
@@ -648,7 +655,7 @@ export const CashfreeCheckoutFlow: React.FC<CashfreeCheckoutFlowProps> = ({
                     className="mt-0.5 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
                   />
                   <span className="text-[11px] leading-relaxed text-slate-700">
-                    I confirm this mobile number belongs to me and consent to one-time INR payment processing via Cashfree Payments.
+                    I confirm this mobile number belongs to me and consent to one-time INR payment processing via Razorpay.
                   </span>
                 </label>
               </div>
@@ -717,7 +724,7 @@ export const CashfreeCheckoutFlow: React.FC<CashfreeCheckoutFlowProps> = ({
           {/* Security Footnote */}
           <div className="flex items-center justify-center gap-4 text-[10px] text-slate-400 pt-2 border-t border-slate-100">
             <span className="flex items-center gap-1">
-              <ShieldCheck className="w-3 h-3 text-indigo-500" /> Secure payment powered by Cashfree
+              <ShieldCheck className="w-3 h-3 text-indigo-500" /> Secure payment powered by Razorpay
             </span>
             <span>&bull;</span>
             <span className="flex items-center gap-1">
@@ -729,3 +736,4 @@ export const CashfreeCheckoutFlow: React.FC<CashfreeCheckoutFlowProps> = ({
     </div>
   );
 };
+export const CashfreeCheckoutFlow = RazorpayCheckoutFlow;

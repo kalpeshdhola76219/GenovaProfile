@@ -3,7 +3,7 @@
  * MODEL: TEMPLATE = PRODUCT
  * Each template is its own purchasable product with its own server-authoritative price: 0 (Free),  40,  50,  60,  80,  100.
  * Free templates (priceINR = 0) require NO payment, NO mobile number, NO login.
- * Paid templates (priceINR > 0) require mobile entry -> order summary -> Cashfree checkout -> verification -> download.
+ * Paid templates (priceINR > 0) require mobile entry -> order summary -> Razorpay checkout -> verification -> download.
  * NO subscriptions. NO plans. NO bundles. NO global passes.
  */
 

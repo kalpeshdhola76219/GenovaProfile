@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { cashfreeService, RestorePurchaseResult } from '../../services/cashfreeService';
+import { razorpayService, RestorePurchaseResult } from '../../services/razorpayService';
 import { storageService } from '../../services/storageService';
 import { BUSINESS } from '../../config/business';
 import {
@@ -51,7 +51,7 @@ export const PurchaseRecoveryPage: React.FC<PurchaseRecoveryPageProps> = ({
 
     setIsLoading(true);
     try {
-      const res = await cashfreeService.restorePurchase({
+      const res = await razorpayService.restorePurchase({
         orderId: cleanOrderId || undefined,
         mobile: cleanMobile,
         recoveryCode: cleanCode || undefined,
@@ -159,7 +159,7 @@ export const PurchaseRecoveryPage: React.FC<PurchaseRecoveryPageProps> = ({
             <div>
               <label className="block text-slate-700 font-semibold mb-1 flex items-center gap-1.5">
                 <Hash className="w-3.5 h-3.5 text-indigo-600" />
-                <span>Cashfree Order ID</span>
+                <span>Razorpay Order ID</span>
               </label>
               <input
                 type="text"

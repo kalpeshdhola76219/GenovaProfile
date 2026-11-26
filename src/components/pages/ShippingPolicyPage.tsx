@@ -44,7 +44,7 @@ export const ShippingPolicyPage: React.FC<ShippingPolicyPageProps> = ({ onNaviga
         <section className="space-y-2 pt-4 border-t border-slate-100">
           <h2 className="text-sm font-extrabold text-slate-900">2. Instant Delivery Mechanism & Access</h2>
           <p>
-            Upon successful payment authorization via our payment gateway (Cashfree), digital fulfillment occurs instantaneously:
+            Upon successful payment authorization via our payment gateway (Razorpay), digital fulfillment occurs instantaneously:
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
             <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200 space-y-1">

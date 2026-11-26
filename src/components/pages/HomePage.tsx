@@ -131,12 +131,12 @@ export const HomePage: React.FC<HomePageProps> = ({
       a: 'Yes. Our ATS-certified resume templates follow single-column parseable structures with standard section titles, standard Unicode typography, and no graphics or multi-column grids that confuse ATS parsers at companies using Workday, Taleo, Greenhouse, or Lever.',
     },
     {
-      q: 'How does the Cashfree UPI payment work for premium templates?',
-      a: 'Free templates (₹0) can be exported immediately with no payment. For premium templates (₹40 - ₹100), you pay a one-time fee via Cashfree\'s secure payment gateway using Google Pay, PhonePe, Paytm, BHIM UPI, Net Banking, or Credit/Debit Cards. No recurring subscriptions or hidden fees.',
+      q: 'How does the Razorpay UPI payment work for premium templates?',
+      a: 'Free templates (₹0) can be exported immediately with no payment. For premium templates (₹40 - ₹100), you pay a one-time fee via Razorpay\'s secure payment gateway using Google Pay, PhonePe, Paytm, BHIM UPI, Net Banking, or Credit/Debit Cards. No recurring subscriptions or hidden fees.',
     },
     {
       q: 'Is my matrimonial and personal family information kept private?',
-      a: 'Yes. We respect your privacy and never sell, rent, or trade your personal, matrimonial, or career data to advertisers or third parties. Mobile numbers entered at checkout are passed transiently to Cashfree and are not stored in our database. Documents are retained for 30 days for downloading, and you can clear your data at any time.',
+      a: 'Yes. We respect your privacy and never sell, rent, or trade your personal, matrimonial, or career data to advertisers or third parties. Mobile numbers entered at checkout are passed transiently to Razorpay and are not stored in our database. Documents are retained for 30 days for downloading, and you can clear your data at any time.',
     },
   ];
 
@@ -692,7 +692,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                   </li>
                   <li className="flex items-start gap-2.5">
                     <Check className="w-4 h-4 text-brand shrink-0 mt-0.5" />
-                    <span><strong className="text-navy">PCI-DSS compliant checkout via Cashfree Payments</strong> (UPI, Cards, NetBanking). Final INR price shown—zero recurring charges.</span>
+                    <span><strong className="text-navy">PCI-DSS compliant checkout via Razorpay</strong> (UPI, Cards, NetBanking). Final INR price shown—zero recurring charges.</span>
                   </li>
                 </ul>
               </div>
@@ -825,7 +825,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                 <Zap className="w-3.5 h-3.5 text-accent" /> Instant PDF Generation
               </span>
               <span className="flex items-center gap-1.5">
-                <ShieldCheck className="w-3.5 h-3.5 text-accent" /> Cashfree UPI Secured
+                <ShieldCheck className="w-3.5 h-3.5 text-accent" /> Razorpay UPI Secured
               </span>
             </div>
           </div>

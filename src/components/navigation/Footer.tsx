@@ -54,7 +54,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
             </div>
             <div className="flex items-center gap-2 text-emerald-300 font-medium text-[12px] pt-1">
               <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
-              <span>Payments secured by Cashfree Payments</span>
+              <span>Payments secured by Razorpay</span>
             </div>
           </div>
 
@@ -229,7 +229,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
         {/* Bottom Bar */}
         <div className="pt-6 mt-6 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4 text-slate-400 text-[11px]">
           <div>
-            &copy; {new Date().getFullYear()} GenovaProfile. All rights reserved. &bull; Payments secured by Cashfree
+            &copy; {new Date().getFullYear()} GenovaProfile. All rights reserved. &bull; Payments secured by Razorpay
           </div>
           <div className="flex flex-wrap gap-4 sm:gap-6 justify-center">
             <a

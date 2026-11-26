@@ -31,8 +31,9 @@ function validateProductionEnvironment(): void {
   const requiredVars = [
     'SUPABASE_URL',
     'SUPABASE_SERVICE_ROLE_KEY',
-    'CASHFREE_CLIENT_ID',
-    'CASHFREE_CLIENT_SECRET',
+    'RAZORPAY_KEY_ID',
+    'RAZORPAY_KEY_SECRET',
+    'RAZORPAY_WEBHOOK_SECRET',
     'RECOVERY_PEPPER',
     'CRON_SECRET',
   ] as const;
@@ -54,15 +55,9 @@ function validateProductionEnvironment(): void {
     errors.push(`Invalid APP_URL: Must start with "https://" in production (current: "${effectiveAppUrl}")`);
   }
 
-  const cashfreeEnv = (process.env.CASHFREE_ENVIRONMENT || '').trim().toLowerCase();
-  if (cashfreeEnv !== 'production') {
-    errors.push(`Invalid CASHFREE_ENVIRONMENT: Must be set to "production" in production mode (current: "${cashfreeEnv || 'undefined'}")`);
-  }
-
-  const cashfreeClientId = (process.env.CASHFREE_CLIENT_ID || process.env.CASHFREE_APP_ID || '').trim();
-  const cashfreeClientSecret = (process.env.CASHFREE_CLIENT_SECRET || process.env.CASHFREE_SECRET_KEY || '').trim();
-  if (cashfreeClientId.startsWith('TEST') || cashfreeClientSecret.startsWith('TEST')) {
-    errors.push('Cashfree credentials cannot start with "TEST" in production mode');
+  const razorpayKeyId = (process.env.RAZORPAY_KEY_ID || '').trim();
+  if (razorpayKeyId && !razorpayKeyId.startsWith('rzp_live_')) {
+    errors.push('RAZORPAY_KEY_ID must be a LIVE key (starts with "rzp_live_") in production mode');
   }
 
   if (errors.length > 0) {
@@ -101,7 +96,7 @@ async function checkRestoreRateLimit(key: string): Promise<boolean> {
   return result.allowed;
 }
 
-// Capture raw body for Cashfree webhook verification (kept <= 4MB for Vercel 4.5MB limit safety)
+// Capture raw body for Razorpay webhook verification (kept <= 4MB for Vercel 4.5MB limit safety)
 app.use(
   express.json({
     limit: '4mb',
@@ -170,76 +165,88 @@ function rateLimit(limit: number, windowMs: number, keyPrefix: string = 'general
 }
 
 // ============================================================================
-// CASHFREE PAYMENT GATEWAY CONFIGURATION & ENVIRONMENT VALIDATION
+// RAZORPAY PAYMENT GATEWAY CONFIGURATION & ENVIRONMENT VALIDATION
 // ============================================================================
-const CASHFREE_CLIENT_ID = (
-  process.env.CASHFREE_CLIENT_ID || process.env.CASHFREE_APP_ID || ''
-).trim();
-const CASHFREE_CLIENT_SECRET = (
-  process.env.CASHFREE_CLIENT_SECRET || process.env.CASHFREE_SECRET_KEY || ''
-).trim();
-const rawCashfreeEnv = (process.env.CASHFREE_ENVIRONMENT || 'sandbox').trim().toLowerCase();
-const isTestCredential =
-  CASHFREE_CLIENT_ID.startsWith('TEST') ||
-  CASHFREE_CLIENT_SECRET.startsWith('TEST');
-const CASHFREE_ENVIRONMENT: 'sandbox' | 'production' =
-  isTestCredential ? 'sandbox' : rawCashfreeEnv === 'production' ? 'production' : 'sandbox';
-const CASHFREE_API_VERSION = (process.env.CASHFREE_API_VERSION || '2023-08-01').trim();
+const cleanEnvSecret = (raw?: string): string => {
+  const trimmed = (raw || '').trim();
+  if (
+    (trimmed.startsWith('"') && trimmed.endsWith('"') && trimmed.length >= 2) ||
+    (trimmed.startsWith("'") && trimmed.endsWith("'") && trimmed.length >= 2)
+  ) {
+    return trimmed.slice(1, -1).trim();
+  }
+  return trimmed;
+};
 
-const isCashfreeConfigured =
-  Boolean(CASHFREE_CLIENT_ID) &&
-  Boolean(CASHFREE_CLIENT_SECRET) &&
-  !CASHFREE_CLIENT_ID.includes('YOUR_') &&
-  !CASHFREE_CLIENT_SECRET.includes('YOUR_');
+const RAZORPAY_KEY_ID = cleanEnvSecret(process.env.RAZORPAY_KEY_ID);
+const RAZORPAY_KEY_SECRET = cleanEnvSecret(process.env.RAZORPAY_KEY_SECRET);
+const RAZORPAY_WEBHOOK_SECRET = cleanEnvSecret(process.env.RAZORPAY_WEBHOOK_SECRET);
+const RAZORPAY_BASE_URL = 'https://api.razorpay.com/v1';
 
-const CASHFREE_BASE_URL =
-  CASHFREE_ENVIRONMENT === 'production'
-    ? 'https://api.cashfree.com/pg'
-    : 'https://sandbox.cashfree.com/pg';
+// Test keys start with rzp_test_, live keys with rzp_live_
+const RAZORPAY_ENVIRONMENT: 'sandbox' | 'production' = RAZORPAY_KEY_ID.startsWith('rzp_live_')
+  ? 'production'
+  : 'sandbox';
+
+const isPlaceholderValue = (val: string) => /your[_-]/i.test(val);
+
+const isRazorpayConfigured =
+  Boolean(RAZORPAY_KEY_ID) &&
+  Boolean(RAZORPAY_KEY_SECRET) &&
+  !isPlaceholderValue(RAZORPAY_KEY_ID) &&
+  !isPlaceholderValue(RAZORPAY_KEY_SECRET);
+
+const RAZORPAY_AUTH_HEADER = `Basic ${Buffer.from(`${RAZORPAY_KEY_ID}:${RAZORPAY_KEY_SECRET}`).toString('base64')}`;
 
 /**
  * Validates whether the environment matches the credential type.
  */
-function getCashfreeEnvironmentWarning(): string | null {
-  if (!isCashfreeConfigured) return null;
-  const isTestKey =
-    CASHFREE_CLIENT_ID.startsWith('TEST') ||
-    CASHFREE_CLIENT_SECRET.startsWith('TEST');
-
-  if (CASHFREE_ENVIRONMENT === 'sandbox' && !isTestKey) {
-    return 'Warning: CASHFREE_ENVIRONMENT is sandbox but credentials do not appear to be test credentials.';
+function getRazorpayEnvironmentWarning(): string | null {
+  if (!isRazorpayConfigured) return null;
+  if (!RAZORPAY_KEY_ID.startsWith('rzp_test_') && !RAZORPAY_KEY_ID.startsWith('rzp_live_')) {
+    return 'Warning: RAZORPAY_KEY_ID does not look like a Razorpay key (expected rzp_test_... or rzp_live_...).';
   }
-  if (CASHFREE_ENVIRONMENT === 'production' && isTestKey) {
-    return 'Warning: CASHFREE_ENVIRONMENT is production but credentials appear to be test credentials.';
+  if (process.env.NODE_ENV === 'production' && RAZORPAY_ENVIRONMENT === 'sandbox') {
+    return 'Warning: NODE_ENV is production but Razorpay is using TEST keys (rzp_test_...).';
   }
   return null;
 }
 
-const startupEnvWarning = getCashfreeEnvironmentWarning();
+const startupEnvWarning = getRazorpayEnvironmentWarning();
 if (startupEnvWarning) {
-  console.warn(`[Cashfree Config] ${startupEnvWarning}`);
+  console.warn(`[Razorpay Config] ${startupEnvWarning}`);
 }
 
-if (isCashfreeConfigured) {
+if (isRazorpayConfigured) {
   console.log(
-    `[Cashfree] Gateway configured in ${CASHFREE_ENVIRONMENT.toUpperCase()} mode (App ID: ${CASHFREE_CLIENT_ID.substring(
-      0,
-      8
-    )}...)`
+    `[Razorpay] Gateway configured in ${RAZORPAY_ENVIRONMENT.toUpperCase()} mode (Key: ${RAZORPAY_KEY_ID.substring(0, 12)}...)`
   );
 } else {
   console.log(
-    `[Cashfree] Gateway not yet configured. Provide CASHFREE_CLIENT_ID and CASHFREE_CLIENT_SECRET in .env for live/sandbox checkouts.`
+    `[Razorpay] Gateway not yet configured. Provide RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET in .env for test/live checkouts.`
   );
 }
 
 /**
- * Normalizes payment session IDs returned by Cashfree API.
- * Trims whitespace while preserving Cashfree's exact authoritative session token string.
+ * Calls the Razorpay REST API with Basic auth.
  */
-export function normalizeSessionId(id: string): string {
-  if (!id) return '';
-  return String(id).trim();
+async function razorpayApi(path: string, init?: { method?: string; body?: any }): Promise<{ ok: boolean; status: number; data: any }> {
+  const response = await fetch(`${RAZORPAY_BASE_URL}${path}`, {
+    method: init?.method || 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: RAZORPAY_AUTH_HEADER,
+    },
+    body: init?.body ? JSON.stringify(init.body) : undefined,
+  });
+  const text = await response.text();
+  let data: any = null;
+  try {
+    data = JSON.parse(text);
+  } catch {
+    console.warn('[Razorpay] Non-JSON response:', response.status, text.substring(0, 300));
+  }
+  return { ok: response.ok, status: response.status, data };
 }
 
 /**
@@ -254,7 +261,7 @@ function getValidCustomerEmail(candidate?: string): string {
 }
 
 /**
- * Sanitizes customer name for Cashfree requirements (3 to 100 characters, letters and spaces only).
+ * Sanitizes customer name (3 to 100 characters, letters and spaces only).
  */
 function sanitizeCustomerName(nameCandidate?: string): string {
   const onlyLettersAndSpaces = (nameCandidate || '').replace(/[^a-zA-Z\s]/g, '').trim().replace(/\s+/g, ' ');
@@ -524,22 +531,23 @@ app.post('/api/documents/sync', async (req, res) => {
 });
 
 // ============================================================================
-// 2. CASHFREE PAYMENT APIS (DIRECT PURCHASE FLOW)
+// 2. RAZORPAY PAYMENT APIS (DIRECT PURCHASE FLOW)
 // ============================================================================
 
 // Gateway Config query
 app.get('/api/payment/config', (_req, res) => {
   return res.json({
     success: true,
-    gateway: 'cashfree',
-    isConfigured: isCashfreeConfigured,
-    environment: CASHFREE_ENVIRONMENT,
+    gateway: 'razorpay',
+    isConfigured: isRazorpayConfigured,
+    environment: RAZORPAY_ENVIRONMENT,
+    keyId: isRazorpayConfigured ? RAZORPAY_KEY_ID : undefined,
     currency: 'INR',
     prices: [0, 40, 50, 60, 80, 100],
   });
 });
 
-// Cashfree Gateway return_url redirect handler (redirects to real path without #hash)
+// Gateway return_url redirect handler (redirects to real path without #hash)
 app.all('/payment-result', (req, res, next) => {
   const orderId =
     req.query.order_id ||
@@ -562,8 +570,8 @@ app.all('/payment-result', (req, res, next) => {
   return next();
 });
 
-// Create Cashfree Order
-app.post(['/api/payment/create-order', '/api/orders/create'], rateLimit(25, 60000), async (req, res) => {
+// Create Razorpay Order
+app.post(['/api/payment/create-order', '/api/orders/create', '/api/create-order'], rateLimit(25, 60000), async (req, res) => {
   try {
     const { documentId, email, templateId, documentTitle, sessionToken, consent } = req.body;
     const rawMobile = req.body.mobile || req.body.customerMobile || '';
@@ -652,75 +660,65 @@ app.post(['/api/payment/create-order', '/api/orders/create'], rateLimit(25, 6000
       });
     }
 
-    // 5. Verify Cashfree configuration
-    if (!isCashfreeConfigured) {
+    // 5. Verify Razorpay configuration
+    if (!isRazorpayConfigured) {
       return res.status(503).json({
         success: false,
-        error: 'Cashfree payment is not configured yet.',
-        message: 'Cashfree payment is not configured yet.',
+        error: 'Razorpay payment is not configured yet.',
+        message: 'Razorpay payment is not configured yet.',
       });
     }
 
     // 6. Generate internal order ID (concise, max 32 chars)
     const internalOrderId = `order_${Date.now()}_${crypto.randomBytes(6).toString('hex')}`;
 
-    // 7. Call Cashfree Order Creation API (2023-08-01)
-    // Intentionally omit order_meta.return_url so Cashfree JS SDK v3 _modal checkout
-    // resolves cleanly in the parent window instead of loading the React app inside the popup.
-    const cashfreeOrderPayload = {
-      order_id: internalOrderId,
-      order_amount: serverAmountINR,
-      order_currency: 'INR',
-      customer_details: {
-        customer_id: sanitizeCustomerId(session.id),
-        customer_phone: cleanMobile,
-        customer_name: sanitizeCustomerName(req.body.customerName || req.body.name || 'GenovaProfile Customer'),
-        customer_email: cleanEmail || `customer_${cleanMobile.slice(-4)}@genovaprofile.com`,
-      },
-      order_meta: {
-        notify_url: `${APP_URL}/api/webhooks/cashfree`,
-      },
-      order_note: `GenovaProfile: ${templateInfo.name} (₹${serverAmountINR})`,
-    };
-
-    const cfResponse = await fetch(`${CASHFREE_BASE_URL}/orders`, {
+    // 7. Call Razorpay Orders API (amount is always the server-authoritative price, in paise)
+    const amountPaise = Math.round(serverAmountINR * 100);
+    if (amountPaise < 100) {
+      return res.status(400).json({
+        success: false,
+        error: 'Amount must be at least 100 paise (Rs 1) for Razorpay.',
+      });
+    }
+    const rzpResult = await razorpayApi('/orders', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-client-id': CASHFREE_CLIENT_ID,
-        'x-client-secret': CASHFREE_CLIENT_SECRET,
-        'x-api-version': CASHFREE_API_VERSION,
+      body: {
+        amount: amountPaise,
+        currency: 'INR',
+        receipt: internalOrderId.slice(0, 40),
+        notes: {
+          internalOrderId,
+          documentId: resolvedDocId,
+          templateId: templateInfo.id,
+          template: String(templateInfo.name).slice(0, 80),
+        },
       },
-      body: JSON.stringify(cashfreeOrderPayload),
     });
 
-    const cfText = await cfResponse.text();
-    let cfData: any = null;
-    try {
-      cfData = JSON.parse(cfText);
-    } catch {
-      console.warn('[Cashfree] Order creation non-JSON response:', cfResponse.status, cfText.substring(0, 300));
-    }
-
-    if (!cfResponse.ok || !cfData?.payment_session_id) {
-      console.warn('[Cashfree] Order creation failed:', cfResponse.status, cfData || cfText.substring(0, 300));
-      return res.status(cfResponse.status >= 500 ? 502 : 400).json({
+    if (!rzpResult.ok || !rzpResult.data?.id) {
+      console.warn('[Razorpay] Order creation failed:', rzpResult.status, rzpResult.data);
+      if (rzpResult.status === 401) {
+        return res.status(401).json({
+          success: false,
+          error: 'Razorpay authentication failed. Please check RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET.',
+        });
+      }
+      return res.status(500).json({
         success: false,
-        error: cfData?.message || 'Cashfree payment gateway is temporarily unreachable. Please try again.',
+        error:
+          rzpResult.data?.error?.description ||
+          'Razorpay payment gateway is temporarily unreachable. Please try again.',
       });
     }
 
-    const rawSessionId = cfData.payment_session_id ? String(cfData.payment_session_id) : '';
-    const normalizedSessionId = normalizeSessionId(rawSessionId);
-
-    const rawLast15 = rawSessionId.length > 15 ? rawSessionId.slice(-15) : rawSessionId;
-    const normLast15 = normalizedSessionId.length > 15 ? normalizedSessionId.slice(-15) : normalizedSessionId;
-    console.log(`[Cashfree Create Order] Env: ${CASHFREE_ENVIRONMENT}, Raw Session End: ...${rawLast15}, Norm Session End: ...${normLast15}`);
+    const razorpayOrderId = String(rzpResult.data.id);
+    console.log(`[Razorpay Create Order] Env: ${RAZORPAY_ENVIRONMENT}, Order: ${razorpayOrderId}, Amount(paise): ${amountPaise}`);
 
     // 8. Persist authoritative order to server database
     await db.createOrder({
       id: internalOrderId,
-      cashfreeOrderId: cfData.cf_order_id ? String(cfData.cf_order_id) : internalOrderId,
+      // NOTE: DB column is still named cashfree_order_id; it now stores the Razorpay order id
+      cashfreeOrderId: razorpayOrderId,
       documentId: resolvedDocId,
       guestSessionId: session.id,
       mobile: cleanMobile,
@@ -741,12 +739,12 @@ app.post(['/api/payment/create-order', '/api/orders/create'], rateLimit(25, 6000
       success: true,
       orderId: internalOrderId,
       order_id: internalOrderId,
-      cashfreeOrderId: cfData.cf_order_id || internalOrderId,
-      paymentSessionId: normalizedSessionId,
-      payment_session_id: normalizedSessionId,
+      razorpayOrderId,
+      keyId: RAZORPAY_KEY_ID,
       amount: serverAmountINR,
+      amountPaise,
       currency: 'INR',
-      environment: CASHFREE_ENVIRONMENT,
+      environment: RAZORPAY_ENVIRONMENT,
       mobile: cleanMobile,
       documentId: resolvedDocId,
       documentTitle: resolvedTitle,
@@ -754,7 +752,7 @@ app.post(['/api/payment/create-order', '/api/orders/create'], rateLimit(25, 6000
       templateName: templateInfo.name,
     });
   } catch (err: any) {
-    console.warn('[Cashfree] Create order exception:', err?.stack || err?.message || err);
+    console.warn('[Razorpay] Create order exception:', err?.stack || err?.message || err);
     return res.status(500).json({
       success: false,
       error: err?.message || 'Payment order could not be created. Please try again.',
@@ -762,7 +760,7 @@ app.post(['/api/payment/create-order', '/api/orders/create'], rateLimit(25, 6000
   }
 });
 
-// Verify Order Status API (Called by frontend after Cashfree _modal checkout closes/completes)
+// Verify Order Status API (Called by frontend after Razorpay checkout closes/completes)
 app.get(['/api/payment/verify-order/:orderId', '/api/orders/:orderId/verify'], async (req, res) => {
   try {
     const { orderId } = req.params;
@@ -843,50 +841,30 @@ app.get(['/api/payment/verify-order/:orderId', '/api/orders/:orderId/verify'], a
       });
     }
 
-    if (isCashfreeConfigured) {
+    if (isRazorpayConfigured) {
       try {
-        const cfHeaders = {
-          'x-client-id': CASHFREE_CLIENT_ID,
-          'x-client-secret': CASHFREE_CLIENT_SECRET,
-          'x-api-version': CASHFREE_API_VERSION,
-        };
-
-        // Fetch both /pg/orders/{order_id} and /pg/orders/{order_id}/payments per 2023-08-01 API
-        const [cfRes, pmtsRes] = await Promise.all([
-          fetch(`${CASHFREE_BASE_URL}/orders/${encodeURIComponent(order.id)}`, { headers: cfHeaders }),
-          fetch(`${CASHFREE_BASE_URL}/orders/${encodeURIComponent(order.id)}/payments`, { headers: cfHeaders }),
+        const razorpayOrderId = order.cashfreeOrderId;
+        const [rzpOrderRes, rzpPaymentsRes] = await Promise.all([
+          razorpayApi(`/orders/${encodeURIComponent(razorpayOrderId)}`),
+          razorpayApi(`/orders/${encodeURIComponent(razorpayOrderId)}/payments`),
         ]);
 
-        const cfOrder: any = cfRes.ok ? await cfRes.json().catch(() => null) : null;
-        const cfStatus = String(cfOrder?.order_status || '').toUpperCase();
+        const rzpOrder: any = rzpOrderRes.ok ? rzpOrderRes.data : null;
+        const rzpOrderStatus = String(rzpOrder?.status || '').toLowerCase(); // created | attempted | paid
+        const payments: any[] = Array.isArray(rzpPaymentsRes.data?.items) ? rzpPaymentsRes.data.items : [];
+        const successPmt = payments.find((p: any) => String(p?.status || '').toLowerCase() === 'captured');
+        const latestPmt = payments.length > 0 ? payments.reduce((a: any, b: any) => ((b?.created_at || 0) >= (a?.created_at || 0) ? b : a)) : null;
+        const latestPmtStatus = String(latestPmt?.status || '').toLowerCase(); // created | authorized | captured | refunded | failed
 
-        const rawPmts: any = pmtsRes.ok ? await pmtsRes.json().catch(() => []) : [];
-        const sortedPmts: any[] = Array.isArray(rawPmts)
-          ? rawPmts
-              .map((p, idx) => ({ p, idx }))
-              .sort((a, b) => {
-                const ta = Date.parse(a.p?.payment_completion_time || a.p?.payment_time || '') || 0;
-                const tb = Date.parse(b.p?.payment_completion_time || b.p?.payment_time || '') || 0;
-                return ta !== tb ? ta - tb : a.idx - b.idx;
-              })
-              .map((item) => item.p)
-          : [];
-
-        const latestPmt = sortedPmts.length > 0 ? sortedPmts[sortedPmts.length - 1] : null;
-        const latestPmtStatus = String(latestPmt?.payment_status || '').toUpperCase();
-        const successPmt = sortedPmts.find((p: any) => String(p?.payment_status || '').toUpperCase() === 'SUCCESS');
-
-        // 1. Confirmed PAID when order_status === 'PAID' or latest payment_status === 'SUCCESS'
-        if (cfStatus === 'PAID' || latestPmtStatus === 'SUCCESS' || successPmt) {
-          const paidAmount = Number(successPmt?.payment_amount ?? cfOrder?.order_amount ?? order.amount);
+        // 1. Confirmed PAID only when a payment is captured for the full server-side amount
+        if (successPmt || rzpOrderStatus === 'paid') {
+          const paidAmount = successPmt ? Number(successPmt.amount) / 100 : Number(rzpOrder?.amount_paid || 0) / 100;
           if (paidAmount >= order.amount) {
             await db.confirmOrderPaid({
               orderId: order.id,
-              cashfreePaymentId: String(
-                successPmt?.cf_payment_id || (cfOrder?.cf_order_id ? `cf_${cfOrder.cf_order_id}` : `cf_${order.id}`)
-              ),
+              cashfreePaymentId: String(successPmt?.id || `rzp_${razorpayOrderId}`),
               paidAmount,
-              paymentMethod: successPmt?.payment_method ? String(successPmt.payment_method) : 'Cashfree PG',
+              paymentMethod: successPmt?.method ? `Razorpay ${String(successPmt.method).toUpperCase()}` : 'Razorpay',
             });
 
             let plainRecoveryCode: string | undefined = undefined;
@@ -913,27 +891,17 @@ app.get(['/api/payment/verify-order/:orderId', '/api/orders/:orderId/verify'], a
               maskedMobile,
               ...(plainRecoveryCode ? { recoveryCode: plainRecoveryCode } : {}),
               codeShown: plainRecoveryCode ? false : true,
-              paidAt: successPmt?.payment_completion_time || new Date().toISOString(),
+              paidAt: successPmt?.created_at ? new Date(successPmt.created_at * 1000).toISOString() : new Date().toISOString(),
               downloadUrl: `/api/documents/${order.documentId}/download-pdf`,
             });
           }
         }
 
-        // 2. Immediately return FAILED if order_status or latest payment attempt failed/dropped/cancelled/void
-        const FAILURE_STATUSES = ['USER_DROPPED', 'FAILED', 'CANCELLED', 'VOID'];
-        const ORDER_TERMINAL_STATUSES = [...FAILURE_STATUSES, 'EXPIRED', 'TERMINATED'];
-
-        if (ORDER_TERMINAL_STATUSES.includes(cfStatus) || FAILURE_STATUSES.includes(latestPmtStatus)) {
-          const effectiveStatus = FAILURE_STATUSES.includes(latestPmtStatus) ? latestPmtStatus : cfStatus;
-          const isCancelLike = ['USER_DROPPED', 'CANCELLED', 'VOID'].includes(effectiveStatus);
-          const rawReason =
-            latestPmt?.payment_message ||
-            latestPmt?.error_details?.error_description ||
-            latestPmt?.error_details?.error_reason ||
-            '';
-          const reason = isCancelLike
-            ? 'Payment was cancelled before completion.'
-            : rawReason || (cfStatus === 'EXPIRED' ? 'Payment session expired.' : 'Payment failed or was declined.');
+        // 2. Failed: the latest attempt failed (verification only runs after the popup has closed,
+        // so any retry inside the popup has already finished by now).
+        if (latestPmtStatus === 'failed') {
+          const reason =
+            latestPmt?.error_description || latestPmt?.error_reason || 'Payment failed or was declined.';
 
           await db.updateOrderStatus(order.id, 'failed');
 
@@ -953,7 +921,7 @@ app.get(['/api/payment/verify-order/:orderId', '/api/orders/:orderId/verify'], a
           });
         }
       } catch (err: any) {
-        console.warn('[Cashfree] Authoritative order check error:', err?.message || err);
+        console.warn('[Razorpay] Authoritative order check error:', err?.message || err);
       }
     }
 
@@ -974,10 +942,128 @@ app.get(['/api/payment/verify-order/:orderId', '/api/orders/:orderId/verify'], a
   }
 });
 
+// Verify Razorpay payment signature: HMAC-SHA256(razorpay_order_id + "|" + razorpay_payment_id, KEY_SECRET)
+app.post(['/api/payment/verify-payment', '/api/verify-payment'], rateLimit(40, 60000), async (req, res) => {
+  try {
+    const razorpay_order_id = String(req.body?.razorpay_order_id || '').trim();
+    const razorpay_payment_id = String(req.body?.razorpay_payment_id || '').trim();
+    const razorpay_signature = String(req.body?.razorpay_signature || '').trim();
+
+    if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
+      return res.status(400).json({
+        success: false,
+        error: 'razorpay_order_id, razorpay_payment_id and razorpay_signature are required.',
+      });
+    }
+    if (!isRazorpayConfigured) {
+      return res.status(503).json({ success: false, error: 'Razorpay payment is not configured yet.' });
+    }
+
+    const token = (req.headers['x-session-token'] as string) || (req.body?.sessionToken as string);
+    if (!token) {
+      return res.status(401).json({ success: false, error: 'Unauthorized: Missing x-session-token header.' });
+    }
+    const session = await db.getGuestSessionByToken(token);
+    if (!session) {
+      return res.status(403).json({ success: false, error: 'Forbidden: Invalid session.' });
+    }
+
+    // 1. Signature check (constant-time)
+    const expectedSignature = crypto
+      .createHmac('sha256', RAZORPAY_KEY_SECRET)
+      .update(`${razorpay_order_id}|${razorpay_payment_id}`)
+      .digest('hex');
+    let signatureMatches = false;
+    try {
+      signatureMatches = crypto.timingSafeEqual(Buffer.from(expectedSignature), Buffer.from(razorpay_signature));
+    } catch {
+      signatureMatches = false;
+    }
+    if (!signatureMatches) {
+      console.warn(`[Razorpay Verify] Signature mismatch for order ${razorpay_order_id}`);
+      return res.status(400).json({ success: false, isPaid: false, error: 'Payment signature verification failed.' });
+    }
+
+    // 2. Match to our own order and session
+    const order = await db.getOrderByCashfreeOrderId(razorpay_order_id);
+    if (!order) {
+      return res.status(404).json({ success: false, error: 'Order not found.' });
+    }
+    if (order.guestSessionId !== session.id) {
+      return res.status(403).json({ success: false, error: 'Forbidden: You do not have permission to access this order.' });
+    }
+
+    const templateInfo = order.templateId ? resolveTemplateInfo(order.templateId) : null;
+    const templateName = templateInfo?.name || order.documentTitle || 'Template Design';
+
+    // 3. Double-check payment with Razorpay: must belong to this order, be captured, and cover the full price
+    const pmtRes = await razorpayApi(`/payments/${encodeURIComponent(razorpay_payment_id)}`);
+    const pmt: any = pmtRes.ok ? pmtRes.data : null;
+    const pmtStatus = String(pmt?.status || '').toLowerCase();
+    if (!pmt || pmt.order_id !== razorpay_order_id) {
+      return res.status(400).json({ success: false, isPaid: false, error: 'Payment does not belong to this order.' });
+    }
+    if (pmtStatus !== 'captured') {
+      // Signature is valid but money is not captured yet; client keeps polling /verify-order
+      return res.json({
+        success: true,
+        isPaid: false,
+        status: 'PENDING',
+        orderId: order.id,
+        documentId: order.documentId,
+        templateId: order.templateId,
+        templateName,
+        amount: order.amount,
+        retryAfter: 1.5,
+      });
+    }
+    const paidAmount = Number(pmt.amount) / 100;
+    if (paidAmount < order.amount) {
+      return res.status(400).json({ success: false, isPaid: false, error: 'Paid amount is lower than the order amount.' });
+    }
+
+    // 4. Mark as paid and return the same payload shape as /verify-order
+    await db.confirmOrderPaid({
+      orderId: order.id,
+      cashfreePaymentId: razorpay_payment_id,
+      paidAmount,
+      paymentMethod: pmt.method ? `Razorpay ${String(pmt.method).toUpperCase()}` : 'Razorpay',
+    });
+
+    let plainRecoveryCode: string | undefined = undefined;
+    if (!order.recoveryCodeHash) {
+      plainRecoveryCode = generateRecoveryCode();
+      await db.updateOrderFields(order.id, { recoveryCodeHash: hashRecoveryCode(plainRecoveryCode), codeShown: true });
+    } else if (!order.codeShown) {
+      await db.updateOrderFields(order.id, { codeShown: true });
+    }
+
+    return res.json({
+      success: true,
+      isPaid: true,
+      status: 'PAID',
+      orderId: order.id,
+      receiptId: order.id,
+      documentId: order.documentId,
+      templateId: order.templateId,
+      templateName,
+      amount: order.amount,
+      maskedMobile: maskMobile(order.mobile),
+      ...(plainRecoveryCode ? { recoveryCode: plainRecoveryCode } : {}),
+      codeShown: plainRecoveryCode ? false : true,
+      paidAt: new Date().toISOString(),
+      downloadUrl: `/api/documents/${order.documentId}/download-pdf`,
+    });
+  } catch (err: any) {
+    console.warn('[Razorpay] Verify payment exception:', err?.message || err);
+    return res.status(500).json({ success: false, error: 'Failed to verify payment.' });
+  }
+});
+
 // Sandbox Simulation Endpoint (Only active in sandbox or development mode)
 app.post('/api/payment/sandbox-complete', rateLimit(20, 60000), async (req, res) => {
   try {
-    if (CASHFREE_ENVIRONMENT === 'production' || process.env.NODE_ENV === 'production') {
+    if (RAZORPAY_ENVIRONMENT === 'production' || process.env.NODE_ENV === 'production') {
       return res.status(403).json({
         success: false,
         error: 'Sandbox simulation is not available in production.',
@@ -997,9 +1083,9 @@ app.post('/api/payment/sandbox-complete', rateLimit(20, 60000), async (req, res)
     // Confirm order in DB
     await db.confirmOrderPaid({
       orderId: order.id,
-      cashfreePaymentId: `cf_sandbox_${Date.now()}_${order.id}`,
+      cashfreePaymentId: `rzp_test_sim_${Date.now()}_${order.id}`,
       paidAmount: order.amount,
-      paymentMethod: 'Cashfree Sandbox Simulation',
+      paymentMethod: 'Razorpay Test Simulation',
     });
 
     let plainRecoveryCode: string | undefined = undefined;
@@ -1035,7 +1121,7 @@ app.post('/api/payment/sandbox-complete', rateLimit(20, 60000), async (req, res)
       downloadUrl: `/api/documents/${order.documentId}/download-pdf`,
     });
   } catch (err: any) {
-    console.warn('[Cashfree] Sandbox complete error:', err);
+    console.warn('[Razorpay] Sandbox complete error:', err);
     return res.status(500).json({ success: false, error: 'Failed to complete sandbox payment.' });
   }
 });
@@ -1263,102 +1349,88 @@ app.get('/api/documents/:id/data', async (req, res) => {
   }
 });
 
-// Official Cashfree Webhook Handler
-app.post('/api/webhooks/cashfree', async (req: any, res) => {
+// Official Razorpay Webhook Handler (events: payment.captured, payment.failed, order.paid)
+app.post('/api/webhooks/razorpay', async (req: any, res) => {
   try {
-    if (!isCashfreeConfigured) {
-      console.warn('[Cashfree Webhook] Webhook called but Cashfree is not configured');
-      return res.status(503).json({ error: 'Cashfree webhook service is unconfigured.' });
+    if (!RAZORPAY_WEBHOOK_SECRET) {
+      console.warn('[Razorpay Webhook] Webhook called but RAZORPAY_WEBHOOK_SECRET is not configured');
+      return res.status(503).json({ error: 'Razorpay webhook service is unconfigured.' });
     }
 
-    const timestamp = req.headers['x-webhook-timestamp'] as string;
-    const signature = req.headers['x-webhook-signature'] as string;
-
-    if (!timestamp || !signature) {
-      console.warn('[Cashfree Webhook] Missing signature headers');
-      return res.status(400).json({ error: 'Missing webhook headers' });
+    const signature = req.headers['x-razorpay-signature'] as string;
+    if (!signature) {
+      console.warn('[Razorpay Webhook] Missing signature header');
+      return res.status(400).json({ error: 'Missing webhook signature' });
     }
 
     const rawBody = req.rawBody ? req.rawBody.toString('utf-8') : JSON.stringify(req.body);
-    const dataToSign = timestamp + rawBody;
-    const expectedSig = crypto
-      .createHmac('sha256', CASHFREE_CLIENT_SECRET)
-      .update(dataToSign)
-      .digest('base64');
+    const expectedSig = crypto.createHmac('sha256', RAZORPAY_WEBHOOK_SECRET).update(rawBody).digest('hex');
 
     let isValid = false;
     try {
-      isValid = crypto.timingSafeEqual(Buffer.from(expectedSig), Buffer.from(signature));
+      isValid = crypto.timingSafeEqual(Buffer.from(expectedSig), Buffer.from(String(signature)));
     } catch {
       isValid = false;
     }
 
     if (!isValid) {
-      console.warn('[Cashfree Webhook] Invalid signature rejected');
+      console.warn('[Razorpay Webhook] Invalid signature rejected');
       return res.status(401).json({ error: 'Invalid webhook signature' });
     }
 
     const event = req.body;
-    const eventType = event?.type || 'PAYMENT_WEBHOOK';
-    const orderId =
-      event?.data?.order?.order_id ||
-      event?.order?.order_id ||
-      event?.data?.order_id;
-    const paymentStatus =
-      event?.data?.payment?.payment_status ||
-      event?.payment?.payment_status;
-    const paymentAmount = Number(
-      event?.data?.payment?.payment_amount ||
-      event?.data?.order?.order_amount ||
-      0
-    );
-    const cfPaymentId =
-      event?.data?.payment?.cf_payment_id ||
-      event?.payment?.cf_payment_id ||
-      `cf_${Date.now()}`;
+    const eventType: string = event?.event || 'unknown';
+    const paymentEntity = event?.payload?.payment?.entity;
+    const orderEntity = event?.payload?.order?.entity;
+    const razorpayOrderId: string = paymentEntity?.order_id || orderEntity?.id || '';
+    const paymentId: string = paymentEntity?.id || `rzp_${Date.now()}`;
+    const paymentStatus = String(paymentEntity?.status || '').toLowerCase();
+    const paymentAmount = Number(paymentEntity?.amount ?? orderEntity?.amount_paid ?? 0) / 100;
 
-    const eventId = `cf_evt_${orderId}_${cfPaymentId}_${eventType}`;
+    const headerEventId = req.headers['x-razorpay-event-id'] as string | undefined;
+    const eventId = `rzp_evt_${headerEventId || `${razorpayOrderId}_${paymentId}_${eventType}`}`;
 
     if (await db.hasProcessedWebhookEvent(eventId)) {
-      console.log(`[Cashfree Webhook] Duplicate event ${eventId} ignored.`);
+      console.log(`[Razorpay Webhook] Duplicate event ${eventId} ignored.`);
       return res.json({ success: true, duplicate: true });
     }
 
-    if (orderId) {
-      const internalOrder = (await db.getOrderById(orderId)) || (await db.getOrderByCashfreeOrderId(orderId));
+    if (razorpayOrderId) {
+      const internalOrder = await db.getOrderByCashfreeOrderId(razorpayOrderId);
       if (internalOrder) {
-        if (paymentStatus === 'SUCCESS') {
+        const isPaidEvent = eventType === 'order.paid' || (eventType === 'payment.captured' && paymentStatus === 'captured');
+        if (isPaidEvent) {
           if (paymentAmount >= internalOrder.amount) {
             await db.updateOrderStatus(internalOrder.id, 'paid');
             await db.markDocumentPaid(internalOrder.documentId);
             await db.recordPayment({
               orderId: internalOrder.id,
-              cashfreePaymentId: String(cfPaymentId),
+              cashfreePaymentId: String(paymentId),
               status: 'SUCCESS',
               amount: paymentAmount,
-              paymentMethod: event?.data?.payment?.payment_method || 'Cashfree PG',
+              paymentMethod: paymentEntity?.method ? `Razorpay ${String(paymentEntity.method).toUpperCase()}` : 'Razorpay',
             });
-            console.log(`[Cashfree Webhook] Order ${internalOrder.id} successfully marked PAID!`);
+            console.log(`[Razorpay Webhook] Order ${internalOrder.id} successfully marked PAID!`);
           }
-        } else if (paymentStatus === 'FAILED' || paymentStatus === 'USER_DROPPED') {
+        } else if (eventType === 'payment.failed') {
           // Do not downgrade if already paid
           if (internalOrder.status !== 'paid') {
             await db.updateOrderStatus(internalOrder.id, 'failed');
           }
           await db.recordPayment({
             orderId: internalOrder.id,
-            cashfreePaymentId: String(cfPaymentId),
-            status: paymentStatus === 'FAILED' ? 'FAILED' : 'USER_DROPPED',
+            cashfreePaymentId: String(paymentId),
+            status: 'FAILED',
             amount: paymentAmount,
           });
         }
       }
     }
 
-    await db.recordWebhookEvent(eventId, eventType, orderId, event);
+    await db.recordWebhookEvent(eventId, eventType, razorpayOrderId, event);
     return res.json({ success: true, processed: true });
   } catch (err: any) {
-    console.error('[Cashfree Webhook] Error processing event:', err?.message || err);
+    console.error('[Razorpay Webhook] Error processing event:', err?.message || err);
     return res.status(500).json({ error: 'Webhook processing error' });
   }
 });
@@ -1728,19 +1800,20 @@ app.post('/api/contact', async (req, res) => {
 
 // Health check endpoint
 app.get('/api/health', async (_req, res) => {
-  const warning = getCashfreeEnvironmentWarning();
+  const warning = getRazorpayEnvironmentWarning();
   const dbReachable = await db.isReachable();
   res.json({
     status: 'ok',
     app: 'GenovaProfile Full-Stack Server',
-    gateway: 'cashfree',
+    gateway: 'razorpay',
     database: {
       configured: db.isConfigured(),
       reachable: dbReachable,
     },
-    cashfree: {
-      configured: isCashfreeConfigured,
-      environment: CASHFREE_ENVIRONMENT,
+    razorpay: {
+      configured: isRazorpayConfigured,
+      environment: RAZORPAY_ENVIRONMENT,
+      webhookConfigured: Boolean(RAZORPAY_WEBHOOK_SECRET),
       ...(warning ? { environmentWarning: warning } : {}),
     },
   });
