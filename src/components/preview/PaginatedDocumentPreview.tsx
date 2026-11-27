@@ -261,6 +261,55 @@ const MultiPagePaginatedDocumentPreview: React.FC<PaginatedDocumentPreviewProps>
                   hyphens: 'none',
                 }}
               >
+                {/* Preview-only full-height sidebar backdrop for International Global Lead.
+                    Skipped by html2canvas (PDF export) via data-html2canvas-ignore. */}
+                {data.templateId === 'resume-prem-international' && (
+                  <div
+                    aria-hidden="true"
+                    data-html2canvas-ignore="true"
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      bottom: 0,
+                      left: 'calc((100% - 210mm) / 2)',
+                      width: 'calc(210mm / 3)',
+                      boxSizing: 'border-box',
+                      backgroundColor: '#f8fafc',
+                      borderRight: '1px solid #e2e8f0',
+                      pointerEvents: 'none',
+                    }}
+                  />
+                )}
+
+                {/* Preview-only full-height left accent bar + page tint for Creative Portfolio Director.
+                    Skipped by html2canvas (PDF export) via data-html2canvas-ignore. */}
+                {data.templateId === 'resume-prem-creative-lead' && (
+                  <div
+                    aria-hidden="true"
+                    data-html2canvas-ignore="true"
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      right: 0,
+                      bottom: 0,
+                      left: 0,
+                      backgroundColor: '#faf8f5',
+                      pointerEvents: 'none',
+                    }}
+                  >
+                    <div
+                      style={{
+                        position: 'absolute',
+                        top: 0,
+                        bottom: 0,
+                        left: 'calc((100% - 210mm) / 2)',
+                        width: '10px',
+                        backgroundColor: data.customization?.primaryColor || '#c2410c',
+                      }}
+                    />
+                  </div>
+                )}
+
                 {/* Content Viewport Window */}
                 <div
                   data-page-viewport="true"

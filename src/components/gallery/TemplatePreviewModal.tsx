@@ -93,7 +93,7 @@ export const TemplatePreviewModal: React.FC<TemplatePreviewModalProps> = ({
   // Reset zoom and ensure dataMode defaults to 'sample' when opened or if no user data
   useEffect(() => {
     if (isOpen) {
-      setZoom(window.innerWidth < 768 ? 0.65 : 0.85);
+      setZoom(window.innerWidth < 768 ? calculateOptimalZoom() : 0.85);
       if (!hasUserFilledData) {
         setDataMode('sample');
       }

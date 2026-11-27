@@ -188,12 +188,12 @@ export const PremiumCreativeLeadResumeTemplate: React.FC<{ data: DocumentData }>
           )}
 
           {customSections && customSections.length > 0 && (
-            <div className="space-y-5">
+            <section className="space-y-5">
               {customSections.map((sec) => (
                 <section key={sec.id} className="avoid-break">
-                  <h2 className="text-xs font-bold uppercase tracking-widest text-stone-900 mb-2.5 pb-1 border-b border-stone-200">
+                  <div role="heading" aria-level={2} className="text-xs font-bold uppercase tracking-widest text-stone-900 mb-2.5 pb-1 border-b border-stone-200">
                     {sec.title}
-                  </h2>
+                  </div>
                   {sec.items && sec.items.length > 0 ? (
                     <div className="space-y-1 text-[11.5px]">
                       {sec.items.map((it) => (
@@ -214,7 +214,7 @@ export const PremiumCreativeLeadResumeTemplate: React.FC<{ data: DocumentData }>
                   )}
                 </section>
               ))}
-            </div>
+            </section>
           )}
         </div>
       </div>
