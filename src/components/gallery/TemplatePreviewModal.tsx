@@ -12,6 +12,7 @@ import { getPreviewDataForTemplate } from '../../data/previewSampleData';
 import { sanitizeDocumentTextFields } from '../../utils/textSanitizer';
 import {
   X,
+  ArrowLeft,
   ArrowRight,
   ZoomIn,
   ZoomOut,
@@ -143,32 +144,42 @@ export const TemplatePreviewModal: React.FC<TemplatePreviewModalProps> = ({
     <div className="fixed inset-0 z-50 overflow-hidden flex flex-col bg-slate-900/80 backdrop-blur-sm animate-in fade-in duration-200">
       {/* Top Header Bar */}
       <header className="bg-white border-b border-slate-200 px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-3 z-10 shrink-0 shadow-xs">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 min-w-0 max-w-full">
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Back to Template Gallery"
+            title="Back to Templates (Esc)"
+            className="shrink-0 inline-flex items-center gap-1.5 text-indigo-700 bg-indigo-50 border border-indigo-200 rounded-xl px-3 py-2 text-xs font-bold hover:bg-indigo-100 hover:border-indigo-300 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-1 transition-all cursor-pointer"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            <span>Back</span>
+          </button>
           <div
             className="w-4 h-4 rounded-full border border-slate-300 shrink-0"
             style={{ backgroundColor: template.primaryColorSample }}
           />
-          <div>
-            <div className="flex items-center gap-2">
-              <h2 className="font-bold text-slate-900 text-sm sm:text-base truncate max-w-[200px] sm:max-w-none">
+          <div className="min-w-0">
+            <div className="flex items-center gap-2 min-w-0">
+              <h2 className="font-bold text-slate-900 text-sm sm:text-base truncate max-w-[150px] sm:max-w-none">
                 {template.name}
               </h2>
               {template.priceINR > 0 ? (
-                <span className="text-[10px] font-bold text-violet-900 bg-violet-100 border border-violet-200 px-2 py-0.5 rounded">
+                <span className="shrink-0 text-[10px] font-bold text-violet-900 bg-violet-100 border border-violet-200 px-2 py-0.5 rounded">
                   ₹{template.priceINR}
                 </span>
               ) : (
-                <span className="text-[10px] font-semibold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded">
+                <span className="shrink-0 text-[10px] font-semibold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded">
                   Free (₹0)
                 </span>
               )}
               {template.isATS && (
-                <span className="hidden sm:inline-flex text-[10px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded items-center gap-0.5">
+                <span className="hidden sm:inline-flex shrink-0 text-[10px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded items-center gap-0.5">
                   <ShieldCheck className="w-3 h-3" /> ATS Friendly
                 </span>
               )}
             </div>
-            <p className="text-xs text-slate-500 capitalize">
+            <p className="text-xs text-slate-500 capitalize truncate">
               {template.type === 'biodata'
                 ? 'Matrimonial Profile'
                 : template.type === 'cover-letter'
@@ -256,7 +267,8 @@ export const TemplatePreviewModal: React.FC<TemplatePreviewModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer"
+            aria-label="Close Preview"
+            className="p-2 text-slate-700 bg-slate-100 border border-slate-200 hover:bg-rose-500 hover:text-white hover:border-rose-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500 focus-visible:ring-offset-1 rounded-xl transition-colors cursor-pointer"
             title="Close Preview (Esc)"
           >
             <X className="w-5 h-5" />

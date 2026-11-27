@@ -433,7 +433,7 @@ export const TemplateGallery: React.FC<TemplateGalleryProps> = ({
                   <button
                     type="button"
                     onClick={() => handleOpenPreviewModal(template)}
-                    className="w-full py-2.5 bg-white/15 text-white border border-white/25 rounded-2xl text-xs font-semibold hover:bg-white/25 transition-colors inline-flex items-center justify-center gap-1.5 cursor-pointer"
+                    className="w-full py-2.5 bg-brand text-white border border-brand rounded-2xl text-xs font-bold shadow-md hover:bg-brand-hover hover:border-brand-hover active:scale-95 transition-all inline-flex items-center justify-center gap-1.5 cursor-pointer"
                   >
                     <Eye className="w-3.5 h-3.5" />
                     <span>Preview</span>

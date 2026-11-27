@@ -211,22 +211,6 @@ export const HomePage: React.FC<HomePageProps> = ({
                           type="button"
                           onClick={() => {
                             setShowDocTypeMenu(false);
-                            onStartDocument('biodata');
-                          }}
-                          className="w-full px-3 py-2.5 rounded-xl hover:bg-slate-50 transition-colors flex items-center gap-3 text-xs font-semibold text-navy text-left cursor-pointer"
-                        >
-                          <div className="w-9 h-9 rounded-xl bg-matrimonial/10 text-matrimonial ring-1 ring-matrimonial-gold/30 flex items-center justify-center shrink-0">
-                            <Heart className="w-4 h-4" />
-                          </div>
-                          <div>
-                            <div className="font-bold text-navy">Matrimonial Profile</div>
-                            <span className="text-[11px] text-slate-500 font-normal">Culturally authentic matrimonial &amp; alliance portfolios</span>
-                          </div>
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setShowDocTypeMenu(false);
                             onStartDocument('cover-letter');
                           }}
                           className="w-full px-3 py-2.5 rounded-xl hover:bg-slate-50 transition-colors flex items-center gap-3 text-xs font-semibold text-navy text-left cursor-pointer"
@@ -237,6 +221,22 @@ export const HomePage: React.FC<HomePageProps> = ({
                           <div>
                             <div className="font-bold text-navy">Cover Letter</div>
                             <span className="text-[11px] text-slate-500 font-normal">Tailored executive and job application letters</span>
+                          </div>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setShowDocTypeMenu(false);
+                            onStartDocument('biodata');
+                          }}
+                          className="w-full px-3 py-2.5 rounded-xl hover:bg-slate-50 transition-colors flex items-center gap-3 text-xs font-semibold text-navy text-left cursor-pointer"
+                        >
+                          <div className="w-9 h-9 rounded-xl bg-matrimonial/10 text-matrimonial ring-1 ring-matrimonial-gold/30 flex items-center justify-center shrink-0">
+                            <Heart className="w-4 h-4" />
+                          </div>
+                          <div>
+                            <div className="font-bold text-navy">Matrimonial Profile</div>
+                            <span className="text-[11px] text-slate-500 font-normal">Culturally authentic matrimonial &amp; alliance portfolios</span>
                           </div>
                         </button>
                       </div>
