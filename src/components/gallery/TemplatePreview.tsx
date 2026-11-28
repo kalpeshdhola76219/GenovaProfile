@@ -96,19 +96,24 @@ export const TemplatePreview: React.FC<TemplatePreviewProps> = ({
     updateWidth();
 
     let resizeObserver: ResizeObserver | null = null;
+    let rafId = 0;
     if (typeof ResizeObserver !== 'undefined' && containerRef.current) {
       resizeObserver = new ResizeObserver((entries) => {
-        for (const entry of entries) {
-          const width = entry.contentRect.width || (containerRef.current?.clientWidth ?? 0);
-          if (width > 0) {
-            setContainerWidth(width);
-          }
+        const lastEntry = entries[entries.length - 1];
+        const width = lastEntry?.contentRect.width || (containerRef.current?.clientWidth ?? 0);
+        if (width > 0) {
+          if (rafId) cancelAnimationFrame(rafId);
+          rafId = requestAnimationFrame(() => {
+            rafId = 0;
+            setContainerWidth((prev) => (prev === width ? prev : width));
+          });
         }
       });
       resizeObserver.observe(containerRef.current);
     }
 
     return () => {
+      if (rafId) cancelAnimationFrame(rafId);
       if (resizeObserver) {
         resizeObserver.disconnect();
       }

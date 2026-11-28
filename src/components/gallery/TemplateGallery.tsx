@@ -20,17 +20,53 @@ interface TemplateGalleryProps {
   onSelectTemplate: (template: TemplateMetadata) => void;
   onPreviewTemplate?: (template: TemplateMetadata) => void;
   currentDocumentData?: DocumentData | null;
+  onTypeChange?: (type: DocumentType) => void;
 }
 
 const getTemplateSubtitle = (template: TemplateMetadata): string => {
   return template.description;
 };
 
+const DOCUMENT_TYPE_TABS: Array<{
+  type: DocumentType;
+  label: string;
+  shortLabel: string;
+  Icon: React.ComponentType<{ className?: string }>;
+  iconClass: string;
+  activeClass: string;
+}> = [
+  {
+    type: 'resume',
+    label: 'Resume',
+    shortLabel: 'Resume',
+    Icon: FileText,
+    iconClass: 'text-resume',
+    activeClass: 'bg-white text-resume shadow-2xs font-bold',
+  },
+  {
+    type: 'cover-letter',
+    label: 'Cover Letter',
+    shortLabel: 'Cover Letter',
+    Icon: Mail,
+    iconClass: 'text-cover-letter',
+    activeClass: 'bg-white text-cover-letter shadow-2xs font-bold',
+  },
+  {
+    type: 'biodata',
+    label: 'Matrimonial Profile',
+    shortLabel: 'Matrimonial',
+    Icon: Heart,
+    iconClass: 'text-matrimonial',
+    activeClass: 'bg-white text-matrimonial shadow-2xs font-bold',
+  },
+];
+
 export const TemplateGallery: React.FC<TemplateGalleryProps> = ({
   initialType = 'resume',
   onSelectTemplate,
   onPreviewTemplate,
   currentDocumentData,
+  onTypeChange,
 }) => {
   const [selectedType, setSelectedType] = useState<DocumentType>(initialType === 'all' ? 'resume' : initialType);
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
@@ -193,46 +229,37 @@ export const TemplateGallery: React.FC<TemplateGalleryProps> = ({
       <div className="site-card p-5 rounded-3xl space-y-5">
         {/* Document Type Selector Segmented Control with DYNAMIC COUNTS */}
         <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-100 pb-4">
-          <div className="flex items-center gap-1 p-1 bg-slate-100 rounded-2xl overflow-x-auto max-w-full scrollbar-none">
-            <button
-              type="button"
-              onClick={() => {
-                setSelectedType('resume');
-                setSelectedCategory('All');
-              }}
-              className={`px-4 py-2 text-xs font-semibold rounded-xl transition-all inline-flex items-center gap-1.5 cursor-pointer whitespace-nowrap shrink-0 ${
-                selectedType === 'resume' ? 'bg-white text-resume shadow-2xs font-bold' : 'text-slate-600 hover:text-navy'
-              }`}
-            >
-              <FileText className="w-3.5 h-3.5 text-resume" />
-              <span>Resume ({resumeCount})</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setSelectedType('cover-letter');
-                setSelectedCategory('All');
-              }}
-              className={`px-4 py-2 text-xs font-semibold rounded-xl transition-all inline-flex items-center gap-1.5 cursor-pointer whitespace-nowrap shrink-0 ${
-                selectedType === 'cover-letter' ? 'bg-white text-cover-letter shadow-2xs font-bold' : 'text-slate-600 hover:text-navy'
-              }`}
-            >
-              <Mail className="w-3.5 h-3.5 text-cover-letter" />
-              <span>Cover Letter ({coverLetterCount})</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setSelectedType('biodata');
-                setSelectedCategory('All');
-              }}
-              className={`px-4 py-2 text-xs font-semibold rounded-xl transition-all inline-flex items-center gap-1.5 cursor-pointer whitespace-nowrap shrink-0 ${
-                selectedType === 'biodata' ? 'bg-white text-matrimonial shadow-2xs font-bold' : 'text-slate-600 hover:text-navy'
-              }`}
-            >
-              <Heart className="w-3.5 h-3.5 text-matrimonial" />
-              <span>Matrimonial Profile ({biodataCount})</span>
-            </button>
+          <div className="grid grid-cols-3 gap-1 p-1 bg-slate-100 rounded-2xl w-full sm:w-auto sm:flex sm:items-center">
+            {DOCUMENT_TYPE_TABS.map(({ type, label, shortLabel, Icon, iconClass, activeClass }) => {
+              const count =
+                type === 'resume'
+                  ? resumeCount
+                  : type === 'cover-letter'
+                  ? coverLetterCount
+                  : biodataCount;
+              const isActive = selectedType === type;
+              return (
+                <button
+                  key={type}
+                  type="button"
+                  onClick={() => {
+                    setSelectedType(type);
+                    setSelectedCategory('All');
+                    onTypeChange?.(type);
+                  }}
+                  className={`min-w-0 px-1.5 sm:px-4 py-2 text-xs font-semibold rounded-xl transition-all flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-1.5 leading-tight cursor-pointer sm:whitespace-nowrap sm:shrink-0 ${
+                    isActive ? activeClass : 'text-slate-600 hover:text-navy'
+                  }`}
+                >
+                  <Icon className={`w-3.5 h-3.5 shrink-0 ${iconClass}`} />
+                  <span className="sm:hidden text-[11px] truncate max-w-full">{shortLabel}</span>
+                  <span className="sm:hidden text-[10px] opacity-75 tabular-nums">({count})</span>
+                  <span className="hidden sm:inline">
+                    {label} ({count})
+                  </span>
+                </button>
+              );
+            })}
           </div>
 
           {/* Quick Filters */}

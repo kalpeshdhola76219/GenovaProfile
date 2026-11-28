@@ -131,13 +131,17 @@ export const CoverLetterContactBar: React.FC<{
         const current = children[i];
         const next = children[i + 1];
         if (!next) {
-          current.removeAttribute('data-line-end');
+          if (current.hasAttribute('data-line-end')) {
+            current.removeAttribute('data-line-end');
+          }
           continue;
         }
         const wrapped = Math.abs(current.offsetTop - next.offsetTop) > 2;
         if (wrapped) {
-          current.setAttribute('data-line-end', 'true');
-        } else {
+          if (current.getAttribute('data-line-end') !== 'true') {
+            current.setAttribute('data-line-end', 'true');
+          }
+        } else if (current.hasAttribute('data-line-end')) {
           current.removeAttribute('data-line-end');
         }
       }
@@ -146,9 +150,19 @@ export const CoverLetterContactBar: React.FC<{
     syncLineEnds();
 
     if (typeof ResizeObserver === 'undefined') return;
-    const observer = new ResizeObserver(syncLineEnds);
+    let rafId = 0;
+    const observer = new ResizeObserver(() => {
+      if (rafId) cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(() => {
+        rafId = 0;
+        syncLineEnds();
+      });
+    });
     observer.observe(container);
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+      if (rafId) cancelAnimationFrame(rafId);
+    };
   }, [items.length, center]);
 
   if (items.length === 0) return null;

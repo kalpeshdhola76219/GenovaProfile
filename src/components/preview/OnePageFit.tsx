@@ -87,7 +87,7 @@ export const OnePageFit: React.FC<OnePageFitProps> = ({
     // 1. Detect background color from the template
     const detectedBg = detectTemplateBackgroundColor(templateRoot);
     if (detectedBg) {
-      setPageBgColor(detectedBg);
+      setPageBgColor((prev) => (prev === detectedBg ? prev : detectedBg));
     }
 
     // 2. Helper to test if a candidate scale s fits inside 1131 / s
@@ -151,11 +151,11 @@ export const OnePageFit: React.FC<OnePageFitProps> = ({
       Math.min(MAX_AUTOFIT_SCALE, Math.round(optimalScale * 1000) / 1000)
     );
 
-    setScale(optimalScale);
-    setIsOverflowing(overflowing);
+    setScale((prev) => (prev === optimalScale ? prev : optimalScale));
+    setIsOverflowing((prev) => (prev === overflowing ? prev : overflowing));
 
     const fillPct = Math.min(100, Math.round((1 / optimalScale) * 100));
-    setFillPercent(fillPct);
+    setFillPercent((prev) => (prev === fillPct ? prev : fillPct));
   };
 
   // Immediate layout measurement on data changes
@@ -199,9 +199,20 @@ export const OnePageFit: React.FC<OnePageFitProps> = ({
     });
 
     if (typeof ResizeObserver !== 'undefined' && measureContainerRef.current) {
-      const ro = new ResizeObserver(safeMeasure);
+      let roRafId = 0;
+      const ro = new ResizeObserver(() => {
+        if (!active) return;
+        if (roRafId) cancelAnimationFrame(roRafId);
+        roRafId = requestAnimationFrame(() => {
+          roRafId = 0;
+          safeMeasure();
+        });
+      });
       ro.observe(measureContainerRef.current);
-      cleanups.push(() => ro.disconnect());
+      cleanups.push(() => {
+        ro.disconnect();
+        if (roRafId) cancelAnimationFrame(roRafId);
+      });
     }
 
     const el = measureContainerRef.current;

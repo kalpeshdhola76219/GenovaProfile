@@ -114,10 +114,12 @@ export const PreviewToolbar: React.FC<PreviewToolbarProps> = ({
           <button
             type="button"
             onClick={onToggleCustomizer}
-            className={`px-2 sm:px-2.5 py-1 rounded-lg text-xs font-medium inline-flex items-center gap-1 sm:gap-1.5 transition-colors cursor-pointer ${
+            aria-pressed={Boolean(isCustomizerOpen)}
+            title="Customize Template & Style"
+            className={`px-2.5 sm:px-3 py-1 rounded-lg text-xs font-semibold inline-flex items-center gap-1 sm:gap-1.5 transition-all active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0066FF] focus-visible:ring-offset-1 cursor-pointer ${
               isCustomizerOpen
-                ? 'bg-indigo-50 text-[#0066FF] border border-indigo-200'
-                : 'text-slate-600 hover:bg-slate-100'
+                ? 'bg-[#0052CC] text-white border border-[#0052CC] ring-2 ring-[#0066FF]/30 shadow-xs'
+                : 'bg-[#0066FF] text-white border border-[#0066FF] hover:bg-[#0055D6] hover:border-[#0055D6] shadow-xs'
             }`}
           >
             <Palette className="w-3.5 h-3.5" />

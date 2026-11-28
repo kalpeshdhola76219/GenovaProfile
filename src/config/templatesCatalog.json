@@ -419,42 +419,12 @@
     "isActive": true,
     "supportsPhoto": true
   },
-  "resume-prem-minimal-executive": {
-    "id": "resume-prem-minimal-executive",
-    "name": "Minimal Executive Tier",
+  "resume-ats-professional": {
+    "id": "resume-ats-professional",
+    "name": "ATS Professional",
     "documentType": "resume",
-    "category": "Executive",
-    "priceINR": 60,
-    "currency": "INR",
-    "isActive": true,
-    "supportsPhoto": false
-  },
-  "resume-prem-international": {
-    "id": "resume-prem-international",
-    "name": "International Global Lead",
-    "documentType": "resume",
-    "category": "Professional",
-    "priceINR": 40,
-    "currency": "INR",
-    "isActive": true,
-    "supportsPhoto": false
-  },
-  "resume-prem-creative-lead": {
-    "id": "resume-prem-creative-lead",
-    "name": "Creative Portfolio Director",
-    "documentType": "resume",
-    "category": "Creative",
-    "priceINR": 40,
-    "currency": "INR",
-    "isActive": true,
-    "supportsPhoto": false
-  },
-  "resume-prem-tech-lead": {
-    "id": "resume-prem-tech-lead",
-    "name": "Silicon Valley Tech Lead",
-    "documentType": "resume",
-    "category": "IT Professional",
-    "priceINR": 40,
+    "category": "ATS Friendly",
+    "priceINR": 0,
     "currency": "INR",
     "isActive": true,
     "supportsPhoto": false
@@ -469,12 +439,12 @@
     "isActive": true,
     "supportsPhoto": false
   },
-  "resume-monaco-sovereign": {
-    "id": "resume-monaco-sovereign",
-    "name": "Monaco Sovereign Executive",
+  "resume-prem-minimal-executive": {
+    "id": "resume-prem-minimal-executive",
+    "name": "Minimal Executive Tier",
     "documentType": "resume",
-    "category": "Executive & Global Leadership",
-    "priceINR": 100,
+    "category": "Executive",
+    "priceINR": 60,
     "currency": "INR",
     "isActive": true,
     "supportsPhoto": false
@@ -482,16 +452,6 @@
   "resume-ats-basic": {
     "id": "resume-ats-basic",
     "name": "ATS Basic Clean",
-    "documentType": "resume",
-    "category": "ATS Friendly",
-    "priceINR": 0,
-    "currency": "INR",
-    "isActive": true,
-    "supportsPhoto": false
-  },
-  "resume-ats-professional": {
-    "id": "resume-ats-professional",
-    "name": "ATS Professional",
     "documentType": "resume",
     "category": "ATS Friendly",
     "priceINR": 0,
@@ -509,41 +469,11 @@
     "isActive": true,
     "supportsPhoto": false
   },
-  "resume-modern-corporate": {
-    "id": "resume-modern-corporate",
-    "name": "Modern Corporate",
-    "documentType": "resume",
-    "category": "Corporate",
-    "priceINR": 100,
-    "currency": "INR",
-    "isActive": true,
-    "supportsPhoto": false
-  },
-  "resume-executive": {
-    "id": "resume-executive",
-    "name": "Executive Leadership",
-    "documentType": "resume",
-    "category": "Executive",
-    "priceINR": 60,
-    "currency": "INR",
-    "isActive": true,
-    "supportsPhoto": false
-  },
   "resume-minimal": {
     "id": "resume-minimal",
     "name": "Swiss Minimalist",
     "documentType": "resume",
     "category": "Minimal",
-    "priceINR": 0,
-    "currency": "INR",
-    "isActive": true,
-    "supportsPhoto": false
-  },
-  "resume-two-column": {
-    "id": "resume-two-column",
-    "name": "Modern Two Column",
-    "documentType": "resume",
-    "category": "Two Column",
     "priceINR": 0,
     "currency": "INR",
     "isActive": true,
@@ -559,22 +489,62 @@
     "isActive": true,
     "supportsPhoto": false
   },
+  "resume-executive": {
+    "id": "resume-executive",
+    "name": "Executive Leadership",
+    "documentType": "resume",
+    "category": "Executive",
+    "priceINR": 60,
+    "currency": "INR",
+    "isActive": true,
+    "supportsPhoto": false
+  },
+  "resume-prem-international": {
+    "id": "resume-prem-international",
+    "name": "International Global Lead",
+    "documentType": "resume",
+    "category": "Professional",
+    "priceINR": 40,
+    "currency": "INR",
+    "isActive": true,
+    "supportsPhoto": false
+  },
+  "resume-monaco-sovereign": {
+    "id": "resume-monaco-sovereign",
+    "name": "Monaco Sovereign Executive",
+    "documentType": "resume",
+    "category": "Executive & Global Leadership",
+    "priceINR": 100,
+    "currency": "INR",
+    "isActive": true,
+    "supportsPhoto": false
+  },
+  "resume-modern-corporate": {
+    "id": "resume-modern-corporate",
+    "name": "Modern Corporate",
+    "documentType": "resume",
+    "category": "Corporate",
+    "priceINR": 100,
+    "currency": "INR",
+    "isActive": true,
+    "supportsPhoto": false
+  },
+  "resume-two-column": {
+    "id": "resume-two-column",
+    "name": "Modern Two Column",
+    "documentType": "resume",
+    "category": "Two Column",
+    "priceINR": 0,
+    "currency": "INR",
+    "isActive": true,
+    "supportsPhoto": false
+  },
   "resume-clean": {
     "id": "resume-clean",
     "name": "Clean Grid",
     "documentType": "resume",
     "category": "Clean",
     "priceINR": 0,
-    "currency": "INR",
-    "isActive": true,
-    "supportsPhoto": false
-  },
-  "resume-creative": {
-    "id": "resume-creative",
-    "name": "Creative Portfolio",
-    "documentType": "resume",
-    "category": "Creative",
-    "priceINR": 40,
     "currency": "INR",
     "isActive": true,
     "supportsPhoto": false
@@ -589,6 +559,36 @@
     "isActive": true,
     "supportsPhoto": false
   },
+  "resume-fresh-graduate": {
+    "id": "resume-fresh-graduate",
+    "name": "Fresh Graduate",
+    "documentType": "resume",
+    "category": "Fresh Graduate",
+    "priceINR": 0,
+    "currency": "INR",
+    "isActive": true,
+    "supportsPhoto": false
+  },
+  "resume-prem-tech-lead": {
+    "id": "resume-prem-tech-lead",
+    "name": "Silicon Valley Tech Lead",
+    "documentType": "resume",
+    "category": "IT Professional",
+    "priceINR": 40,
+    "currency": "INR",
+    "isActive": true,
+    "supportsPhoto": false
+  },
+  "resume-prem-creative-lead": {
+    "id": "resume-prem-creative-lead",
+    "name": "Creative Portfolio Director",
+    "documentType": "resume",
+    "category": "Creative",
+    "priceINR": 40,
+    "currency": "INR",
+    "isActive": true,
+    "supportsPhoto": false
+  },
   "resume-it": {
     "id": "resume-it",
     "name": "IT & Cloud Architect",
@@ -599,12 +599,12 @@
     "isActive": true,
     "supportsPhoto": false
   },
-  "resume-fresh-graduate": {
-    "id": "resume-fresh-graduate",
-    "name": "Fresh Graduate",
+  "resume-creative": {
+    "id": "resume-creative",
+    "name": "Creative Portfolio",
     "documentType": "resume",
-    "category": "Fresh Graduate",
-    "priceINR": 0,
+    "category": "Creative",
+    "priceINR": 40,
     "currency": "INR",
     "isActive": true,
     "supportsPhoto": false

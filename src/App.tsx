@@ -15,6 +15,7 @@ import { Footer } from './components/navigation/Footer';
 // Pages
 import { HomePage } from './components/pages/HomePage';
 import { TemplateGallery } from './components/gallery/TemplateGallery';
+import { TemplateGalleryPage } from './components/pages/TemplateGalleryPage';
 import { Dashboard } from './components/dashboard/Dashboard';
 import { DocumentBuilder } from './components/builder/DocumentBuilder';
 import { CoverLetterBuilder } from './components/builder/CoverLetterBuilder';
@@ -236,54 +237,30 @@ export default function App() {
         )}
 
         {currentPage === 'biodata-templates' && (
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-6">
-            <div className="text-center max-w-2xl mx-auto space-y-2">
-              <span className="text-xs font-bold uppercase tracking-wider text-rose-600">Matrimonial Suite</span>
-              <h1 className="text-3xl font-black text-slate-900 tracking-tight">Matrimonial Profile Templates</h1>
-              <p className="text-xs sm:text-sm text-slate-500">
-                Culturally authentic Vedic formats, elegant gold crests, royal floral frames, and modern styles.
-              </p>
-            </div>
-            <TemplateGallery
-              initialType="biodata"
-              onSelectTemplate={handleSelectTemplate}
-              currentDocumentData={activeDocument}
-            />
-          </div>
+          <TemplateGalleryPage
+            key="biodata-templates"
+            initialType="biodata"
+            onSelectTemplate={handleSelectTemplate}
+            currentDocumentData={activeDocument}
+          />
         )}
 
         {currentPage === 'resume-templates' && (
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-6">
-            <div className="text-center max-w-2xl mx-auto space-y-2">
-              <span className="text-xs font-bold uppercase tracking-wider text-[#5B4BDB]">Career Architecture</span>
-              <h1 className="text-3xl font-black text-slate-900 tracking-tight">Professional Resume Templates</h1>
-              <p className="text-xs sm:text-sm text-slate-500">
-                ATS-friendly single column, modern corporate, tech stack showcases, and executive leadership designs.
-              </p>
-            </div>
-            <TemplateGallery
-              initialType="resume"
-              onSelectTemplate={handleSelectTemplate}
-              currentDocumentData={activeDocument}
-            />
-          </div>
+          <TemplateGalleryPage
+            key="resume-templates"
+            initialType="resume"
+            onSelectTemplate={handleSelectTemplate}
+            currentDocumentData={activeDocument}
+          />
         )}
 
         {currentPage === 'cover-letter-templates' && (
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-6">
-            <div className="text-center max-w-2xl mx-auto space-y-2">
-              <span className="text-xs font-bold uppercase tracking-wider text-emerald-600">Application Suite</span>
-              <h1 className="text-3xl font-black text-slate-900 tracking-tight">Cover Letter Templates</h1>
-              <p className="text-xs sm:text-sm text-slate-500">
-                Pair your resume with beautifully formatted corporate, executive, tech, and creative cover letters.
-              </p>
-            </div>
-            <TemplateGallery
-              initialType="cover-letter"
-              onSelectTemplate={handleSelectTemplate}
-              currentDocumentData={activeDocument}
-            />
-          </div>
+          <TemplateGalleryPage
+            key="cover-letter-templates"
+            initialType="cover-letter"
+            onSelectTemplate={handleSelectTemplate}
+            currentDocumentData={activeDocument}
+          />
         )}
 
         {currentPage === 'dashboard' && (

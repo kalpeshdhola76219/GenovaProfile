@@ -35,7 +35,7 @@ export const CreativeResumeTemplate: React.FC<{ data: DocumentData }> = ({ data 
       }}
     >
       {/* Creative Header */}
-      <div className="border-b pb-6 mb-6 border-slate-200">
+      <div className="border-b pb-3 mb-4 border-slate-200">
         <div>
           <div className="inline-block px-2.5 py-0.5 rounded text-[11px] font-bold uppercase tracking-wider text-white mb-1" style={{ backgroundColor: accent }}>
             {personal.professionalTitle || 'Creative Technologist'}
@@ -112,7 +112,10 @@ export const CreativeResumeTemplate: React.FC<{ data: DocumentData }> = ({ data 
       )}
 
       {(education.length > 0 || skills.length > 0) && (
-        <div className="grid grid-cols-2 gap-6 mb-4 no-justify">
+        <div
+          className="grid gap-6 mb-4 no-justify items-start"
+          style={{ gridTemplateColumns: education.length > 0 && skills.length > 0 ? '2fr 3fr' : '1fr' }}
+        >
           {education.length > 0 && (
             <div className="avoid-break">
               <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 mb-2">Education</h2>
@@ -132,9 +135,9 @@ export const CreativeResumeTemplate: React.FC<{ data: DocumentData }> = ({ data 
           {skills.length > 0 && (
             <div className="avoid-break no-justify">
               <h2 className="text-xs font-bold uppercase tracking-wider text-slate-900 mb-2">Toolkit</h2>
-              <div className="flex flex-wrap gap-1 no-justify">
+              <div className="flex flex-wrap gap-1.5 no-justify">
                 {skills.map((s) => (
-                  <span key={s.id} className="text-xs bg-slate-100 text-slate-800 px-2 py-0.5 rounded font-medium">
+                  <span key={s.id} className="text-[11px] bg-slate-100 text-slate-800 px-2 py-0.5 rounded font-medium">
                     {s.name}
                   </span>
                 ))}

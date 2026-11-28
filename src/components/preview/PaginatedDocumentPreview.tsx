@@ -281,6 +281,25 @@ const MultiPagePaginatedDocumentPreview: React.FC<PaginatedDocumentPreviewProps>
                   />
                 )}
 
+                {/* Preview-only full-height sidebar backdrop for Modern Two Column.
+                    Skipped by html2canvas (PDF export) via data-html2canvas-ignore. */}
+                {data.templateId === 'resume-two-column' && (
+                  <div
+                    aria-hidden="true"
+                    data-html2canvas-ignore="true"
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      bottom: 0,
+                      left: 'calc((100% - 210mm) / 2)',
+                      width: 'calc(210mm * 0.35)',
+                      boxSizing: 'border-box',
+                      backgroundColor: '#0f172a',
+                      pointerEvents: 'none',
+                    }}
+                  />
+                )}
+
                 {/* Preview-only full-height left accent bar + page tint for Creative Portfolio Director.
                     Skipped by html2canvas (PDF export) via data-html2canvas-ignore. */}
                 {data.templateId === 'resume-prem-creative-lead' && (
